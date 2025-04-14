@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 import {
   Container,
   Typography,
@@ -8,11 +8,18 @@ import {
   Paper,
   Alert,
   CircularProgress,
+  AlertColor,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
+interface SearchResult {
+  status: string;
+  date: string;
+  details: string;
+}
+
 // Simulation d'une base de données locale
-const mockDatabase = {
+const mockDatabase: Record<string, SearchResult> = {
   'STU-12345': {
     status: 'En traitement',
     date: '2024-04-13',
@@ -30,13 +37,13 @@ const mockDatabase = {
   },
 };
 
-const SuiviDemande = () => {
-  const [trackingNumber, setTrackingNumber] = useState('');
-  const [searchResult, setSearchResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+const SuiviDemande: React.FC = () => {
+  const [trackingNumber, setTrackingNumber] = useState<string>('');
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -54,7 +61,7 @@ const SuiviDemande = () => {
     }, 1000);
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string): AlertColor => {
     switch (status) {
       case 'En traitement':
         return 'info';
@@ -63,7 +70,7 @@ const SuiviDemande = () => {
       case 'Étudiant trouvé':
         return 'success';
       default:
-        return 'default';
+        return 'info';
     }
   };
 
@@ -79,7 +86,7 @@ const SuiviDemande = () => {
               fullWidth
               label="Numéro de suivi"
               value={trackingNumber}
-              onChange={(e) => setTrackingNumber(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setTrackingNumber(e.target.value)}
               placeholder="Ex: STU-12345"
               sx={{ mb: 3 }}
             />

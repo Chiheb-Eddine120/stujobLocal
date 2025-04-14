@@ -34,7 +34,7 @@ npm install
 Pour lancer l'application en mode développement :
 
 ```bash
-npm start
+npm run dev
 ```
 
 L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
@@ -49,26 +49,35 @@ npm run build
 
 Les fichiers de production seront générés dans le dossier `build/`.
 
+Pour prévisualiser la version de production :
+
+```bash
+npm run preview
+```
+
 ## Structure du projet
 
 ```
 stujob-vitrine/
 ├── public/
-│   ├── index.html
-│   ├── manifest.json
-│   └── favicon.ico
+│   ├── favicon.ico
+│   └── manifest.json
 ├── src/
 │   ├── components/
-│   │   └── Navbar.js
+│   │   └── Navbar.tsx
 │   ├── pages/
-│   │   ├── Home.js
-│   │   ├── DemandeForm.js
-│   │   ├── SuiviDemande.js
-│   │   ├── Etudiants.js
-│   │   ├── About.js
-│   │   └── Contact.js
-│   ├── App.js
-│   └── index.js
+│   │   ├── Home.tsx
+│   │   ├── DemandeForm.tsx
+│   │   ├── SuiviDemande.tsx
+│   │   ├── Etudiants.tsx
+│   │   ├── About.tsx
+│   │   └── Contact.tsx
+│   ├── App.tsx
+│   └── index.tsx
+├── index.html
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.node.json
 ├── package.json
 └── README.md
 ```
@@ -76,9 +85,20 @@ stujob-vitrine/
 ## Technologies utilisées
 
 - React
+- TypeScript
+- Vite
 - Material-UI
 - React Router
 - Emotion (pour le styling)
+
+## Variables d'environnement
+
+Les variables d'environnement doivent être préfixées par `VITE_` pour être accessibles dans l'application.
+
+Exemple :
+```env
+VITE_API_URL=http://api.example.com
+```
 
 ## Contribution
 

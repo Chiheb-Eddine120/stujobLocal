@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import {
   Container,
   Typography,
@@ -13,17 +13,30 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
+interface FormData {
+  nom: string;
+  email: string;
+  sujet: string;
+  message: string;
+}
+
+interface ContactInfo {
+  icon: React.ReactNode;
+  title: string;
+  content: string;
+}
+
+const Contact: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
     nom: '',
     email: '',
     sujet: '',
     message: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -31,14 +44,14 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Ici, vous pourriez ajouter la logique pour envoyer l'email
     console.log('Données du formulaire:', formData);
     setSubmitted(true);
   };
 
-  const contactInfo = [
+  const contactInfo: ContactInfo[] = [
     {
       icon: <EmailIcon />,
       title: 'Email',

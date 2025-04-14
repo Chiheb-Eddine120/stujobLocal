@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import {
   Container,
   Typography,
@@ -19,8 +19,19 @@ const sectors = [
   'Autre',
 ];
 
-const DemandeForm = () => {
-  const [formData, setFormData] = useState({
+interface FormData {
+  entreprise: string;
+  secteur: string;
+  profil: string;
+  urgence: string;
+  ville: string;
+  email: string;
+  telephone: string;
+  remarques: string;
+}
+
+const DemandeForm: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
     entreprise: '',
     secteur: '',
     profil: '',
@@ -31,10 +42,10 @@ const DemandeForm = () => {
     remarques: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
-  const [trackingNumber, setTrackingNumber] = useState('');
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const [trackingNumber, setTrackingNumber] = useState<string>('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -42,13 +53,13 @@ const DemandeForm = () => {
     }));
   };
 
-  const generateTrackingNumber = () => {
+  const generateTrackingNumber = (): string => {
     const prefix = 'STU';
     const random = Math.floor(Math.random() * 100000);
     return `${prefix}-${random}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newTrackingNumber = generateTrackingNumber();
     setTrackingNumber(newTrackingNumber);

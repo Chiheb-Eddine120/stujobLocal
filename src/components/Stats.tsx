@@ -11,7 +11,13 @@ import BusinessIcon from '@mui/icons-material/Business';
 import WorkIcon from '@mui/icons-material/Work';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
-const stats = [
+interface StatItem {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}
+
+const stats: StatItem[] = [
   {
     icon: <PeopleIcon sx={{ fontSize: 40 }} />,
     value: '1000+',
@@ -34,7 +40,7 @@ const stats = [
   },
 ];
 
-const Stats = () => {
+const Stats: React.FC = () => {
   return (
     <Box sx={{ py: 8, backgroundColor: 'primary.main', color: 'white' }}>
       <Container maxWidth="lg">

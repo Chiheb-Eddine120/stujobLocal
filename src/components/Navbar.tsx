@@ -9,7 +9,7 @@ import {
   Box,
 } from '@mui/material';
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   return (
     <AppBar position="static">
       <Container maxWidth="lg">

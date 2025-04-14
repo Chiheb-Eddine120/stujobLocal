@@ -10,7 +10,12 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const faqs = [
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+const faqs: FAQItem[] = [
   {
     question: 'Comment fonctionne le processus de recrutement ?',
     answer: 'Le processus est simple : 1) L\'entreprise fait une demande via notre formulaire, 2) Nous analysons le besoin sous 24h, 3) Nous recherchons les étudiants correspondants, 4) Nous présentons les profils à l\'entreprise, 5) L\'entreprise choisit et nous gérons la mise en relation.',
@@ -37,10 +42,10 @@ const faqs = [
   },
 ];
 
-const FAQ = () => {
-  const [expanded, setExpanded] = useState(false);
+const FAQ: React.FC = () => {
+  const [expanded, setExpanded] = useState<string | false>(false);
 
-  const handleChange = (panel) => (event, isExpanded) => {
+  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
   };
 

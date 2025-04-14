@@ -12,8 +12,14 @@ import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
 import PeopleIcon from '@mui/icons-material/People';
 import SpeedIcon from '@mui/icons-material/Speed';
 
-const About = () => {
-  const values = [
+interface Value {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const About: React.FC = () => {
+  const values: Value[] = [
     {
       icon: <EmojiObjectsIcon sx={{ fontSize: 40 }} />,
       title: 'Simplicité',

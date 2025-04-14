@@ -11,7 +11,15 @@ import {
 } from '@mui/material';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 
-const testimonials = [
+interface Testimonial {
+  name: string;
+  role: string;
+  image: string;
+  rating: number;
+  text: string;
+}
+
+const testimonials: Testimonial[] = [
   {
     name: 'Marie Dubois',
     role: 'Directrice RH, Restaurant Le Gourmet',
@@ -35,7 +43,7 @@ const testimonials = [
   },
 ];
 
-const Testimonials = () => {
+const Testimonials: React.FC = () => {
   return (
     <Box sx={{ py: 8, backgroundColor: 'background.default' }}>
       <Container maxWidth="lg">

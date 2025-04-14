@@ -17,8 +17,14 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EuroIcon from '@mui/icons-material/Euro';
 import PersonIcon from '@mui/icons-material/Person';
 
-const Etudiants = () => {
-  const features = [
+interface Feature {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const Etudiants: React.FC = () => {
+  const features: Feature[] = [
     {
       icon: <WorkIcon />,
       title: 'Missions variées',
@@ -41,7 +47,7 @@ const Etudiants = () => {
     },
   ];
 
-  const handleJoinClick = () => {
+  const handleJoinClick = (): void => {
     // Redirection vers le formulaire Google (à remplacer par votre lien)
     window.open('https://forms.gle/your-form-link', '_blank');
   };

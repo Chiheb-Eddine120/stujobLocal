@@ -10,14 +10,19 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import Testimonials from '../components/Testimonials';
+import Testimonials from '../components/Testimonials.tsx';
 import Stats from '../components/Stats';
 import FAQ from '../components/FAQ';
 
-const Home = () => {
+interface Feature {
+  title: string;
+  description: string;
+}
+
+const Home: React.FC = () => {
   const navigate = useNavigate();
 
-  const features = [
+  const features: Feature[] = [
     {
       title: 'Mise en relation humaine',
       description: 'Un accompagnement personnalisé pour trouver le bon étudiant',

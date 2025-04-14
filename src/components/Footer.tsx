@@ -17,7 +17,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
     <Box
       component="footer"
