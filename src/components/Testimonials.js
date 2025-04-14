@@ -27,8 +27,8 @@ const testimonials = [
     text: 'J\'ai trouvé plusieurs missions intéressantes qui correspondent parfaitement à mon emploi du temps étudiant. Un vrai gain de temps !',
   },
   {
-    name: 'Sophie Laurent',
-    role: 'Gérante, Boutique Mode',
+    name: 'Gaspard Laurent',
+    role: 'Gérant, Boutique Fitness',
     image: 'https://i.pravatar.cc/150?img=3',
     rating: 5,
     text: 'La qualité des candidats proposés est excellente. Les étudiants sont bien préparés et professionnels dès le premier jour.',
