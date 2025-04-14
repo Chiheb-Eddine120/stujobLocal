@@ -14,10 +14,79 @@ import Contact from './pages/Contact';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#2563EB', // Bleu royal moderne
+      light: '#60A5FA',
+      dark: '#1E40AF',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#10B981', // Vert émeraude
+      light: '#34D399',
+      dark: '#059669',
+    },
+    background: {
+      default: '#F9FAFB',
+      paper: '#FFFFFF',
+    },
+    text: {
+      primary: '#1F2937',
+      secondary: '#4B5563',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      fontSize: '2.5rem',
+    },
+    h2: {
+      fontWeight: 700,
+      fontSize: '2rem',
+    },
+    h3: {
+      fontWeight: 600,
+      fontSize: '1.75rem',
+    },
+    h4: {
+      fontWeight: 600,
+      fontSize: '1.5rem',
+    },
+    h5: {
+      fontWeight: 600,
+      fontSize: '1.25rem',
+    },
+    h6: {
+      fontWeight: 600,
+      fontSize: '1rem',
+    },
+    button: {
+      textTransform: 'none',
+      fontWeight: 500,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          padding: '8px 24px',
+        },
+        contained: {
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.05)',
+        },
+      },
     },
   },
 });
