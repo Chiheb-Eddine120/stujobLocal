@@ -1,15 +1,89 @@
-# Stujob - Site Vitrine
+# Stujob - Plateforme de Recrutement d'Étudiants
 
-Site vitrine pour Stujob, une plateforme de mise en relation entre entreprises et étudiants.
+## Présentation
+
+Stujob est une plateforme web qui met en relation les entreprises cherchant à recruter des étudiants avec des étudiants à la recherche de missions flexibles. La plateforme simplifie le processus de recrutement en offrant un service d'intermédiation personnalisé.
 
 ## Fonctionnalités
 
-- Page d'accueil avec présentation du service
-- Formulaire de demande de recrutement
-- Suivi de demande avec numéro unique
-- Page étudiants avec inscription
-- Page À propos
-- Page Contact
+### Pour les Entreprises
+- **Formulaire de demande de recrutement** : Les entreprises peuvent soumettre leurs besoins en personnel étudiant
+- **Suivi de demande** : Possibilité de suivre l'état d'avancement de leur demande via un numéro de suivi
+- **Mise en relation personnalisée** : Accompagnement pour trouver l'étudiant correspondant à leurs besoins
+
+### Pour les Étudiants
+- **Inscription au réseau** : Les étudiants peuvent s'inscrire pour être mis en relation avec des entreprises
+- **Missions flexibles** : Opportunités adaptées à leur emploi du temps étudiant
+- **Processus simplifié** : Pas besoin de rechercher activement des missions, Stujob s'en charge
+
+## Architecture Technique
+
+### Frontend
+- **Framework** : React avec TypeScript
+- **Build Tool** : Vite (pour des performances optimales)
+- **UI Framework** : Material-UI (MUI)
+- **Routing** : React Router
+- **État** : React Hooks (useState, useEffect)
+
+### Structure du Projet
+- **Pages** : 
+  - Home : Page d'accueil avec présentation des services
+  - DemandeForm : Formulaire de demande de recrutement
+  - SuiviDemande : Suivi de l'état d'une demande
+  - Etudiants : Page d'inscription pour les étudiants
+  - About : Présentation de l'entreprise
+  - Contact : Formulaire de contact
+
+- **Composants** :
+  - Navbar : Barre de navigation
+  - Footer : Pied de page
+  - Stats : Statistiques et chiffres clés
+  - Testimonials : Témoignages clients
+  - FAQ : Questions fréquemment posées
+
+## Flux de Fonctionnement
+
+1. **Demande de Recrutement** :
+   - L'entreprise remplit le formulaire de demande
+   - Un numéro de suivi unique est généré
+   - La demande est enregistrée dans le système
+
+2. **Traitement de la Demande** :
+   - L'équipe Stujob analyse la demande
+   - Recherche d'étudiants correspondants dans la base
+   - Mise en relation avec les candidats potentiels
+
+3. **Suivi et Finalisation** :
+   - L'entreprise peut suivre l'état de sa demande
+   - Une fois un étudiant trouvé, contact est établi
+   - Suivi post-recrutement si nécessaire
+
+## Technologies Utilisées
+
+- **Langages** : TypeScript, JavaScript
+- **Frontend** : React, Vite
+- **UI** : Material-UI, CSS personnalisé
+- **Routing** : React Router
+- **Gestion d'État** : React Hooks
+- **Validation de Formulaire** : Validation native HTML5
+- **Responsive Design** : Grid et Flexbox de Material-UI
+
+## Points Forts
+
+- **Interface intuitive** : Design moderne et facile à utiliser
+- **Processus simplifié** : Réduction du temps de recrutement
+- **Flexibilité** : Adapté aux emplois du temps étudiants
+- **Personnalisation** : Accompagnement sur mesure
+- **Performance** : Application rapide grâce à Vite
+- **Maintenabilité** : Code TypeScript bien structuré
+
+## Évolutions Futures
+
+- Intégration d'un système de messagerie interne
+- Ajout d'un espace membre pour les étudiants
+- Système de notation et d'avis
+- Application mobile
+- Intégration avec des plateformes de paiement
 
 ## Prérequis
 

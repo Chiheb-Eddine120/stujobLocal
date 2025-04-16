@@ -9,7 +9,9 @@ import {
   Grid,
   Paper,
   Alert,
+  CircularProgress,
 } from '@mui/material';
+import { demandeService, DemandeRecrutement } from '../services/demandeService';
 
 const sectors = [
   'Restauration',
@@ -19,19 +21,8 @@ const sectors = [
   'Autre',
 ];
 
-interface FormData {
-  entreprise: string;
-  secteur: string;
-  profil: string;
-  urgence: string;
-  ville: string;
-  email: string;
-  telephone: string;
-  remarques: string;
-}
-
 const DemandeForm: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<Omit<DemandeRecrutement, 'id' | 'status' | 'created_at'>>({
     entreprise: '',
     secteur: '',
     profil: '',
@@ -44,6 +35,8 @@ const DemandeForm: React.FC = () => {
 
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [trackingNumber, setTrackingNumber] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -53,21 +46,21 @@ const DemandeForm: React.FC = () => {
     }));
   };
 
-  const generateTrackingNumber = (): string => {
-    const prefix = 'STU';
-    const random = Math.floor(Math.random() * 100000);
-    return `${prefix}-${random}`;
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newTrackingNumber = generateTrackingNumber();
-    setTrackingNumber(newTrackingNumber);
-    setSubmitted(true);
-    
-    // Ici, vous pourriez ajouter la logique pour envoyer les données à votre backend
-    console.log('Données du formulaire:', formData);
-    console.log('Numéro de suivi:', newTrackingNumber);
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await demandeService.createDemande(formData);
+      setTrackingNumber(result.id!);
+      setSubmitted(true);
+    } catch (err) {
+      setError('Une erreur est survenue lors de l\'envoi de votre demande. Veuillez réessayer.');
+      console.error('Erreur lors de la création de la demande:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -100,6 +93,11 @@ const DemandeForm: React.FC = () => {
           Faire une demande de recrutement
         </Typography>
         <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
@@ -110,6 +108,7 @@ const DemandeForm: React.FC = () => {
                   name="entreprise"
                   value={formData.entreprise}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -121,6 +120,7 @@ const DemandeForm: React.FC = () => {
                   name="secteur"
                   value={formData.secteur}
                   onChange={handleChange}
+                  disabled={loading}
                 >
                   {sectors.map((option) => (
                     <MenuItem key={option} value={option}>
@@ -140,6 +140,7 @@ const DemandeForm: React.FC = () => {
                   value={formData.profil}
                   onChange={handleChange}
                   helperText="Décrivez les compétences ou tâches recherchées"
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -154,6 +155,7 @@ const DemandeForm: React.FC = () => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -164,6 +166,7 @@ const DemandeForm: React.FC = () => {
                   name="ville"
                   value={formData.ville}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -175,6 +178,7 @@ const DemandeForm: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -185,6 +189,7 @@ const DemandeForm: React.FC = () => {
                   name="telephone"
                   value={formData.telephone}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -196,6 +201,7 @@ const DemandeForm: React.FC = () => {
                   name="remarques"
                   value={formData.remarques}
                   onChange={handleChange}
+                  disabled={loading}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -204,8 +210,10 @@ const DemandeForm: React.FC = () => {
                   variant="contained"
                   size="large"
                   fullWidth
+                  disabled={loading}
+                  startIcon={loading ? <CircularProgress size={20} /> : null}
                 >
-                  Envoyer la demande
+                  {loading ? 'Envoi en cours...' : 'Envoyer la demande'}
                 </Button>
               </Grid>
             </Grid>

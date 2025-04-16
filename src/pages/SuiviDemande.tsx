@@ -1,4 +1,4 @@
-import React, { useState, FormEvent, ChangeEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import {
   Container,
   Typography,
@@ -8,97 +8,93 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  AlertColor,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-
-interface SearchResult {
-  status: string;
-  date: string;
-  details: string;
-}
-
-// Simulation d'une base de données locale
-const mockDatabase: Record<string, SearchResult> = {
-  'STU-12345': {
-    status: 'En traitement',
-    date: '2024-04-13',
-    details: 'Votre demande est en cours d\'analyse par notre équipe.',
-  },
-  'STU-67890': {
-    status: 'En cours de recherche',
-    date: '2024-04-12',
-    details: 'Nous recherchons activement des candidats correspondant à votre profil.',
-  },
-  'STU-24680': {
-    status: 'Étudiant trouvé',
-    date: '2024-04-11',
-    details: 'Un étudiant correspondant à votre profil a été trouvé. Nous vous contacterons bientôt.',
-  },
-};
+import { demandeService, DemandeRecrutement } from '../services/demandeService';
 
 const SuiviDemande: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState<string>('');
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+  const [searchResult, setSearchResult] = useState<DemandeRecrutement | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const handleSearch = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSearch = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSearchResult(null);
 
-    // Simuler un délai de recherche
-    setTimeout(() => {
-      const result = mockDatabase[trackingNumber];
+    try {
+      const result = await demandeService.getDemandeByTrackingNumber(trackingNumber);
       if (result) {
         setSearchResult(result);
       } else {
         setError('Numéro de suivi non trouvé. Veuillez vérifier et réessayer.');
       }
+    } catch (err) {
+      setError('Une erreur est survenue lors de la recherche. Veuillez réessayer.');
+      console.error('Erreur lors de la recherche:', err);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const getStatusColor = (status: string): AlertColor => {
+  const getStatusColor = (status: string): 'info' | 'warning' | 'success' | 'error' => {
     switch (status) {
-      case 'En traitement':
+      case 'en_attente':
         return 'info';
-      case 'En cours de recherche':
+      case 'en_traitement':
         return 'warning';
-      case 'Étudiant trouvé':
+      case 'etudiant_trouve':
         return 'success';
+      case 'termine':
+        return 'info';
       default:
         return 'info';
     }
   };
 
+  const getStatusText = (status: string): string => {
+    switch (status) {
+      case 'en_attente':
+        return 'En attente de traitement';
+      case 'en_traitement':
+        return 'En cours de traitement';
+      case 'etudiant_trouve':
+        return 'Étudiant trouvé';
+      case 'termine':
+        return 'Demande terminée';
+      default:
+        return status;
+    }
+  };
+
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Suivre une demande
         </Typography>
+
         <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
           <form onSubmit={handleSearch}>
-            <TextField
-              fullWidth
-              label="Numéro de suivi"
-              value={trackingNumber}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTrackingNumber(e.target.value)}
-              placeholder="Ex: STU-12345"
-              sx={{ mb: 3 }}
-            />
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                label="Numéro de suivi"
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+                placeholder="Ex: STU-12345"
+                disabled={loading}
+              />
+            </Box>
             <Button
               type="submit"
               variant="contained"
-              size="large"
               fullWidth
-              startIcon={<SearchIcon />}
               disabled={loading}
+              startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              {loading ? <CircularProgress size={24} /> : 'Rechercher'}
+              {loading ? 'Recherche en cours...' : 'Rechercher'}
             </Button>
           </form>
 
@@ -110,17 +106,29 @@ const SuiviDemande: React.FC = () => {
 
           {searchResult && (
             <Box sx={{ mt: 4 }}>
-              <Alert severity={getStatusColor(searchResult.status)} sx={{ mb: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  Statut : {searchResult.status}
-                </Typography>
-                <Typography variant="body2">
-                  Date de mise à jour : {searchResult.date}
-                </Typography>
+              <Alert severity={getStatusColor(searchResult.status)} sx={{ mb: 3 }}>
+                {getStatusText(searchResult.status)}
               </Alert>
-              <Typography variant="body1" sx={{ mt: 2 }}>
-                {searchResult.details}
+              <Typography variant="body1" paragraph>
+                <strong>Entreprise:</strong> {searchResult.entreprise}
               </Typography>
+              <Typography variant="body1" paragraph>
+                <strong>Secteur:</strong> {searchResult.secteur}
+              </Typography>
+              <Typography variant="body1" paragraph>
+                <strong>Profil recherché:</strong> {searchResult.profil}
+              </Typography>
+              <Typography variant="body1" paragraph>
+                <strong>Date de début souhaitée:</strong> {searchResult.urgence}
+              </Typography>
+              <Typography variant="body1" paragraph>
+                <strong>Localisation:</strong> {searchResult.ville}
+              </Typography>
+              {searchResult.remarques && (
+                <Typography variant="body1" paragraph>
+                  <strong>Remarques:</strong> {searchResult.remarques}
+                </Typography>
+              )}
             </Box>
           )}
         </Paper>
