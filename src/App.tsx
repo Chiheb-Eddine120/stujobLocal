@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme, Theme } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -10,83 +10,19 @@ import SuiviDemande from './pages/SuiviDemande';
 import Etudiants from './pages/Etudiants';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import DashboardMatch from './pages/DashboardMatch';
+import Login from './pages/Login';
+import Unauthorized from './pages/Unauthorized';
+import ProtectedRoute from './components/ProtectedRoute';
+import Register from './pages/Register';
 
-const theme: Theme = createTheme({
+const theme = createTheme({
   palette: {
     primary: {
-      main: '#2563EB', // Bleu royal moderne
-      light: '#60A5FA',
-      dark: '#1E40AF',
+      main: '#1976d2',
     },
     secondary: {
-      main: '#10B981', // Vert émeraude
-      light: '#34D399',
-      dark: '#059669',
-    },
-    background: {
-      default: '#F9FAFB',
-      paper: '#FFFFFF',
-    },
-    text: {
-      primary: '#1F2937',
-      secondary: '#4B5563',
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontWeight: 700,
-      fontSize: '2.5rem',
-    },
-    h2: {
-      fontWeight: 700,
-      fontSize: '2rem',
-    },
-    h3: {
-      fontWeight: 600,
-      fontSize: '1.75rem',
-    },
-    h4: {
-      fontWeight: 600,
-      fontSize: '1.5rem',
-    },
-    h5: {
-      fontWeight: 600,
-      fontSize: '1.25rem',
-    },
-    h6: {
-      fontWeight: 600,
-      fontSize: '1rem',
-    },
-    button: {
-      textTransform: 'none',
-      fontWeight: 500,
-    },
-  },
-  shape: {
-    borderRadius: 8,
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          padding: '8px 24px',
-        },
-        contained: {
-          boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-          },
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.05)',
-        },
-      },
+      main: '#dc004e',
     },
   },
 });
@@ -98,7 +34,7 @@ const App: React.FC = () => {
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />
-          <main style={{ flex: 1 }}>
+          <main style={{ flex: 1, padding: '20px 0' }}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/demande" element={<DemandeForm />} />
@@ -106,6 +42,18 @@ const App: React.FC = () => {
               <Route path="/etudiants" element={<Etudiants />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <DashboardMatch />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
           <Footer />

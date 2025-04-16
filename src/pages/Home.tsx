@@ -1,159 +1,146 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Button,
-  Box,
-  Grid,
-  Paper,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { Container, Typography, Button, Box, Grid, Paper } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { 
+  Work as WorkIcon, 
+  School as SchoolIcon, 
+  Handshake as HandshakeIcon,
+  TrendingUp as TrendingUpIcon
+} from '@mui/icons-material';
 import Testimonials from '../components/Testimonials.tsx';
 import Stats from '../components/Stats';
 import FAQ from '../components/FAQ';
 
-interface Feature {
-  title: string;
-  description: string;
-}
-
 const Home: React.FC = () => {
-  const navigate = useNavigate();
-
-  const features: Feature[] = [
-    {
-      title: 'Mise en relation humaine',
-      description: 'Un accompagnement personnalisé pour trouver le bon étudiant',
-    },
-    {
-      title: 'Réponse rapide',
-      description: 'Une réponse sous 24h pour toutes vos demandes',
-    },
-    {
-      title: 'Pas de tri de CV',
-      description: 'Nous vous présentons directement les candidats adaptés',
-    },
-  ];
-
   return (
-    <>
-      <Box
-        sx={{
-          background: 'linear-gradient(45deg, #2563EB 30%, #60A5FA 90%)',
-          color: 'white',
-          py: 8,
-          mb: 8,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography
-                variant="h2"
-                component="h1"
-                gutterBottom
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: { xs: '2.5rem', md: '3.5rem' },
-                }}
-              >
-                Trouvez un étudiant fiable, sans perdre de temps
-              </Typography>
-              <Typography
-                variant="h5"
-                sx={{ mb: 4, opacity: 0.9 }}
-              >
-                La solution simple pour recruter des étudiants motivés
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<SearchIcon />}
-                  onClick={() => navigate('/demande')}
-                  sx={{
-                    backgroundColor: 'white',
-                    color: 'primary.main',
-                    '&:hover': {
-                      backgroundColor: 'grey.100',
-                    },
-                  }}
-                >
-                  Faire une demande
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  startIcon={<LocalShippingIcon />}
-                  onClick={() => navigate('/suivi')}
-                  sx={{
-                    borderColor: 'white',
-                    color: 'white',
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                >
-                  Suivre une demande
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                component="img"
-                src="/hero-image.png"
-                alt="Illustration"
-                sx={{
-                  width: '100%',
-                  maxWidth: 500,
-                  height: 'auto',
-                  display: 'block',
-                  margin: '0 auto',
-                }}
-              />
-            </Grid>
-          </Grid>
-        </Container>
+    <Container maxWidth="lg">
+      {/* Hero Section */}
+      <Box sx={{ 
+        py: 8, 
+        textAlign: 'center',
+        background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+        color: 'white',
+        borderRadius: 2,
+        mb: 6
+      }}>
+        <Typography variant="h2" component="h1" gutterBottom>
+          Stujob
+        </Typography>
+        <Typography variant="h5" component="h2" gutterBottom sx={{ mb: 4 }}>
+          La plateforme qui connecte les étudiants aux opportunités professionnelles
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="secondary" 
+          size="large" 
+          component={RouterLink} 
+          to="/demande"
+          sx={{ mr: 2 }}
+        >
+          Faire une demande
+        </Button>
+        <Button 
+          variant="outlined" 
+          color="inherit" 
+          size="large" 
+          component={RouterLink} 
+          to="/etudiants"
+        >
+          Voir les profils
+        </Button>
       </Box>
 
-      <Container maxWidth="lg">
-        <Grid container spacing={4} sx={{ mb: 8 }}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Paper
-                elevation={3}
-                sx={{
-                  p: 4,
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  transition: 'transform 0.3s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                  },
-                }}
-              >
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  {feature.title}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </Paper>
-            </Grid>
-          ))}
+      {/* Features Section */}
+      <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 4 }}>
+        Nos services
+      </Typography>
+      <Grid container spacing={4} sx={{ mb: 6 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%', textAlign: 'center' }}>
+            <WorkIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Offres d'emploi
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Trouvez des opportunités adaptées à votre profil et à vos compétences
+            </Typography>
+          </Paper>
         </Grid>
-      </Container>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%', textAlign: 'center' }}>
+            <SchoolIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Profils étudiants
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Découvrez des talents prometteurs pour vos projets et missions
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%', textAlign: 'center' }}>
+            <HandshakeIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Mise en relation
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Notre algorithme vous aide à trouver le meilleur match pour vos besoins
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={3} sx={{ p: 3, height: '100%', textAlign: 'center' }}>
+            <TrendingUpIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              Suivi personnalisé
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Accompagnement tout au long du processus de recrutement
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* CTA Section */}
+      <Box sx={{ 
+        py: 6, 
+        textAlign: 'center',
+        background: 'linear-gradient(45deg, #f5f5f5 30%, #e0e0e0 90%)',
+        borderRadius: 2,
+        mb: 6
+      }}>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Prêt à commencer ?
+        </Typography>
+        <Typography variant="body1" paragraph sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
+          Que vous soyez une entreprise à la recherche de talents ou un étudiant cherchant une opportunité,
+          Stujob est là pour vous accompagner dans votre démarche.
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          size="large" 
+          component={RouterLink} 
+          to="/demande"
+          sx={{ mr: 2 }}
+        >
+          Créer une demande
+        </Button>
+        <Button 
+          variant="outlined" 
+          color="primary" 
+          size="large" 
+          component={RouterLink} 
+          to="/contact"
+        >
+          Nous contacter
+        </Button>
+      </Box>
 
       <Stats />
       <Testimonials />
       <FAQ />
-    </>
+    </Container>
   );
 };
 

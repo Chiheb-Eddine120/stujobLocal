@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -7,9 +7,58 @@ import {
   Button,
   Container,
   Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Divider,
 } from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  AccountCircle as AccountCircleIcon,
+  Logout as LogoutIcon,
+} from '@mui/icons-material';
+import { authService } from '../services/authService';
 
 const Navbar: React.FC = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authenticated = await authService.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      
+      if (authenticated) {
+        const admin = await authService.isAdmin();
+        setIsAdmin(admin);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.signOut();
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      handleClose();
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
     <AppBar position="static">
       <Container maxWidth="lg">
@@ -63,6 +112,55 @@ const Navbar: React.FC = () => {
             >
               Contact
             </Button>
+            
+            {isAdmin && (
+              <IconButton
+                color="inherit"
+                component={RouterLink}
+                to="/dashboard"
+                sx={{ ml: 2 }}
+              >
+                <DashboardIcon />
+              </IconButton>
+            )}
+            
+            {isAuthenticated ? (
+              <>
+                <IconButton
+                  color="inherit"
+                  onClick={handleMenu}
+                  sx={{ ml: 1 }}
+                >
+                  <AccountCircleIcon />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                  <MenuItem component={RouterLink} to="/profile" onClick={handleClose}>
+                    Mon profil
+                  </MenuItem>
+                  <MenuItem component={RouterLink} to="/settings" onClick={handleClose}>
+                    Paramètres
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem onClick={handleLogout}>
+                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                    Déconnexion
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/login"
+                sx={{ ml: 1 }}
+              >
+                Connexion
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </Container>

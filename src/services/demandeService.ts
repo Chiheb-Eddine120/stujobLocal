@@ -1,46 +1,52 @@
-import { supabase } from '../lib/supabase';
-
-export interface DemandeRecrutement {
-  id?: string;
-  entreprise: string;
-  secteur: string;
-  profil: string;
-  urgence: string;
-  ville: string;
-  email: string;
-  telephone: string;
-  remarques?: string;
-  status: 'en_attente' | 'en_traitement' | 'etudiant_trouve' | 'termine';
-  created_at?: string;
-}
+import { supabase } from './supabaseClient';
+import { Demande } from '../types';
 
 export const demandeService = {
-  async createDemande(demande: Omit<DemandeRecrutement, 'id' | 'status' | 'created_at'>): Promise<DemandeRecrutement> {
-    try {
-      const { data, error } = await supabase
-        .from('demandes')
-        .insert([
-          {
-            ...demande,
-            status: 'en_attente',
-          },
-        ])
-        .select()
-        .single();
+  async getDemande(id: string) {
+    const { data, error } = await supabase
+      .from('demandes')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      if (error) {
-        console.error('Erreur Supabase:', error);
-        throw new Error('Erreur lors de la création de la demande');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Erreur lors de la création de la demande:', error);
-      throw error;
-    }
+    if (error) throw error;
+    return data as Demande;
   },
 
-  async getDemandeByTrackingNumber(trackingNumber: string): Promise<DemandeRecrutement | null> {
+  async createDemande(demande: Omit<Demande, 'id' | 'created_at'>) {
+    const { data, error } = await supabase
+      .from('demandes')
+      .insert([demande])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Demande;
+  },
+
+  async updateDemande(id: string, demande: Partial<Demande>) {
+    const { data, error } = await supabase
+      .from('demandes')
+      .update(demande)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Demande;
+  },
+
+  async getAllDemandes() {
+    const { data, error } = await supabase
+      .from('demandes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as Demande[];
+  },
+
+  async getDemandeByTrackingNumber(trackingNumber: string): Promise<Demande | null> {
     try {
       const { data, error } = await supabase
         .from('demandes')
@@ -61,9 +67,8 @@ export const demandeService = {
     }
   },
 
-  async updateDemandeStatus(trackingNumber: string, status: DemandeRecrutement['status']): Promise<void> {
+  async updateDemandeStatus(trackingNumber: string, status: Demande['status']): Promise<void> {
     try {
-      // Vérifier d'abord si l'utilisateur est authentifié
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -85,28 +90,28 @@ export const demandeService = {
     }
   },
 
-  // Nouvelle méthode pour récupérer toutes les demandes (admin seulement)
-  async getAllDemandes(): Promise<DemandeRecrutement[]> {
+  async getDemandesEnAttente(): Promise<Demande[]> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        throw new Error('Vous devez être connecté pour voir toutes les demandes');
+        throw new Error('Vous devez être connecté pour voir les demandes en attente');
       }
 
       const { data, error } = await supabase
         .from('demandes')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('status', 'en_attente')
+        .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Erreur Supabase:', error);
-        throw new Error('Erreur lors de la récupération des demandes');
+        throw new Error('Erreur lors de la récupération des demandes en attente');
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur lors de la récupération des demandes:', error);
+      console.error('Erreur lors de la récupération des demandes en attente:', error);
       throw error;
     }
   }
