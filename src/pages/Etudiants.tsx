@@ -16,6 +16,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EuroIcon from '@mui/icons-material/Euro';
 import PersonIcon from '@mui/icons-material/Person';
+import { useNavigate } from 'react-router-dom';
 
 interface Feature {
   icon: React.ReactNode;
@@ -24,6 +25,8 @@ interface Feature {
 }
 
 const Etudiants: React.FC = () => {
+  const navigate = useNavigate();
+
   const features: Feature[] = [
     {
       icon: <WorkIcon />,
@@ -48,8 +51,7 @@ const Etudiants: React.FC = () => {
   ];
 
   const handleJoinClick = (): void => {
-    // Redirection vers le formulaire Google (à remplacer par votre lien)
-    window.open('https://forms.gle/your-form-link', '_blank');
+    navigate('/login');
   };
 
   return (
