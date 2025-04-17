@@ -108,6 +108,13 @@ const DemandeForm: React.FC = () => {
     }));
   };
 
+  const handleSelectPredefinedCompetence = (competence: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      competences_requises: [...prev.competences_requises, competence],
+    }));
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setShowLegalDialog(true);

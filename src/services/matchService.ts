@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Match, DemandeRecrutement, Etudiant } from '../types';
+import { Match, DemandeRecrutement, Etudiant, NiveauCompetence } from '../types';
 
 export const matchService = {
   async createMatch(match: Omit<Match, 'id' | 'created_at' | 'updated_at'>) {
@@ -83,13 +83,11 @@ export const matchService = {
 
   async calculateMatchScore(demande: DemandeRecrutement, etudiant: Etudiant): Promise<number> {
     let score = 0;
-    const maxScore = 100;
+    const totalScore = 100;
 
     // Vérification des compétences requises
     const competencesMatch = demande.competences.filter(reqComp => 
-      etudiant.competences.some(etudiantComp => 
-        etudiantComp.nom === reqComp.nom
-      )
+      etudiant.competences_techniques.includes(reqComp.nom)
     );
 
     // Score basé sur les compétences (60% du score total)
@@ -98,23 +96,20 @@ export const matchService = {
 
     // Score basé sur le niveau des compétences (20% du score total)
     const niveauScore = competencesMatch.reduce((acc, reqComp) => {
-      const etudiantComp = etudiant.competences.find(c => c.nom === reqComp.nom);
-      if (!etudiantComp) return acc;
-
-      const niveauValues = {
+      const niveauValues: Record<NiveauCompetence, number> = {
         'Débutant': 1,
         'Intermédiaire': 2,
         'Avancé': 3,
         'Expert': 4
       };
 
-      return acc + (niveauValues[etudiantComp.niveau] / 4);
+      return acc + (niveauValues[reqComp.priorite as NiveauCompetence] / 4);
     }, 0) * 20;
 
     score += niveauScore;
 
     // Score basé sur la disponibilité (20% du score total)
-    const disponibiliteScore = etudiant.disponibilites.length > 0 ? 20 : 0;
+    const disponibiliteScore = etudiant.disponibilite ? 20 : 0;
     score += disponibiliteScore;
 
     return Math.round(score);

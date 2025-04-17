@@ -1,10 +1,12 @@
 export type NiveauPriorite = 'Essentiel' | 'Important' | 'Optionnel';
 export type NiveauFlexibilite = 'Faible' | 'Moyen' | 'Élevé';
 export type TypeMission = 'Stage' | 'Ponctuel' | 'Freelance' | 'Temps partiel' | 'Saisonnier';
+export type NiveauCompetence = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
 
 export interface Competence {
   nom: string;
   priorite: NiveauPriorite;
+  niveau?: NiveauCompetence;
 }
 
 export interface DemandeRecrutement {
@@ -25,8 +27,6 @@ export interface DemandeRecrutement {
   created_at?: string;
 }
 
-export type NiveauCompetence = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
-
 export interface Experience {
   titre: string;
   entreprise: string;
@@ -35,39 +35,33 @@ export interface Experience {
   competences: string[];
 }
 
-export type Profile = {
+export interface Profile {
   id: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'entreprise';
   email: string;
   nom: string;
   prenom: string;
   telephone: string;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type Etudiant = {
+export interface Etudiant {
   id: string;
   profile_id: string;
   cv_url: string | null;
   lettre_motivation_url: string | null;
   competences_techniques: string[];
   competences_soft: string[];
-  experiences: Array<{
-    titre: string;
-    entreprise: string;
-    description: string;
-    date_debut: string;
-    date_fin: string;
-  }>;
-  disponibilite: string;
+  experiences: Experience[];
+  disponibilite: boolean;
   niveau_etudes: string;
   ecole: string;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type Demande = {
+export interface Demande {
   id: string;
   entreprise: string;
   secteur: string;
@@ -79,15 +73,15 @@ export type Demande = {
   remarques: string;
   status: string;
   description_projet: string;
-  competences_requises: string[];
-  niveau_priorite: string;
+  competences_requises: Competence[];
+  niveau_priorite: NiveauPriorite;
   duree_mission: string;
   date_debut_souhaitee: string;
   budget: string;
   created_at: string;
-};
+}
 
-export type Match = {
+export interface Match {
   id: string;
   demande_id: string;
   etudiant_id: string;
@@ -95,4 +89,4 @@ export type Match = {
   notes_admin: string | null;
   created_at: string;
   updated_at: string;
-}; 
+} 
