@@ -2,6 +2,8 @@ export type NiveauPriorite = 'Essentiel' | 'Important' | 'Optionnel';
 export type NiveauFlexibilite = 'Faible' | 'Moyen' | 'Élevé';
 export type TypeMission = 'Stage' | 'Ponctuel' | 'Freelance' | 'Temps partiel' | 'Saisonnier';
 export type NiveauCompetence = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
+export type NiveauUrgence = 'Normal' | 'Urgent' | 'Très urgent';
+export type Secteur = 'Restauration' | 'Vente' | 'Logistique' | 'IT' | 'Autre';
 
 export interface Competence {
   nom: string;
@@ -64,9 +66,9 @@ export interface Etudiant {
 export interface Demande {
   id: string;
   entreprise: string;
-  secteur: string;
+  secteur: Secteur;
   profil: string;
-  urgence: string;
+  urgence: NiveauUrgence;
   ville: string;
   email: string;
   telephone: string;

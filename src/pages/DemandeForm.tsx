@@ -19,11 +19,12 @@ import {
   DialogContent,
   DialogActions,
   FormHelperText,
+  SelectChangeEvent,
 } from '@mui/material';
 import { demandeService } from '../services/demandeService';
-import { Demande, NiveauPriorite } from '../types';
+import { Demande, NiveauPriorite, Competence, NiveauUrgence, Secteur } from '../types';
 
-const sectors = [
+const sectors: Secteur[] = [
   'Restauration',
   'Vente',
   'Logistique',
@@ -42,16 +43,37 @@ const competencesPredefinies = [
   'Analyse',
   'Organisation',
   'Adaptabilité',
-];
+] as const;
 
 const niveauxPriorite: NiveauPriorite[] = ['Essentiel', 'Important', 'Optionnel'];
+const niveauxUrgence: NiveauUrgence[] = ['Normal', 'Urgent', 'Très urgent'];
+
+const initialFormData: Demande = {
+  id: '',
+  entreprise: '',
+  secteur: 'Autre' as Secteur,
+  profil: '',
+  urgence: 'Normal' as NiveauUrgence,
+  ville: '',
+  email: '',
+  telephone: '',
+  remarques: '',
+  status: 'en_attente',
+  description_projet: '',
+  competences_requises: [],
+  niveau_priorite: 'Important' as NiveauPriorite,
+  duree_mission: '',
+  date_debut_souhaitee: '',
+  budget: '',
+  created_at: new Date().toISOString()
+};
 
 const DemandeForm: React.FC = () => {
   const [formData, setFormData] = useState<Omit<Demande, 'id' | 'created_at'>>({
     entreprise: '',
-    secteur: '',
+    secteur: 'Autre' as Secteur,
     profil: '',
-    urgence: 'Normal',
+    urgence: 'Normal' as NiveauUrgence,
     ville: '',
     email: '',
     telephone: '',
@@ -59,7 +81,7 @@ const DemandeForm: React.FC = () => {
     status: 'en_attente',
     description_projet: '',
     competences_requises: [],
-    niveau_priorite: 'Normal',
+    niveau_priorite: 'Important' as NiveauPriorite,
     duree_mission: '',
     date_debut_souhaitee: '',
     budget: '',
@@ -70,24 +92,55 @@ const DemandeForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showLegalDialog, setShowLegalDialog] = useState<boolean>(false);
-  const [newCompetence, setNewCompetence] = useState<{nom: string; priorite: NiveauPriorite}>({
+  const [newCompetence, setNewCompetence] = useState<Competence>({
     nom: '',
-    priorite: 'Important',
+    priorite: 'Important' as NiveauPriorite,
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: Omit<Demande, 'id' | 'created_at'>) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleCompetenceChange = (e: ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target;
-    setNewCompetence((prev: {nom: string; priorite: NiveauPriorite}) => ({
+  const handleUrgenceChange = (e: SelectChangeEvent<NiveauUrgence>) => {
+    const value = e.target.value as NiveauUrgence;
+    setFormData((prev) => ({
       ...prev,
-      [name as string]: value,
+      urgence: value,
+    }));
+  };
+
+  const handlePrioriteChange = (e: SelectChangeEvent<NiveauPriorite>) => {
+    const value = e.target.value as NiveauPriorite;
+    setFormData((prev) => ({
+      ...prev,
+      niveau_priorite: value,
+    }));
+  };
+
+  const handleSecteurChange = (event: SelectChangeEvent<Secteur>) => {
+    setFormData(prev => ({
+      ...prev,
+      secteur: event.target.value as Secteur
+    }));
+  };
+
+  const handleCompetenceTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewCompetence((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCompetencePrioriteChange = (e: SelectChangeEvent<NiveauPriorite>) => {
+    const value = e.target.value as NiveauPriorite;
+    setNewCompetence((prev) => ({
+      ...prev,
+      priorite: value,
     }));
   };
 
@@ -95,9 +148,9 @@ const DemandeForm: React.FC = () => {
     if (newCompetence.nom) {
       setFormData((prev) => ({
         ...prev,
-        competences_requises: [...prev.competences_requises, newCompetence.nom],
+        competences_requises: [...prev.competences_requises, { ...newCompetence }],
       }));
-      setNewCompetence({ nom: '', priorite: 'Important' });
+      setNewCompetence({ nom: '', priorite: 'Important' as NiveauPriorite });
     }
   };
 
@@ -109,9 +162,13 @@ const DemandeForm: React.FC = () => {
   };
 
   const handleSelectPredefinedCompetence = (competence: string) => {
+    const newComp: Competence = {
+      nom: competence,
+      priorite: 'Important',
+    };
     setFormData((prev) => ({
       ...prev,
-      competences_requises: [...prev.competences_requises, competence],
+      competences_requises: [...prev.competences_requises, newComp],
     }));
   };
 
@@ -181,27 +238,27 @@ const DemandeForm: React.FC = () => {
                   label="Nom de l'entreprise"
                   name="entreprise"
                   value={formData.entreprise}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  select
-                  label="Secteur"
-                  name="secteur"
-                  value={formData.secteur}
-                  onChange={handleChange}
-                  disabled={loading}
-                >
-                  {sectors.map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <FormControl fullWidth>
+                  <InputLabel id="secteur-label">Secteur</InputLabel>
+                  <Select
+                    labelId="secteur-label"
+                    id="secteur"
+                    value={formData.secteur}
+                    label="Secteur"
+                    onChange={handleSecteurChange}
+                  >
+                    {sectors.map((sector) => (
+                      <MenuItem key={sector} value={sector}>
+                        {sector}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
 
               <Grid item xs={12}>
@@ -216,7 +273,7 @@ const DemandeForm: React.FC = () => {
                         label="Compétence"
                         name="nom"
                         value={newCompetence.nom}
-                        onChange={(e) => handleCompetenceChange(e as ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
+                        onChange={handleCompetenceTextChange}
                         disabled={loading}
                       />
                     </Grid>
@@ -226,7 +283,7 @@ const DemandeForm: React.FC = () => {
                         <Select
                           name="priorite"
                           value={newCompetence.priorite}
-                          onChange={(e) => handleCompetenceChange(e as ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>)}
+                          onChange={handleCompetencePrioriteChange}
                           label="Priorité"
                           disabled={loading}
                         >
@@ -255,7 +312,7 @@ const DemandeForm: React.FC = () => {
                   {formData.competences_requises.map((comp, index) => (
                     <Chip
                       key={index}
-                      label={comp}
+                      label={`${comp.nom} (${comp.priorite})`}
                       onDelete={() => handleRemoveCompetence(index)}
                       disabled={loading}
                     />
@@ -272,7 +329,7 @@ const DemandeForm: React.FC = () => {
                   label="Description du projet"
                   name="description_projet"
                   value={formData.description_projet}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
@@ -283,13 +340,15 @@ const DemandeForm: React.FC = () => {
                   <Select
                     name="niveau_priorite"
                     value={formData.niveau_priorite}
-                    onChange={(e) => handleChange(e as ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)}
+                    onChange={handlePrioriteChange}
                     label="Niveau de priorité"
                     disabled={loading}
                   >
-                    <MenuItem value="Normal">Normal</MenuItem>
-                    <MenuItem value="Urgent">Urgent</MenuItem>
-                    <MenuItem value="Très urgent">Très urgent</MenuItem>
+                    {niveauxPriorite.map((niveau) => (
+                      <MenuItem key={niveau} value={niveau}>
+                        {niveau}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -300,13 +359,15 @@ const DemandeForm: React.FC = () => {
                   <Select
                     name="urgence"
                     value={formData.urgence}
-                    onChange={(e) => handleChange(e as ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)}
+                    onChange={handleUrgenceChange}
                     label="Urgence"
                     disabled={loading}
                   >
-                    <MenuItem value="Normal">Normal</MenuItem>
-                    <MenuItem value="Urgent">Urgent</MenuItem>
-                    <MenuItem value="Très urgent">Très urgent</MenuItem>
+                    {niveauxUrgence.map((niveau) => (
+                      <MenuItem key={niveau} value={niveau}>
+                        {niveau}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -318,7 +379,7 @@ const DemandeForm: React.FC = () => {
                   label="Durée de la mission"
                   name="duree_mission"
                   value={formData.duree_mission}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   placeholder="Ex: 3 mois, 6 mois, 1 an..."
                   disabled={loading}
                 />
@@ -331,7 +392,7 @@ const DemandeForm: React.FC = () => {
                   label="Budget"
                   name="budget"
                   value={formData.budget}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   placeholder="Ex: 1000€/mois, 5000€..."
                   disabled={loading}
                 />
@@ -345,7 +406,7 @@ const DemandeForm: React.FC = () => {
                   name="date_debut_souhaitee"
                   type="date"
                   value={formData.date_debut_souhaitee}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   InputLabelProps={{
                     shrink: true,
                   }}
@@ -360,7 +421,7 @@ const DemandeForm: React.FC = () => {
                   label="Profil recherché"
                   name="profil"
                   value={formData.profil}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
@@ -372,7 +433,7 @@ const DemandeForm: React.FC = () => {
                   label="Ville ou zone géographique"
                   name="ville"
                   value={formData.ville}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
@@ -385,7 +446,7 @@ const DemandeForm: React.FC = () => {
                   name="email"
                   type="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
@@ -397,7 +458,7 @@ const DemandeForm: React.FC = () => {
                   label="Téléphone"
                   name="telephone"
                   value={formData.telephone}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>
@@ -410,7 +471,7 @@ const DemandeForm: React.FC = () => {
                   label="Remarques additionnelles"
                   name="remarques"
                   value={formData.remarques}
-                  onChange={handleChange}
+                  onChange={handleTextChange}
                   disabled={loading}
                 />
               </Grid>

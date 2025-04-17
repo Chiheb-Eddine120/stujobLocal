@@ -9,11 +9,12 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { demandeService, DemandeRecrutement } from '../services/demandeService';
+import { demandeService } from '../services/demandeService';
+import { Demande } from '../types';
 
 const SuiviDemande: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState<string>('');
-  const [searchResult, setSearchResult] = useState<DemandeRecrutement | null>(null);
+  const [searchResult, setSearchResult] = useState<Demande | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 

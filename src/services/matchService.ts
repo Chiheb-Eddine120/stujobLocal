@@ -83,7 +83,6 @@ export const matchService = {
 
   async calculateMatchScore(demande: DemandeRecrutement, etudiant: Etudiant): Promise<number> {
     let score = 0;
-    const totalScore = 100;
 
     // Vérification des compétences requises
     const competencesMatch = demande.competences.filter(reqComp => 
