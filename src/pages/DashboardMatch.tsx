@@ -5,9 +5,6 @@ import {
   Paper,
   Box,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
   Button,
   Chip,
   TextField,
@@ -30,13 +27,11 @@ import {
   FilterList as FilterIcon,
   Search as SearchIcon,
   Person as PersonIcon,
-  Business as BusinessIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Email as EmailIcon,
 } from '@mui/icons-material';
 import { demandeService } from '../services/demandeService';
-import { etudiantService } from '../services/etudiantService';
 import { matchService } from '../services/matchService';
 import { DemandeRecrutement, Etudiant, Match, NiveauCompetence } from '../types';
 
@@ -46,9 +41,21 @@ interface FilterState {
   typeMission: string;
 }
 
+interface MatchWithEtudiant extends Match {
+  etudiant: Etudiant & {
+    profiles: {
+      nom: string;
+      prenom: string;
+      email: string;
+      telephone: string;
+    };
+  };
+  score?: number;
+}
+
 const DashboardMatch: React.FC = () => {
   const [demandes, setDemandes] = useState<DemandeRecrutement[]>([]);
-  const [matches, setMatches] = useState<(Match & { etudiant: Etudiant })[]>([]);
+  const [matches, setMatches] = useState<MatchWithEtudiant[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [filters, setFilters] = useState<FilterState>({
@@ -69,8 +76,8 @@ const DashboardMatch: React.FC = () => {
         demandeService.getDemandesEnAttente(),
         matchService.getMatchesByDemande(demandes[0]?.id || ''),
       ]);
-      setDemandes(demandesData);
-      setMatches(matchesData);
+      setDemandes(demandesData as unknown as DemandeRecrutement[]);
+      setMatches(matchesData as MatchWithEtudiant[]);
     } catch (err) {
       setError('Erreur lors du chargement des données');
       console.error('Erreur:', err);
@@ -92,7 +99,7 @@ const DashboardMatch: React.FC = () => {
 
   const handleContact = async (matchId: string) => {
     try {
-      await matchService.updateMatchStatus(matchId, 'accepte');
+      await matchService.updateMatch(matchId, { statut: 'accepté' });
       await loadData();
     } catch (err) {
       setError('Erreur lors de la mise en relation');
@@ -102,7 +109,7 @@ const DashboardMatch: React.FC = () => {
 
   const handleReject = async (matchId: string) => {
     try {
-      await matchService.updateMatchStatus(matchId, 'refuse');
+      await matchService.updateMatch(matchId, { statut: 'refusé' });
       await loadData();
     } catch (err) {
       setError('Erreur lors du refus du match');
@@ -112,17 +119,17 @@ const DashboardMatch: React.FC = () => {
 
   const filteredMatches = matches.filter(match => {
     const matchesSearch = 
-      match.etudiant.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      match.etudiant.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      match.etudiant.competences.some(c => c.nom.toLowerCase().includes(searchTerm.toLowerCase()));
+      match.etudiant.profiles.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      match.etudiant.profiles.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      match.etudiant.competences_techniques.some(c => c.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesFilters = 
       (!filters.competences.length || 
-        match.etudiant.competences.some(c => filters.competences.includes(c.nom))) &&
+        match.etudiant.competences_techniques.some(c => filters.competences.includes(c))) &&
       (!filters.niveauMin || 
-        match.etudiant.competences.some(c => {
-          const niveaux = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert'];
-          return niveaux.indexOf(c.niveau) >= niveaux.indexOf(filters.niveauMin);
+        match.etudiant.competences_techniques.some(c => {
+          const niveaux = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert'] as const;
+          return niveaux.indexOf(c as typeof niveaux[number]) >= niveaux.indexOf(filters.niveauMin as typeof niveaux[number]);
         }));
 
     return matchesSearch && matchesFilters;
@@ -211,20 +218,20 @@ const DashboardMatch: React.FC = () => {
                       <PersonIcon color="primary" />
                       <Box>
                         <Typography variant="subtitle1">
-                          {match.etudiant.prenom} {match.etudiant.nom}
+                          {match.etudiant.profiles.prenom} {match.etudiant.profiles.nom}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {match.etudiant.email}
+                          {match.etudiant.profiles.email}
                         </Typography>
                       </Box>
                     </Box>
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {match.etudiant.competences.map((comp, index) => (
+                      {match.etudiant.competences_techniques.map((comp, index) => (
                         <Chip
                           key={index}
-                          label={`${comp.nom} (${comp.niveau})`}
+                          label={comp}
                           size="small"
                         />
                       ))}
@@ -234,29 +241,29 @@ const DashboardMatch: React.FC = () => {
                     <Typography
                       variant="h6"
                       color={
-                        match.score >= 80
+                        (match.score || 0) >= 80
                           ? 'success.main'
-                          : match.score >= 60
+                          : (match.score || 0) >= 60
                           ? 'warning.main'
                           : 'error.main'
                       }
                     >
-                      {match.score}%
+                      {match.score || 0}%
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={
-                        match.status === 'en_attente'
+                        match.statut === 'proposé'
                           ? 'En attente'
-                          : match.status === 'accepte'
+                          : match.statut === 'accepté'
                           ? 'Accepté'
                           : 'Refusé'
                       }
                       color={
-                        match.status === 'en_attente'
+                        match.statut === 'proposé'
                           ? 'default'
-                          : match.status === 'accepte'
+                          : match.statut === 'accepté'
                           ? 'success'
                           : 'error'
                       }
@@ -264,12 +271,12 @@ const DashboardMatch: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      {match.status === 'en_attente' && (
+                      {match.statut === 'proposé' && (
                         <>
                           <Tooltip title="Accepter">
                             <IconButton
                               color="success"
-                              onClick={() => handleContact(match.id!)}
+                              onClick={() => handleContact(match.id)}
                             >
                               <CheckCircleIcon />
                             </IconButton>
@@ -277,7 +284,7 @@ const DashboardMatch: React.FC = () => {
                           <Tooltip title="Refuser">
                             <IconButton
                               color="error"
-                              onClick={() => handleReject(match.id!)}
+                              onClick={() => handleReject(match.id)}
                             >
                               <CancelIcon />
                             </IconButton>
