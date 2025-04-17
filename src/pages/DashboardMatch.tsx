@@ -40,14 +40,20 @@ import { etudiantService } from '../services/etudiantService';
 import { matchService } from '../services/matchService';
 import { DemandeRecrutement, Etudiant, Match, NiveauCompetence } from '../types';
 
+interface FilterState {
+  competences: string[];
+  niveauMin: NiveauCompetence | '';
+  typeMission: string;
+}
+
 const DashboardMatch: React.FC = () => {
   const [demandes, setDemandes] = useState<DemandeRecrutement[]>([]);
   const [matches, setMatches] = useState<(Match & { etudiant: Etudiant })[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
-  const [filters, setFilters] = useState({
-    competences: [] as string[],
-    niveauMin: '' as NiveauCompetence | '',
+  const [filters, setFilters] = useState<FilterState>({
+    competences: [],
+    niveauMin: '',
     typeMission: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,7 +79,7 @@ const DashboardMatch: React.FC = () => {
     }
   };
 
-  const handleFilterChange = (field: string, value: any) => {
+  const handleFilterChange = (field: keyof FilterState, value: FilterState[keyof FilterState]) => {
     setFilters(prev => ({
       ...prev,
       [field]: value,
@@ -87,7 +93,7 @@ const DashboardMatch: React.FC = () => {
   const handleContact = async (matchId: string) => {
     try {
       await matchService.updateMatchStatus(matchId, 'accepte');
-      loadData();
+      await loadData();
     } catch (err) {
       setError('Erreur lors de la mise en relation');
       console.error('Erreur:', err);
@@ -97,9 +103,9 @@ const DashboardMatch: React.FC = () => {
   const handleReject = async (matchId: string) => {
     try {
       await matchService.updateMatchStatus(matchId, 'refuse');
-      loadData();
+      await loadData();
     } catch (err) {
-      setError('Erreur lors du rejet de la mise en relation');
+      setError('Erreur lors du refus du match');
       console.error('Erreur:', err);
     }
   };
@@ -164,7 +170,7 @@ const DashboardMatch: React.FC = () => {
                   <InputLabel>Niveau minimum</InputLabel>
                   <Select
                     value={filters.niveauMin}
-                    onChange={(e) => handleFilterChange('niveauMin', e.target.value)}
+                    onChange={(e) => handleFilterChange('niveauMin', e.target.value as NiveauCompetence)}
                     label="Niveau minimum"
                   >
                     <MenuItem value="">Tous les niveaux</MenuItem>
