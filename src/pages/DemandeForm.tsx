@@ -48,26 +48,6 @@ const competencesPredefinies = [
 const niveauxPriorite: NiveauPriorite[] = ['Essentiel', 'Important', 'Optionnel'];
 const niveauxUrgence: NiveauUrgence[] = ['Normal', 'Urgent', 'Très urgent'];
 
-const initialFormData: Demande = {
-  id: '',
-  entreprise: '',
-  secteur: 'Autre' as Secteur,
-  profil: '',
-  urgence: 'Normal' as NiveauUrgence,
-  ville: '',
-  email: '',
-  telephone: '',
-  remarques: '',
-  status: 'en_attente',
-  description_projet: '',
-  competences_requises: [],
-  niveau_priorite: 'Important' as NiveauPriorite,
-  duree_mission: '',
-  date_debut_souhaitee: '',
-  budget: '',
-  created_at: new Date().toISOString()
-};
-
 const DemandeForm: React.FC = () => {
   const [formData, setFormData] = useState<Omit<Demande, 'id' | 'created_at'>>({
     entreprise: '',
@@ -164,7 +144,7 @@ const DemandeForm: React.FC = () => {
   const handleSelectPredefinedCompetence = (competence: string) => {
     const newComp: Competence = {
       nom: competence,
-      priorite: 'Important',
+      priorite: 'Important' as NiveauPriorite,
     };
     setFormData((prev) => ({
       ...prev,
@@ -321,8 +301,20 @@ const DemandeForm: React.FC = () => {
               </Grid>
 
               <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  Compétences prédéfinies
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                  {competencesPredefinies.map((competence) => (
+                    <Chip
+                      key={competence}
+                      label={competence}
+                      onClick={() => handleSelectPredefinedCompetence(competence)}
+                      disabled={loading}
+                    />
+                  ))}
+                </Box>
                 <TextField
-                  required
                   fullWidth
                   multiline
                   rows={4}
