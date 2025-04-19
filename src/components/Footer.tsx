@@ -8,8 +8,6 @@ import {
   Link,
   IconButton,
   Stack,
-  List,
-  ListItem,
 } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
