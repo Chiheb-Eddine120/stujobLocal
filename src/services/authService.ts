@@ -126,35 +126,40 @@ export const authService = {
   async signUp(email: string, password: string, profileData: Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'role' | 'email'>): Promise<User> {
     try {
       // 1. Créer l'utilisateur dans Auth
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
-        password,
+        password
       });
 
       if (signUpError) throw signUpError;
-      if (!user) throw new Error('Erreur lors de la création du compte');
+      if (!authData.user) throw new Error('Erreur lors de la création du compte');
 
-      // 2. Créer le profil dans la table profiles
-      const { error: profileError } = await supabase
+      // 2. Créer le profil dans la table profiles avec le client service
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .insert([{
-          id: user.id,
+        .insert({
+          id: authData.user.id,
           role: 'student' as UserRole,
           email,
-          ...profileData,
-        }]);
+          ...profileData
+        })
+        .select()
+        .single();
 
       if (profileError) {
-        // En cas d'erreur, on essaie de supprimer l'utilisateur créé
-        await supabase.auth.admin.deleteUser(user.id);
-        throw profileError;
+        console.error('Erreur détaillée lors de la création du profil:', profileError);
+        throw new Error(`Erreur lors de la création du profil: ${profileError.message}`);
+      }
+
+      if (!profile) {
+        throw new Error('Profil non créé');
       }
 
       return {
-        id: user.id,
-        email: user.email!,
+        id: authData.user.id,
+        email: authData.user.email!,
         role: 'student',
-        created_at: user.created_at,
+        created_at: authData.user.created_at,
       };
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error);

@@ -19,10 +19,80 @@ import Register from './pages/Register';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#A236EC',
+      light: '#FF28C6',
+      dark: '#8929BD',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#FF7970',
+      light: '#FF9B94',
+      dark: '#CC614A',
+    },
+  },
+  typography: {
+    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
+    button: {
+      textTransform: 'none',
+      fontWeight: 600,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20,
+          padding: '10px 24px',
+          fontSize: '1rem',
+          fontWeight: 600,
+          transition: 'all 0.3s ease',
+        },
+        contained: {
+          '&.MuiButton-containedPrimary': {
+            background: 'linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%)',
+            boxShadow: '0 4px 10px rgba(162, 54, 236, 0.25)',
+            '&:hover': {
+              background: 'linear-gradient(90deg, #8929BD 0%, #E619B0 50%, #E66A61 100%)',
+              boxShadow: '0 6px 12px rgba(162, 54, 236, 0.35)',
+            },
+          },
+        },
+        text: {
+          background: 'transparent',
+          boxShadow: 'none',
+          '&:hover': {
+            background: 'rgba(255, 255, 255, 0.1)',
+          },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          background: 'linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%)',
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+        },
+      },
     },
   },
 });
@@ -34,11 +104,12 @@ const App: React.FC = () => {
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />
-          <main style={{ flex: 1, padding: '20px 0' }}>
+          <main style={{ flex: 1, paddingBottom: '20px' }}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/demande" element={<DemandeForm />} />
               <Route path="/suivi" element={<SuiviDemande />} />
+              <Route path="/suivi/:trackingNumber" element={<SuiviDemande />} />
               <Route path="/etudiants" element={<Etudiants />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

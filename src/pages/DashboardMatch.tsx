@@ -72,12 +72,16 @@ const DashboardMatch: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [demandesData, matchesData] = await Promise.all([
-        demandeService.getDemandesEnAttente(),
-        matchService.getMatchesByDemande(demandes[0]?.id || ''),
-      ]);
+      const demandesData = await demandeService.getDemandesEnAttente();
       setDemandes(demandesData as unknown as DemandeRecrutement[]);
-      setMatches(matchesData as MatchWithEtudiant[]);
+
+      // Ne charger les matches que s'il y a des demandes
+      if (demandesData && demandesData.length > 0) {
+        const matchesData = await matchService.getMatchesByDemande(demandesData[0].id);
+        setMatches(matchesData as MatchWithEtudiant[]);
+      } else {
+        setMatches([]);
+      }
     } catch (err) {
       setError('Erreur lors du chargement des données');
       console.error('Erreur:', err);
@@ -158,46 +162,54 @@ const DashboardMatch: React.FC = () => {
           </Alert>
         )}
 
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Rechercher"
-                value={searchTerm}
-                onChange={handleSearch}
-                InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={8}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Niveau minimum</InputLabel>
-                  <Select
-                    value={filters.niveauMin}
-                    onChange={(e) => handleFilterChange('niveauMin', e.target.value as NiveauCompetence)}
-                    label="Niveau minimum"
+        {demandes.length === 0 && !loading && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Aucune demande de recrutement en attente pour le moment.
+          </Alert>
+        )}
+
+        {demandes.length > 0 && (
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="Rechercher"
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  InputProps={{
+                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={8}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <FormControl sx={{ minWidth: 200 }}>
+                    <InputLabel>Niveau minimum</InputLabel>
+                    <Select
+                      value={filters.niveauMin}
+                      onChange={(e) => handleFilterChange('niveauMin', e.target.value as NiveauCompetence)}
+                      label="Niveau minimum"
+                    >
+                      <MenuItem value="">Tous les niveaux</MenuItem>
+                      <MenuItem value="Débutant">Débutant</MenuItem>
+                      <MenuItem value="Intermédiaire">Intermédiaire</MenuItem>
+                      <MenuItem value="Avancé">Avancé</MenuItem>
+                      <MenuItem value="Expert">Expert</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="outlined"
+                    startIcon={<FilterIcon />}
+                    onClick={() => setFilters({ competences: [], niveauMin: '', typeMission: '' })}
                   >
-                    <MenuItem value="">Tous les niveaux</MenuItem>
-                    <MenuItem value="Débutant">Débutant</MenuItem>
-                    <MenuItem value="Intermédiaire">Intermédiaire</MenuItem>
-                    <MenuItem value="Avancé">Avancé</MenuItem>
-                    <MenuItem value="Expert">Expert</MenuItem>
-                  </Select>
-                </FormControl>
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterIcon />}
-                  onClick={() => setFilters({ competences: [], niveauMin: '', typeMission: '' })}
-                >
-                  Réinitialiser les filtres
-                </Button>
-              </Box>
+                    Réinitialiser les filtres
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Paper>
+          </Paper>
+        )}
 
         <TableContainer component={Paper}>
           <Table>

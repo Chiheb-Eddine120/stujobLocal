@@ -73,14 +73,15 @@ export interface Demande {
   email: string;
   telephone: string;
   remarques: string;
-  status: string;
+  status: 'en_attente' | 'en_traitement' | 'etudiant_trouve' | 'termine';
   description_projet: string;
   competences_requises: Competence[];
   niveau_priorite: NiveauPriorite;
   duree_mission: string;
   date_debut_souhaitee: string;
-  budget: string;
   created_at: string;
+  facturation_status?: 'en_attente' | 'en_cours' | 'termine';
+  facturation_montant?: number;
 }
 
 export interface Match {

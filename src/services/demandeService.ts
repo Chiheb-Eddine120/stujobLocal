@@ -16,7 +16,11 @@ export const demandeService = {
   async createDemande(demande: Omit<Demande, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('demandes')
-      .insert([demande])
+      .insert([{
+        ...demande,
+        facturation_status: 'en_attente',
+        facturation_montant: 0
+      }])
       .select()
       .single();
 
@@ -46,12 +50,12 @@ export const demandeService = {
     return data as Demande[];
   },
 
-  async getDemandeByTrackingNumber(trackingNumber: string): Promise<Demande | null> {
+  async getDemandeByTrackingNumber(id: string): Promise<Demande | null> {
     try {
       const { data, error } = await supabase
         .from('demandes')
         .select('*')
-        .eq('id', trackingNumber)
+        .eq('id', id)
         .single();
 
       if (error) {
@@ -67,7 +71,7 @@ export const demandeService = {
     }
   },
 
-  async updateDemandeStatus(trackingNumber: string, status: Demande['status']): Promise<void> {
+  async updateDemandeStatus(id: string, status: Demande['status']): Promise<void> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -78,7 +82,7 @@ export const demandeService = {
       const { error } = await supabase
         .from('demandes')
         .update({ status })
-        .eq('id', trackingNumber);
+        .eq('id', id);
 
       if (error) {
         console.error('Erreur Supabase:', error);
@@ -112,6 +116,37 @@ export const demandeService = {
       return data || [];
     } catch (error) {
       console.error('Erreur lors de la récupération des demandes en attente:', error);
+      throw error;
+    }
+  },
+
+  async updateFacturationStatus(id: string, status: Demande['facturation_status'], montant?: number): Promise<void> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Vous devez être connecté pour mettre à jour le statut de facturation');
+      }
+
+      const updateData: Partial<Demande> = {
+        facturation_status: status
+      };
+
+      if (montant !== undefined) {
+        updateData.facturation_montant = montant;
+      }
+
+      const { error } = await supabase
+        .from('demandes')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw new Error('Erreur lors de la mise à jour du statut de facturation');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut de facturation:', error);
       throw error;
     }
   }

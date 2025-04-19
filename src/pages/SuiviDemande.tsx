@@ -1,139 +1,308 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
+  //Paper,
+  Box,
+  CircularProgress,
+  Alert,
+  //Chip,
+  Grid,
+  Divider,
   TextField,
   Button,
-  Box,
-  Paper,
-  Alert,
-  CircularProgress,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import { demandeService } from '../services/demandeService';
 import { Demande } from '../types';
 
 const SuiviDemande: React.FC = () => {
-  const [trackingNumber, setTrackingNumber] = useState<string>('');
-  const [searchResult, setSearchResult] = useState<Demande | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const { trackingNumber: demandeId } = useParams<{ trackingNumber: string }>();
+  const navigate = useNavigate();
+  const [searchId, setSearchId] = useState('');
+  const [demande, setDemande] = useState<Demande | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSearchResult(null);
+    if (!searchId.trim()) return;
+    
+    if (demandeId === searchId.trim()) {
+      fetchDemande();
+    } else {
+      navigate(`/suivi/${searchId.trim()}`, { replace: true });
+    }
+  };
 
+  const fetchDemande = async () => {
+    if (!demandeId) return;
+    
+    setLoading(true);
+    setError(null);
+    
     try {
-      const result = await demandeService.getDemandeByTrackingNumber(trackingNumber);
-      if (result) {
-        setSearchResult(result);
+      const data = await demandeService.getDemandeByTrackingNumber(demandeId);
+      if (data) {
+        setDemande(data);
       } else {
-        setError('Numéro de suivi non trouvé. Veuillez vérifier et réessayer.');
+        setError('Demande non trouvée. Veuillez vérifier votre numéro de suivi.');
       }
     } catch (err) {
-      setError('Une erreur est survenue lors de la recherche. Veuillez réessayer.');
-      console.error('Erreur lors de la recherche:', err);
+      setError('Erreur lors de la récupération de la demande');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string): 'info' | 'warning' | 'success' | 'error' => {
+  useEffect(() => {
+    if (demandeId) {
+      setSearchId(demandeId);
+      fetchDemande();
+    }
+  }, [demandeId]);
+
+  const SearchForm = () => (
+    <Box sx={{ 
+      maxWidth: '800px', 
+      mx: 'auto',
+      p: 4,
+      borderRadius: 4,
+      background: 'white',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+    }}>
+      <form onSubmit={handleSearch}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#1F1F1F', fontWeight: 600 }}>
+          Rechercher une demande
+        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2,
+          mt: 3,
+        }}>
+          <TextField
+            fullWidth
+            label="Numéro de suivi"
+            value={searchId}
+            onChange={(e) => setSearchId(e.target.value)}
+            placeholder="Entrez votre numéro de suivi"
+            sx={{ 
+              flex: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: '#9333EA',
+                },
+              },
+              '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#9333EA !important',
+              },
+            }}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!searchId.trim() || loading}
+            startIcon={<SearchIcon />}
+            sx={{
+              background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
+              borderRadius: '12px',
+              px: 4,
+              '&:hover': {
+                background: 'linear-gradient(90deg, #7928CA 0%, #E6447E 100%)',
+              }
+            }}
+          >
+            Rechercher
+          </Button>
+        </Box>
+      </form>
+    </Box>
+  );
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'en_attente':
-        return 'info';
+        return '#FFB547';
       case 'en_traitement':
-        return 'warning';
+        return '#33C2FF';
       case 'etudiant_trouve':
-        return 'success';
+        return '#4CAF50';
       case 'termine':
-        return 'info';
+        return '#9333EA';
       default:
-        return 'info';
+        return '#666666';
     }
   };
 
-  const getStatusText = (status: string): string => {
+  const getStatusBackground = (status: string) => {
     switch (status) {
       case 'en_attente':
-        return 'En attente de traitement';
+        return '#FFF4E5';
       case 'en_traitement':
-        return 'En cours de traitement';
+        return '#E3F2FD';
       case 'etudiant_trouve':
-        return 'Étudiant trouvé';
+        return '#E8F5E9';
       case 'termine':
-        return 'Demande terminée';
+        return '#F3E8FF';
       default:
-        return status;
+        return '#F5F5F5';
     }
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          Suivre une demande
-        </Typography>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Typography 
+        variant="h3" 
+        component="h1" 
+        align="center"
+        sx={{ 
+          mb: 6,
+          fontWeight: 700,
+          background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+        }}
+      >
+        Suivi de votre demande
+      </Typography>
 
-        <Paper elevation={3} sx={{ p: 4, mt: 4 }}>
-          <form onSubmit={handleSearch}>
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                fullWidth
-                label="Numéro de suivi"
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                placeholder="Ex: STU-12345"
-                disabled={loading}
-              />
-            </Box>
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : null}
-            >
-              {loading ? 'Recherche en cours...' : 'Rechercher'}
-            </Button>
-          </form>
+      <SearchForm />
 
-          {error && (
-            <Alert severity="error" sx={{ mt: 3 }}>
-              {error}
-            </Alert>
-          )}
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress sx={{ color: '#9333EA' }} />
+        </Box>
+      )}
 
-          {searchResult && (
-            <Box sx={{ mt: 4 }}>
-              <Alert severity={getStatusColor(searchResult.status)} sx={{ mb: 3 }}>
-                {getStatusText(searchResult.status)}
-              </Alert>
-              <Typography variant="body1" paragraph>
-                <strong>Entreprise:</strong> {searchResult.entreprise}
+      {error && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            maxWidth: '800px', 
+            mx: 'auto',
+            mt: 4,
+            borderRadius: 2,
+          }}
+        >
+          {error}
+        </Alert>
+      )}
+
+      {demande && (
+        <Box sx={{ 
+          maxWidth: '800px', 
+          mx: 'auto',
+          mt: 4,
+          p: 4,
+          borderRadius: 4,
+          background: 'white',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        }}>
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ color: '#1F1F1F', fontWeight: 600, mb: 2 }}>
+                Numéro de suivi
               </Typography>
-              <Typography variant="body1" paragraph>
-                <strong>Secteur:</strong> {searchResult.secteur}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                <strong>Profil recherché:</strong> {searchResult.profil}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                <strong>Date de début souhaitée:</strong> {searchResult.urgence}
-              </Typography>
-              <Typography variant="body1" paragraph>
-                <strong>Localisation:</strong> {searchResult.ville}
-              </Typography>
-              {searchResult.remarques && (
-                <Typography variant="body1" paragraph>
-                  <strong>Remarques:</strong> {searchResult.remarques}
+              <Box sx={{ 
+                p: 2, 
+                borderRadius: 2, 
+                bgcolor: '#F8F9FA',
+                border: '1px dashed #E0E0E0'
+              }}>
+                <Typography variant="body1" sx={{ color: '#666', fontFamily: 'monospace' }}>
+                  {demande.id}
                 </Typography>
-              )}
-            </Box>
-          )}
-        </Paper>
-      </Box>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h6" sx={{ color: '#1F1F1F', fontWeight: 600, mb: 2 }}>
+                Statut de la demande
+              </Typography>
+              <Box sx={{ 
+                display: 'inline-flex',
+                px: 2,
+                py: 1,
+                borderRadius: '20px',
+                bgcolor: getStatusBackground(demande.status),
+                color: getStatusColor(demande.status),
+                fontWeight: 500,
+              }}>
+                {demande.status}
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h6" sx={{ color: '#1F1F1F', fontWeight: 600, mb: 2 }}>
+                Statut de facturation
+              </Typography>
+              <Box sx={{ 
+                display: 'inline-flex',
+                px: 2,
+                py: 1,
+                borderRadius: '20px',
+                bgcolor: getStatusBackground(demande.facturation_status || 'en_attente'),
+                color: getStatusColor(demande.facturation_status || 'en_attente'),
+                fontWeight: 500,
+              }}>
+                {demande.facturation_status || 'En attente'}
+              </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ color: '#1F1F1F', fontWeight: 600, mb: 3 }}>
+                Détails de la demande
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" sx={{ color: '#666', mb: 1 }}>
+                    Entreprise
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#1F1F1F', fontWeight: 500 }}>
+                    {demande.entreprise}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" sx={{ color: '#666', mb: 1 }}>
+                    Secteur
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#1F1F1F', fontWeight: 500 }}>
+                    {demande.secteur}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" sx={{ color: '#666', mb: 1 }}>
+                    Ville
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#1F1F1F', fontWeight: 500 }}>
+                    {demande.ville}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle2" sx={{ color: '#666', mb: 1 }}>
+                    Date de création
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#1F1F1F', fontWeight: 500 }}>
+                    {demande.created_at}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
     </Container>
   );
 };

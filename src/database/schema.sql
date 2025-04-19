@@ -126,4 +126,71 @@ create policy "Les admins peuvent gérer toutes les demandes"
       where profiles.id = auth.uid()
       and profiles.role = 'admin'
     )
-  ); 
+  );
+
+-- Table demandes_entreprises
+create table demandes_entreprises (
+  id uuid default uuid_generate_v4() primary key,
+  numero_demande text unique not null,
+  email text not null,
+  telephone text not null,
+  nom_entreprise text not null,
+  prenom_contact text not null,
+  nom_contact text not null,
+  sexe_prefere text check (sexe_prefere in ('homme', 'femme', 'pas de préférence')),
+  age_minimum integer,
+  competences_requises jsonb default '[]'::jsonb,
+  langues_requises jsonb default '[]'::jsonb,
+  region text,
+  type_etude text,
+  description_projet text,
+  duree_mission text,
+  date_debut_souhaitee date,
+  budget text,
+  statut text check (statut in ('nouvelle', 'en cours', 'terminée', 'annulée')) not null default 'nouvelle',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create trigger update_demandes_entreprises_updated_at
+    before update on demandes_entreprises
+    for each row
+    execute function update_updated_at_column();
+
+-- Fonction pour générer automatiquement le numéro de demande
+create or replace function generate_numero_demande()
+returns trigger as $$
+begin
+    new.numero_demande := 'DEM-' || to_char(current_date, 'YYYYMMDD') || '-' || 
+                         lpad(cast(floor(random() * 1000) as text), 3, '0');
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger generate_numero_demande_trigger
+    before insert on demandes_entreprises
+    for each row
+    execute function generate_numero_demande();
+
+-- Politiques de sécurité pour demandes_entreprises
+alter table demandes_entreprises enable row level security;
+
+create policy "Les demandes d'entreprises sont visibles par les admins"
+    on demandes_entreprises for select
+    using (
+        exists (
+            select 1 from profiles
+            where profiles.id = auth.uid()
+            and profiles.role = 'admin'
+        )
+    );
+
+create policy "Les admins peuvent gérer toutes les demandes d'entreprises"
+    on demandes_entreprises for all
+    using (
+        exists (
+            select 1 from profiles
+            where profiles.id = auth.uid()
+            and profiles.role = 'admin'
+        )
+    ); 

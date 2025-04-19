@@ -1,0 +1,44 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Style pour les boutons avec dégradé */
+.gradient-button {
+  background: linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%);
+  border: none;
+  color: white;
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(162, 54, 236, 0.25);
+}
+
+.gradient-button:hover {
+  background: linear-gradient(90deg, #8929BD 0%, #E619B0 50%, #E66A61 100%);
+  box-shadow: 0 6px 12px rgba(162, 54, 236, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Style pour les conteneurs avec dégradé */
+.gradient-container {
+  background: linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%);
+  border-radius: 16px;
+  color: white;
+} 
