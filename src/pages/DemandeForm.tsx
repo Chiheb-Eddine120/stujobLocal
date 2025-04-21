@@ -281,7 +281,7 @@ const DemandeForm: React.FC = () => {
           color: 'transparent',
         }}
       >
-        Faire une demande de recrutement
+        Introduire une demande de recrutement
       </Typography>
 
       <Box 

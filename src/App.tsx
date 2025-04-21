@@ -113,30 +113,9 @@ const App: React.FC = () => {
           <main style={{ flex: 1, paddingBottom: '20px' }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route 
-                path="/demande" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <DemandeForm />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/suivi" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <SuiviDemande />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/suivi/:trackingNumber" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <SuiviDemande />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/demande" element={<DemandeForm />} />
+              <Route path="/suivi" element={<SuiviDemande />} />
+              <Route path="/suivi/:trackingNumber" element={<SuiviDemande />} />
               <Route path="/etudiants" element={<Etudiants />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />

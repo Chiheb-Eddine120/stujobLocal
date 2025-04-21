@@ -88,7 +88,7 @@ const Home: React.FC = () => {
           Chez Stujob, nous vous simplifions la recherche d'un étudiant motivé et disponible. Dites-nous ce dont vous avez besoin, nous trouverons la bonne personne, sans perte de temps.
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-          {userRole === 'entreprise' || userRole === 'admin' && (
+          {userRole === 'entreprise' || userRole === 'admin' ? (
             <Button
               component={RouterLink}
               to="/demande"
@@ -106,8 +106,7 @@ const Home: React.FC = () => {
             >
               Introduire une demande
             </Button>
-          )}
-          {userRole === 'student' && (
+          ) : userRole === 'student' ? (
             <Button
               component={RouterLink}
               to="/espace-etudiant"
@@ -125,6 +124,46 @@ const Home: React.FC = () => {
             >
               Vers mon espace étudiant
             </Button>
+          ) : (
+            <>
+              <Button
+                component={RouterLink}
+                to="/demande"
+                variant="contained"
+                sx={{
+                  bgcolor: '#9333EA',
+                  borderRadius: '25px',
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.1rem',
+                  '&:hover': {
+                    bgcolor: '#7928CA'
+                  }
+                }}
+              >
+                Introduire une demande
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="outlined"
+                sx={{
+                  borderColor: '#9333EA',
+                  color: '#9333EA',
+                  borderRadius: '25px',
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.1rem',
+                  '&:hover': {
+                    borderColor: '#7928CA',
+                    color: '#7928CA',
+                    bgcolor: 'rgba(147, 51, 234, 0.04)'
+                  }
+                }}
+              >
+                Se connecter
+              </Button>
+            </>
           )}
         </Box>
       </Container>

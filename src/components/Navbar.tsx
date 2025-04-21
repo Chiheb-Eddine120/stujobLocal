@@ -146,46 +146,38 @@ const Navbar: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex' }}>
-              {(userRole === 'entreprise' || userRole === 'admin') && (
-                <>
-                  <Button
-                    component={RouterLink}
-                    to="/demande"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={buttonStyle}
-                  >
-                    Faire une demande
-                  </Button>
+              <Button
+                component={RouterLink}
+                to="/demande"
+                disableRipple
+                disableElevation
+                variant="text"
+                sx={buttonStyle}
+              >
+                Introduire une demande
+              </Button>
 
-                  <Button
-                    component={RouterLink}
-                    to="/suivi"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={buttonStyle}
-                  >
-                    Suivre une demande
-                  </Button>
-                </>
-              )}
+              <Button
+                component={RouterLink}
+                to="/suivi"
+                disableRipple
+                disableElevation
+                variant="text"
+                sx={buttonStyle}
+              >
+                Suivre une demande
+              </Button>
 
-              {(userRole === 'student' || userRole === 'admin') && (
-                <Button
-                  component={RouterLink}
-                  to="/espace-etudiant"
-                  disableRipple
-                  disableElevation
-                  variant="text"
-                  sx={buttonStyle}
-                >
-                  Mon espace étudiant
-                </Button>
-              )}
-
-
+              <Button
+                component={RouterLink}
+                to="/etudiants"
+                disableRipple
+                disableElevation
+                variant="text"
+                sx={buttonStyle}
+              >
+                Espace étudiant
+              </Button>
             </Box>
           </Box>
 
@@ -194,84 +186,53 @@ const Navbar: React.FC = () => {
               <CircularProgress size={24} sx={{ color: 'white' }} />
             ) : (
               <>
-                {userRole === 'admin' && (
-                  <Button
-                    component={RouterLink}
-                    to="/dashboard"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={{
-                      color: 'white',
-                      minWidth: '40px',
-                      width: '40px',
-                      height: '40px',
-                      mr: 3,
-                      p: 0,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'white',
-                        color: '#9333EA',
-                        transform: 'rotate(90deg)',
-                        boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
-                      }
-                    }}
-                  >
-                    <DashboardIcon />
-                  </Button>
-                )}
-
                 {isAuthenticated ? (
                   <>
-                    <IconButton
-                      onClick={handleMenu}
-                      sx={{ p: 0 }}
-                    >
-                      <Avatar 
-                        sx={{ 
-                          width: 38, 
-                          height: 38,
-                          backgroundColor: 'transparent',
-                          color: 'white',
-                          fontSize: '0.95rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
+                    {userRole === 'admin' && (
+                      <Button
+                        component={RouterLink}
+                        to="/dashboard"
+                        startIcon={<DashboardIcon />}
+                        sx={{
+                          ...buttonStyle,
+                          background: 'rgba(255, 255, 255, 0.1)',
                           '&:hover': {
-                            backgroundColor: 'transparent',
+                            background: 'rgba(255, 255, 255, 0.2)',
                           }
                         }}
                       >
-                        F
+                        Dashboard
+                      </Button>
+                    )}
+                    <IconButton
+                      onClick={handleMenu}
+                      sx={{
+                        color: 'white',
+                        '&:hover': {
+                          background: 'rgba(255, 255, 255, 0.1)',
+                        }
+                      }}
+                    >
+                      <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
+                        {userRole?.[0].toUpperCase()}
                       </Avatar>
                     </IconButton>
                     <Menu
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl)}
                       onClose={handleClose}
-                      sx={{
-                        '& .MuiPaper-root': {
-                          borderRadius: 2,
+                      PaperProps={{
+                        sx: {
+                          mt: 1.5,
+                          borderRadius: '12px',
                           minWidth: 180,
-                          boxShadow: 'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-                          '& .MuiMenu-list': {
-                            padding: '4px 0',
-                          },
-                          '& .MuiMenuItem-root': {
-                            '& .MuiSvgIcon-root': {
-                              fontSize: 18,
-                              color: '#666',
-                              marginRight: 1.5,
-                            },
-                            '&:active': {
-                              backgroundColor: '#666',
-                            },
-                          },
-                        },
+                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                        }
                       }}
                     >
-                      <MenuItem onClick={handleLogout}>
-                        <LogoutIcon />
-                        Se déconnecter
+                      <MenuItem onClick={handleLogout} sx={{ py: 1 }}>
+                        <LogoutIcon sx={{ mr: 1, color: '#666' }} />
+                        Déconnexion
                       </MenuItem>
                     </Menu>
                   </>
@@ -282,15 +243,13 @@ const Navbar: React.FC = () => {
                     startIcon={<LoginIcon />}
                     sx={{
                       ...buttonStyle,
-                      mr: 0,
-                      border: '1px solid white',
+                      background: 'rgba(255, 255, 255, 0.1)',
                       '&:hover': {
-                        ...buttonStyle['&:hover'],
-                        borderColor: 'white',
+                        background: 'rgba(255, 255, 255, 0.2)',
                       }
                     }}
                   >
-                    Se connecter
+                    Connexion
                   </Button>
                 )}
               </>
