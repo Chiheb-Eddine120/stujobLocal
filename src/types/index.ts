@@ -4,6 +4,7 @@ export type TypeMission = 'Stage' | 'Ponctuel' | 'Freelance' | 'Temps partiel' |
 export type NiveauCompetence = 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
 export type NiveauUrgence = 'Normal' | 'Urgent' | 'Très urgent';
 export type Secteur = 'Restauration' | 'Vente' | 'Logistique' | 'IT' | 'Autre';
+export type UserRole = 'admin' | 'student' | 'entreprise';
 
 export interface Competence {
   nom: string;

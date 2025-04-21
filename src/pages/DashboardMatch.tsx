@@ -5,14 +5,8 @@ import {
   Paper,
   Box,
   Grid,
-  Button,
   Chip,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
   Alert,
   Table,
   TableBody,
@@ -26,9 +20,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  CircularProgress
 } from '@mui/material';
 import {
-  FilterList as FilterIcon,
   Search as SearchIcon,
   Person as PersonIcon,
   CheckCircle as CheckCircleIcon,
@@ -39,13 +33,14 @@ import {
 } from '@mui/icons-material';
 import { demandeService } from '../services/demandeService';
 import { matchService } from '../services/matchService';
-import { Demande, Etudiant, Match, NiveauCompetence } from '../types';
+import { Demande, Etudiant, Match /*, NiveauCompetence */ } from '../types';
+import DashboardBackButton from '../components/DashboardBackButton';
 
-interface FilterState {
+/*interface FilterState {
   competences: string[];
   niveauMin: NiveauCompetence | '';
   typeMission: string;
-}
+}*/
 
 interface MatchWithEtudiant extends Match {
   etudiant: Etudiant & {
@@ -91,22 +86,17 @@ const DashboardMatch: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      console.log('Début du chargement des données');
       
       const demandesData = (await demandeService.getDemandesEnAttente() as unknown) as Demande[];
-      console.log('Demandes en attente:', demandesData);
 
       const demandesWithMatches = await Promise.all(
         demandesData.map(async (demande) => {
           if (!demande.id) return { ...demande, matches: [], matchCount: 0 };
           
-          console.log('Chargement des matches pour la demande:', demande.id);
           let matchesData = await matchService.getMatchesByDemande(demande.id);
           
           if (!matchesData || matchesData.length === 0) {
-            console.log('Aucun match trouvé pour la demande', demande.id, '- Génération automatique...');
             const generatedMatches = await matchService.generateMatchesForDemande(demande);
-            console.log('Matches générés:', generatedMatches);
             
             if (generatedMatches && generatedMatches.length > 0) {
               matchesData = await matchService.getMatchesByDemande(demande.id);
@@ -185,92 +175,91 @@ const DashboardMatch: React.FC = () => {
   }
 
   return (
-    <>
-      <Container maxWidth="lg">
-        <Box sx={{ mt: 4, mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Liste des Demandes de Recrutement
-          </Typography>
+    <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
+      <DashboardBackButton />
+      <Typography variant="h4" component="h1" gutterBottom>
+        Gestion des Matches
+      </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
+      <Box sx={{ mt: 4, mb: 4 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
 
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Rechercher une demande"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  InputProps={{
-                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                  }}
-                />
-              </Grid>
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Rechercher une demande"
+                value={searchTerm}
+                onChange={handleSearch}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
             </Grid>
-          </Paper>
+          </Grid>
+        </Paper>
 
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Entreprise</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Compétences requises</TableCell>
-                  <TableCell>Ville</TableCell>
-                  <TableCell>Étudiants compatibles</TableCell>
-                  <TableCell>Actions</TableCell>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Entreprise</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Compétences requises</TableCell>
+                <TableCell>Ville</TableCell>
+                <TableCell>Étudiants compatibles</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredDemandes.map((demande) => (
+                <TableRow 
+                  key={demande.id}
+                  hover
+                  onClick={() => handleDemandeClick(demande)}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <TableCell>{demande.entreprise}</TableCell>
+                  <TableCell>
+                    <Typography noWrap style={{ maxWidth: 200 }}>
+                      {demande.description_projet}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {demande.competences_requises.map((comp, index) => (
+                        <Chip
+                          key={index}
+                          label={comp.nom}
+                          size="small"
+                          color={comp.priorite === 'Essentiel' ? 'primary' : 'default'}
+                        />
+                      ))}
+                    </Box>
+                  </TableCell>
+                  <TableCell>{demande.ville}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${demande.matchCount} étudiant${demande.matchCount > 1 ? 's' : ''}`}
+                      color={demande.matchCount > 0 ? 'success' : 'default'}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <IconButton size="small">
+                      <KeyboardArrowDownIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredDemandes.map((demande) => (
-                  <TableRow 
-                    key={demande.id}
-                    hover
-                    onClick={() => handleDemandeClick(demande)}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell>{demande.entreprise}</TableCell>
-                    <TableCell>
-                      <Typography noWrap style={{ maxWidth: 200 }}>
-                        {demande.description_projet}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {demande.competences_requises.map((comp, index) => (
-                          <Chip
-                            key={index}
-                            label={comp.nom}
-                            size="small"
-                            color={comp.priorite === 'Essentiel' ? 'primary' : 'default'}
-                          />
-                        ))}
-                      </Box>
-                    </TableCell>
-                    <TableCell>{demande.ville}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={`${demande.matchCount} étudiant${demande.matchCount > 1 ? 's' : ''}`}
-                        color={demande.matchCount > 0 ? 'success' : 'default'}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton size="small">
-                        <KeyboardArrowDownIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      </Container>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
 
       <Dialog
         open={!!selectedDemande}
@@ -453,8 +442,8 @@ const DashboardMatch: React.FC = () => {
           {notification.message}
         </Alert>
       </Snackbar>
-    </>
+    </Container>
   );
 };
 
-export default DashboardMatch; 
+export default DashboardMatch;

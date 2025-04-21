@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box, Grid, Paper } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -6,9 +6,26 @@ import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { authService } from '../services/authService';
 
 const Home: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const isAuthenticated = await authService.isAuthenticated();
+        if (isAuthenticated) {
+          const user = await authService.getCurrentUser();
+          setUserRole(user?.role || null);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du rôle:', error);
+      }
+    };
+    checkUserRole();
+  }, []);
 
   const faqItems = [
     {
@@ -70,23 +87,46 @@ const Home: React.FC = () => {
         <Typography variant="body1" sx={{ mb: 4, color: '#666', maxWidth: '600px', mx: 'auto' }}>
           Chez Stujob, nous vous simplifions la recherche d'un étudiant motivé et disponible. Dites-nous ce dont vous avez besoin, nous trouverons la bonne personne, sans perte de temps.
         </Typography>
-        <Button
-          component={RouterLink}
-          to="/demande"
-          variant="contained"
-          sx={{
-            bgcolor: '#9333EA',
-            borderRadius: '25px',
-            px: 6,
-            py: 2,
-            fontSize: '1.1rem',
-            '&:hover': {
-              bgcolor: '#7928CA'
-            }
-          }}
-        >
-          Introduire une demande
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+          {userRole === 'entreprise' || userRole === 'admin' && (
+            <Button
+              component={RouterLink}
+              to="/demande"
+              variant="contained"
+              sx={{
+                bgcolor: '#9333EA',
+                borderRadius: '25px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                '&:hover': {
+                  bgcolor: '#7928CA'
+                }
+              }}
+            >
+              Introduire une demande
+            </Button>
+          )}
+          {userRole === 'student' && (
+            <Button
+              component={RouterLink}
+              to="/espace-etudiant"
+              variant="contained"
+              sx={{
+                bgcolor: '#9333EA',
+                borderRadius: '25px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                '&:hover': {
+                  bgcolor: '#7928CA'
+                }
+              }}
+            >
+              Vers mon espace étudiant
+            </Button>
+          )}
+        </Box>
       </Container>
 
       {/* Features Section */}
@@ -379,23 +419,63 @@ const Home: React.FC = () => {
           <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', color: '#666' }}>
             Que vous soyez une entreprise à la recherche de talents ou un étudiant cherchant une opportunité, Stujob est là pour vous accompagner dans votre démarche.
           </Typography>
-          <Button
-            component={RouterLink}
-            to="/demande"
-            variant="contained"
-            sx={{
-              bgcolor: '#9333EA',
-              borderRadius: '25px',
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              '&:hover': {
-                bgcolor: '#7928CA'
-              }
-            }}
-          >
-            Créer une demande
-          </Button>
+          {!userRole && (
+            <Button
+              component={RouterLink}
+              to="/login"
+              variant="contained"
+              sx={{
+                bgcolor: '#9333EA',
+                borderRadius: '25px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                '&:hover': {
+                  bgcolor: '#7928CA'
+                }
+              }}
+            >
+              Se connecter
+            </Button>
+          )}
+          {(userRole === 'entreprise' || userRole === 'admin') && (
+            <Button
+              component={RouterLink}
+              to="/demande"
+              variant="contained"
+              sx={{
+                bgcolor: '#9333EA',
+                borderRadius: '25px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                '&:hover': {
+                  bgcolor: '#7928CA'
+                }
+              }}
+            >
+              Créer une demande
+            </Button>
+          )}
+          {userRole === 'student' && (
+            <Button
+              component={RouterLink}
+              to="/espace-etudiant"
+              variant="contained"
+              sx={{
+                bgcolor: '#9333EA',
+                borderRadius: '25px',
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                '&:hover': {
+                  bgcolor: '#7928CA'
+                }
+              }}
+            >
+              Accéder à mon espace
+            </Button>
+          )}
         </Paper>
       </Container>
     </Box>

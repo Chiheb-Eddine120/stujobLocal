@@ -17,10 +17,11 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import { authService } from '../services/authService';
+import { UserRole } from '../types';
 
 const Navbar: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
@@ -32,13 +33,13 @@ const Navbar: React.FC = () => {
         const authenticated = await authService.isAuthenticated();
         setIsAuthenticated(authenticated);
         if (authenticated) {
-          const isAdminRole = await authService.hasRole('admin');
-          setIsAdmin(isAdminRole);
+          const role = await authService.getCurrentUser();
+          setUserRole(role?.role as UserRole);
         }
       } catch (error) {
         console.error('Erreur lors de la vérification de l\'authentification:', error);
         setIsAuthenticated(false);
-        setIsAdmin(false);
+        setUserRole(null);
       } finally {
         setIsLoading(false);
       }
@@ -58,7 +59,7 @@ const Navbar: React.FC = () => {
     try {
       await authService.signOut();
       setIsAuthenticated(false);
-      setIsAdmin(false);
+      setUserRole(null);
       handleClose();
       navigate('/login');
     } catch (error) {
@@ -145,38 +146,46 @@ const Navbar: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex' }}>
-              <Button
-                component={RouterLink}
-                to="/demande"
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
-              >
-                Faire une demande
-              </Button>
+              {(userRole === 'entreprise' || userRole === 'admin') && (
+                <>
+                  <Button
+                    component={RouterLink}
+                    to="/demande"
+                    disableRipple
+                    disableElevation
+                    variant="text"
+                    sx={buttonStyle}
+                  >
+                    Faire une demande
+                  </Button>
 
-              <Button
-                component={RouterLink}
-                to="/suivi"
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
-              >
-                Suivre une demande
-              </Button>
+                  <Button
+                    component={RouterLink}
+                    to="/suivi"
+                    disableRipple
+                    disableElevation
+                    variant="text"
+                    sx={buttonStyle}
+                  >
+                    Suivre une demande
+                  </Button>
+                </>
+              )}
 
-              <Button
-                component={RouterLink}
-                to="/etudiants"
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
-              >
-                Étudiants
-              </Button>
+              {(userRole === 'student' || userRole === 'admin') && (
+                <Button
+                  component={RouterLink}
+                  to="/espace-etudiant"
+                  disableRipple
+                  disableElevation
+                  variant="text"
+                  sx={buttonStyle}
+                >
+                  Mon espace étudiant
+                </Button>
+              )}
+
+
             </Box>
           </Box>
 
@@ -185,7 +194,7 @@ const Navbar: React.FC = () => {
               <CircularProgress size={24} sx={{ color: 'white' }} />
             ) : (
               <>
-                {isAdmin && (
+                {userRole === 'admin' && (
                   <Button
                     component={RouterLink}
                     to="/dashboard"

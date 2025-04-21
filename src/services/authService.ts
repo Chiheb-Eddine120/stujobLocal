@@ -7,6 +7,9 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
+  nom: string;
+  prenom: string;
+  telephone: string;
   created_at: string;
 }
 
@@ -41,6 +44,9 @@ export const authService = {
         id: user.id,
         email: user.email!,
         role: profile.role as UserRole,
+        nom: '',
+        prenom: '',
+        telephone: '',
         created_at: user.created_at,
       };
     } catch (error) {
@@ -62,33 +68,21 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<User | null> {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error || !session) {
-        return null;
-      }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
 
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
 
-      if (profileError) {
-        return null;
-      }
-
-      return {
-        id: session.user.id,
-        email: session.user.email!,
-        role: profile.role as UserRole,
-        created_at: session.user.created_at,
-      };
-    } catch (error) {
-      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-      return null;
+    if (error) {
+      console.error('Erreur lors de la récupération du profil:', error);
+      throw error;
     }
+
+    return data as User;
   },
 
   async isAuthenticated(): Promise<boolean> {
@@ -101,14 +95,9 @@ export const authService = {
     }
   },
 
-  async hasRole(requiredRole: User['role']): Promise<boolean> {
-    try {
-      const user = await this.getCurrentUser();
-      return user?.role === requiredRole;
-    } catch (error) {
-      console.error('Erreur lors de la vérification du rôle:', error);
-      return false;
-    }
+  async hasRole(role: UserRole): Promise<boolean> {
+    const user = await this.getCurrentUser();
+    return user?.role === role;
   },
 
   async isAdmin(): Promise<boolean> {
@@ -159,11 +148,92 @@ export const authService = {
         id: authData.user.id,
         email: authData.user.email!,
         role: 'student',
+        nom: '',
+        prenom: '',
+        telephone: '',
         created_at: authData.user.created_at,
       };
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error);
       throw error;
     }
-  }
+  },
+
+  async getAllUsers(): Promise<User[]> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+      throw error;
+    }
+
+    return data as User[];
+  },
+
+  async updateUser(userId: string, userData: Partial<User>, adminPassword?: string): Promise<void> {
+    try {
+      // Vérifier si on essaie de promouvoir en admin
+      if (userData.role === 'admin') {
+        const adminSecret = import.meta.env.VITE_ADMIN_SECRET;
+        if (!adminPassword || adminPassword !== adminSecret) {
+          throw new Error('Mot de passe administrateur invalide');
+        }
+      }
+
+      // Vérifier si l'utilisateur est déjà admin
+      const { data: currentUser, error: userError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (userError) throw userError;
+
+      if (currentUser.role === 'admin') {
+        // Supprimer toute tentative de modification du rôle pour un admin
+        delete userData.role;
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(userData)
+        .eq('id', userId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
+      throw error;
+    }
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    // Vérifier d'abord si l'utilisateur est admin
+    const { data: user, error: checkError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (checkError) {
+      console.error('Erreur lors de la vérification du rôle:', checkError);
+      throw checkError;
+    }
+
+    if (user.role === 'admin') {
+      throw new Error('Impossible de supprimer un compte administrateur');
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+      throw error;
+    }
+  },
 }; 

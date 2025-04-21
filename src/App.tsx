@@ -13,11 +13,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import DashboardMenu from './pages/DashboardMenu';
 import DashboardMatch from './pages/DashboardMatch';
+import DashboardUsers from './pages/DashboardUsers';
+import DashboardStats from './pages/DashboardStats';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Privacy from './pages/Privacy';
+import { UserRole } from './types';
 
 const theme = createTheme({
   palette: {
@@ -110,9 +113,30 @@ const App: React.FC = () => {
           <main style={{ flex: 1, paddingBottom: '20px' }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/demande" element={<DemandeForm />} />
-              <Route path="/suivi" element={<SuiviDemande />} />
-              <Route path="/suivi/:trackingNumber" element={<SuiviDemande />} />
+              <Route 
+                path="/demande" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <DemandeForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/suivi" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <SuiviDemande />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/suivi/:trackingNumber" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <SuiviDemande />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="/etudiants" element={<Etudiants />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -125,7 +149,7 @@ const App: React.FC = () => {
               <Route 
                 path="/dashboard" 
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
                     <DashboardMenu />
                   </ProtectedRoute>
                 } 
@@ -133,8 +157,32 @@ const App: React.FC = () => {
               <Route 
                 path="/dashboard/match" 
                 element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
                     <DashboardMatch />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/users" 
+                element={
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
+                    <DashboardUsers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/stats" 
+                element={
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
+                    <DashboardStats />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/espace-etudiant" 
+                element={
+                  <ProtectedRoute requiredRole={'student' as UserRole}>
+                    <Etudiants />
                   </ProtectedRoute>
                 } 
               />
