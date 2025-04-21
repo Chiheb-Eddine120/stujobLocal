@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CookieConsent from './components/CookieConsent';
 import Home from './pages/Home';
 import DemandeForm from './pages/DemandeForm';
 import SuiviDemande from './pages/SuiviDemande';
@@ -128,6 +129,7 @@ const App: React.FC = () => {
             </Routes>
           </main>
           <Footer />
+          <CookieConsent />
         </div>
       </Router>
     </ThemeProvider>

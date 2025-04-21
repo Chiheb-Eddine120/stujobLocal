@@ -77,8 +77,9 @@ const Home: React.FC = () => {
           sx={{
             bgcolor: '#9333EA',
             borderRadius: '25px',
-            px: 4,
-            py: 1.5,
+            px: 6,
+            py: 2,
+            fontSize: '1.1rem',
             '&:hover': {
               bgcolor: '#7928CA'
             }
@@ -385,8 +386,9 @@ const Home: React.FC = () => {
             sx={{
               bgcolor: '#9333EA',
               borderRadius: '25px',
-              px: 4,
-              py: 1.5,
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
               '&:hover': {
                 bgcolor: '#7928CA'
               }
