@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
+import Privacy from './pages/Privacy';
 
 const theme = createTheme({
   palette: {
@@ -114,6 +115,7 @@ const App: React.FC = () => {
               <Route path="/etudiants" element={<Etudiants />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/unauthorized" element={<Unauthorized />} />

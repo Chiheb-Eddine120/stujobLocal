@@ -144,7 +144,7 @@ const Footer: React.FC = () => {
             </Typography>
             <Stack spacing={2}>
               <Typography sx={{ color: 'white', opacity: 0.9, fontSize: '1rem' }}>
-                contact@stujob.fr
+                contact@sujob.be
               </Typography>
               <Typography sx={{ color: 'white', opacity: 0.9, fontSize: '1rem' }}>
                 +33 6 XX XX XX XX

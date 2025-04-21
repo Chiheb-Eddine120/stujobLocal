@@ -199,11 +199,12 @@ const Navbar: React.FC = () => {
                       height: '40px',
                       mr: 3,
                       p: 0,
-                      backgroundColor: 'transparent !important',
-                      boxShadow: 'none !important',
+                      transition: 'all 0.3s ease',
                       '&:hover': {
-                        backgroundColor: 'transparent !important',
-                        boxShadow: 'none !important',
+                        background: 'white',
+                        color: '#9333EA',
+                        transform: 'rotate(90deg)',
+                        boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
                       }
                     }}
                   >
