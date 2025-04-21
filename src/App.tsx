@@ -11,6 +11,7 @@ import SuiviDemande from './pages/SuiviDemande';
 import Etudiants from './pages/Etudiants';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import DashboardMenu from './pages/DashboardMenu';
 import DashboardMatch from './pages/DashboardMatch';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
@@ -119,8 +120,18 @@ const App: React.FC = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              {/* Routes du Dashboard */}
               <Route 
                 path="/dashboard" 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <DashboardMenu />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/match" 
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <DashboardMatch />

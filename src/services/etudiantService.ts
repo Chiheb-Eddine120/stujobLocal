@@ -1,6 +1,18 @@
 import { supabase } from './supabaseClient';
 import { Etudiant, Experience, NiveauCompetence } from '../types';
 
+export interface CompetenceWithLevel {
+  nom: string;
+  niveau: NiveauCompetence;
+}
+
+export const niveauOrdre: Record<NiveauCompetence, number> = {
+  'Débutant': 1,
+  'Intermédiaire': 2,
+  'Avancé': 3,
+  'Expert': 4
+};
+
 export const etudiantService = {
   async getEtudiant(profileId: string) {
     const { data, error } = await supabase
@@ -111,14 +123,49 @@ export const etudiantService = {
 
       let query = supabase
         .from('etudiants')
-        .select('*');
+        .select(`
+          *,
+          profiles (
+            nom,
+            prenom,
+            email,
+            telephone
+          )
+        `);
 
+      // Recherche dans les compétences techniques et soft
       if (criteres.competences?.length) {
-        query = query.contains('competences', criteres.competences);
+        // Nettoyer et valider les compétences
+        const validCompetences = criteres.competences
+          .filter(comp => comp && typeof comp === 'string' && comp.trim().length > 0)
+          .map(comp => comp.trim());
+
+        if (validCompetences.length > 0) {
+          const filters = validCompetences.flatMap(comp => {
+            const jsonValue = JSON.stringify([comp]); // Crée ["React"] par exemple
+            return [
+              `competences_techniques.cs.${jsonValue}`,
+              `competences_soft.cs.${jsonValue}`
+            ];
+          });
+
+          const orClause = filters.join(',');
+          query = query.or(orClause);
+
+          console.log('Recherche avec les filtres:', orClause);
+        }
       }
 
+      // Filtre de niveau minimum si spécifié
+      if (criteres.niveauMin) {
+        const niveauMinValue = niveauOrdre[criteres.niveauMin];
+        const jsonNiveauValue = JSON.stringify({ niveau: niveauMinValue });
+        query = query.gte('niveau_competence', jsonNiveauValue);
+      }
+
+      // Filtre de disponibilité
       if (criteres.disponibilites?.length) {
-        query = query.overlaps('disponibilites', criteres.disponibilites);
+        query = query.eq('disponibilite', true);
       }
 
       const { data, error } = await query;
@@ -128,7 +175,23 @@ export const etudiantService = {
         throw new Error('Erreur lors de la recherche d\'étudiants');
       }
 
-      return data || [];
+      // Post-traitement pour le niveau minimum si nécessaire
+      let filteredData = data || [];
+      if (criteres.niveauMin && filteredData.length > 0) {
+        const niveauMinValue = niveauOrdre[criteres.niveauMin as NiveauCompetence];
+        filteredData = filteredData.filter(etudiant => {
+          // Vérifier le niveau pour chaque compétence demandée
+          return criteres.competences?.every(comp => {
+            const compTech = etudiant.competences_techniques.find((c: CompetenceWithLevel) => c.nom === comp);
+            const compSoft = etudiant.competences_soft.find((c: CompetenceWithLevel) => c.nom === comp);
+            if (compTech?.niveau && niveauOrdre[compTech.niveau as NiveauCompetence] >= niveauMinValue) return true;
+            if (compSoft?.niveau && niveauOrdre[compSoft.niveau as NiveauCompetence] >= niveauMinValue) return true;
+            return false;
+          }) ?? true;
+        });
+      }
+
+      return filteredData;
     } catch (error) {
       console.error('Erreur lors de la recherche d\'étudiants:', error);
       throw error;
