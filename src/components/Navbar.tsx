@@ -146,37 +146,41 @@ const Navbar: React.FC = () => {
             </Typography>
 
             <Box sx={{ display: 'flex' }}>
-              <Button
-                component={RouterLink}
-                to="/demande"
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
-              >
-                Introduire une demande
-              </Button>
+              {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
+                <>
+                  <Button
+                    component={RouterLink}
+                    to="/demande"
+                    disableRipple
+                    disableElevation
+                    variant="text"
+                    sx={buttonStyle}
+                  >
+                    Introduire une demande
+                  </Button>
+
+                  <Button
+                    component={RouterLink}
+                    to="/suivi"
+                    disableRipple
+                    disableElevation
+                    variant="text"
+                    sx={buttonStyle}
+                  >
+                    Suivre une demande
+                  </Button>
+                </>
+              )}
 
               <Button
                 component={RouterLink}
-                to="/suivi"
+                to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
                 disableRipple
                 disableElevation
                 variant="text"
                 sx={buttonStyle}
               >
-                Suivre une demande
-              </Button>
-
-              <Button
-                component={RouterLink}
-                to="/etudiants"
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
-              >
-                Espace étudiant
+                {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Espace étudiant'}
               </Button>
             </Box>
           </Box>
@@ -192,12 +196,25 @@ const Navbar: React.FC = () => {
                       <Button
                         component={RouterLink}
                         to="/dashboard"
-                        startIcon={<DashboardIcon />}
+                        startIcon={
+                          <DashboardIcon 
+                            sx={{
+                              transition: 'transform 0.3s ease',
+                              transform: 'rotate(0deg)',
+                              '.MuiButton-root:hover &': {
+                                transform: 'rotate(90deg)',
+                              },
+                            }}
+                          />
+                        }
                         sx={{
                           ...buttonStyle,
                           background: 'rgba(255, 255, 255, 0.1)',
                           '&:hover': {
-                            background: 'rgba(255, 255, 255, 0.2)',
+                            background: 'white',
+                            color: '#9333EA',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
                           }
                         }}
                       >

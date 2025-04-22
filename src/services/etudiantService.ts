@@ -14,26 +14,53 @@ export const niveauOrdre: Record<NiveauCompetence, number> = {
 };
 
 export const etudiantService = {
-  async getEtudiant(profileId: string) {
+  async getEtudiant(profileId: string): Promise<Etudiant | null> {
     const { data, error } = await supabase
       .from('etudiants')
       .select('*')
       .eq('profile_id', profileId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // Aucun étudiant trouvé pour ce profil
+        return null;
+      }
+      console.error('Erreur lors de la récupération de l\'étudiant:', error);
+      throw new Error('Impossible de récupérer les informations de l\'étudiant');
+    }
+
     return data as Etudiant;
   },
 
-  async updateEtudiant(profileId: string, etudiant: Partial<Etudiant>) {
+  async saveEtudiant(etudiantData: Partial<Etudiant>): Promise<Etudiant> {
     const { data, error } = await supabase
       .from('etudiants')
-      .update(etudiant)
-      .eq('profile_id', profileId)
+      .upsert(etudiantData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Erreur lors de la sauvegarde de l\'étudiant:', error);
+      throw new Error('Impossible de sauvegarder les informations de l\'étudiant');
+    }
+
+    return data as Etudiant;
+  },
+
+  async updateEtudiant(etudiantId: string, etudiantData: Partial<Etudiant>): Promise<Etudiant> {
+    const { data, error } = await supabase
+      .from('etudiants')
+      .update(etudiantData)
+      .eq('id', etudiantId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erreur lors de la mise à jour de l\'étudiant:', error);
+      throw new Error('Impossible de mettre à jour les informations de l\'étudiant');
+    }
+
     return data as Etudiant;
   },
 
@@ -49,20 +76,58 @@ export const etudiantService = {
   },
 
   async getAllEtudiants() {
-    const { data, error } = await supabase
-      .from('etudiants')
-      .select(`
-        *,
-        profiles (
-          nom,
-          prenom,
-          email,
-          telephone
-        )
-      `);
+    try {
+      console.log('Récupération de tous les étudiants...');
+      
+      // Vérifier l'authentification
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Session:', session ? 'Connecté' : 'Non connecté');
+      
+      // D'abord, comptons les étudiants
+      const { count, error: countError } = await supabase
+        .from('etudiants')
+        .select('*', { count: 'exact', head: true });
+        
+      console.log('Nombre total d\'étudiants:', count);
+      
+      if (countError) {
+        console.error('Erreur lors du comptage:', countError);
+        throw countError;
+      }
 
-    if (error) throw error;
-    return data as (Etudiant & { profiles: { nom: string; prenom: string; email: string; telephone: string } })[];
+      // Ensuite, récupérons les données
+      const { data, error } = await supabase
+        .from('etudiants')
+        .select(`
+          *,
+          profile:profiles (
+            id,
+            nom,
+            prenom,
+            email,
+            telephone
+          )
+        `);
+
+      if (error) {
+        console.error('Erreur lors de la récupération des étudiants:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.log('Aucune donnée retournée par Supabase');
+      } else if (data.length === 0) {
+        console.log('La table etudiants est vide');
+      } else {
+        console.log('Nombre d\'étudiants trouvés:', data.length);
+        console.log('Premier étudiant:', data[0]);
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Erreur complète dans getAllEtudiants:', error);
+      throw error;
+    }
   },
 
   async addExperience(etudiantId: string, experience: Experience): Promise<void> {

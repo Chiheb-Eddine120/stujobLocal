@@ -9,18 +9,21 @@ import Home from './pages/Home';
 import DemandeForm from './pages/DemandeForm';
 import SuiviDemande from './pages/SuiviDemande';
 import Etudiants from './pages/Etudiants';
+import EspaceEtudiant from './pages/EspaceEtudiant';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import DashboardMenu from './pages/DashboardMenu';
 import DashboardMatch from './pages/DashboardMatch';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardStats from './pages/DashboardStats';
+import DashboardNotifications from './pages/DashboardNotifications';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Privacy from './pages/Privacy';
 import { UserRole } from './types';
+import DashboardSettings from './pages/DashboardSettings';
 
 const theme = createTheme({
   palette: {
@@ -113,10 +116,34 @@ const App: React.FC = () => {
           <main style={{ flex: 1, paddingBottom: '20px' }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/demande" element={<DemandeForm />} />
-              <Route path="/suivi" element={<SuiviDemande />} />
-              <Route path="/suivi/:trackingNumber" element={<SuiviDemande />} />
-              <Route path="/etudiants" element={<Etudiants />} />
+              <Route 
+                path="/demande" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <DemandeForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route 
+                path="/suivi" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <SuiviDemande />
+                  </ProtectedRoute>
+                }
+              />
+              <Route 
+                path="/suivi/:trackingNumber" 
+                element={
+                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                    <SuiviDemande />
+                  </ProtectedRoute>
+                }
+              />
+              <Route 
+                path="/etudiants" 
+                element={<Etudiants />}
+              />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
@@ -158,12 +185,28 @@ const App: React.FC = () => {
                 } 
               />
               <Route 
+                path="/dashboard/notifications" 
+                element={
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
+                    <DashboardNotifications />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/dashboard/settings" 
+                element={
+                  <ProtectedRoute requiredRole={'admin' as UserRole}>
+                    <DashboardSettings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/espace-etudiant" 
                 element={
                   <ProtectedRoute requiredRole={'student' as UserRole}>
-                    <Etudiants />
+                    <EspaceEtudiant />
                   </ProtectedRoute>
-                } 
+                }
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

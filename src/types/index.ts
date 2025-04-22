@@ -33,14 +33,14 @@ export interface DemandeRecrutement {
 export interface Experience {
   titre: string;
   entreprise: string;
-  periode: string;
   description: string;
-  competences: string[];
+  date_debut: string;
+  date_fin?: string;
 }
 
 export interface Profile {
   id: string;
-  role: 'admin' | 'student' | 'entreprise';
+  role: string;
   email: string;
   nom: string;
   prenom: string;
@@ -52,16 +52,17 @@ export interface Profile {
 export interface Etudiant {
   id: string;
   profile_id: string;
-  cv_url: string | null;
-  lettre_motivation_url: string | null;
-  competences_techniques: string[];
-  competences_soft: string[];
+  cv_url: string;
+  lettre_motivation_url: string;
+  competences_techniques: Competence[];
+  competences_soft: Competence[];
   experiences: Experience[];
-  disponibilite: boolean;
+  disponibilite: string;
   niveau_etudes: string;
   ecole: string;
   created_at: string;
   updated_at: string;
+  profile?: Profile;
 }
 
 export interface Demande {

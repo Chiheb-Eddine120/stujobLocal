@@ -20,7 +20,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  CircularProgress
+  CircularProgress,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -33,8 +35,9 @@ import {
 } from '@mui/icons-material';
 import { demandeService } from '../services/demandeService';
 import { matchService } from '../services/matchService';
-import { Demande, Etudiant, Match /*, NiveauCompetence */ } from '../types';
+import { Demande, Etudiant, Match, NiveauCompetence } from '../types';
 import DashboardBackButton from '../components/DashboardBackButton';
+import { etudiantService } from '../services/etudiantService';
 
 /*interface FilterState {
   competences: string[];
@@ -44,7 +47,7 @@ import DashboardBackButton from '../components/DashboardBackButton';
 
 interface MatchWithEtudiant extends Match {
   etudiant: Etudiant & {
-    profiles: {
+    profile: {
       nom: string;
       prenom: string;
       email: string;
@@ -74,29 +77,105 @@ const DashboardMatch: React.FC = () => {
     message: '',
     severity: 'info'
   });
+  const [compareAll, setCompareAll] = useState(false);
+  const [allStudents, setAllStudents] = useState<Etudiant[]>([]);
 
   useEffect(() => {
     loadData();
   }, []);
 
+  // Effet pour charger les étudiants quand compareAll change
+  useEffect(() => {
+    const loadStudents = async () => {
+      if (compareAll) {
+        try {
+          setLoading(true);
+          const students = await etudiantService.getAllEtudiants();
+          console.log('Étudiants chargés:', students);
+          setAllStudents(students);
+        } catch (error) {
+          console.error('Erreur chargement étudiants:', error);
+          setNotification({
+            open: true,
+            message: 'Erreur lors du chargement des étudiants',
+            severity: 'error'
+          });
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setAllStudents([]);
+      }
+    };
+
+    loadStudents();
+  }, [compareAll]);
+
   const handleCloseNotification = () => {
     setNotification(prev => ({ ...prev, open: false }));
+  };
+
+  const calculateScore = (etudiant: Etudiant, demande: Demande): number => {
+    let score = 0;
+    let totalPoids = 0;
+
+    // Parcourir les compétences requises
+    demande.competences_requises.forEach(requise => {
+      const poids = requise.priorite === 'Essentiel' ? 3 : requise.priorite === 'Important' ? 2 : 1;
+      totalPoids += poids;
+
+      // Chercher dans les compétences techniques
+      const techMatch = etudiant.competences_techniques.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
+      if (techMatch && techMatch.niveau) {
+        const niveauScore: Record<NiveauCompetence, number> = {
+          'Débutant': 0.25,
+          'Intermédiaire': 0.5,
+          'Avancé': 0.75,
+          'Expert': 1
+        };
+        score += poids * (niveauScore[techMatch.niveau as NiveauCompetence] || 0);
+      }
+
+      // Chercher dans les compétences soft
+      const softMatch = etudiant.competences_soft.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
+      if (softMatch && softMatch.niveau) {
+        const niveauScore: Record<NiveauCompetence, number> = {
+          'Débutant': 0.25,
+          'Intermédiaire': 0.5,
+          'Avancé': 0.75,
+          'Expert': 1
+        };
+        score += poids * (niveauScore[softMatch.niveau as NiveauCompetence] || 0);
+      }
+    });
+
+    return Math.round((score / totalPoids) * 100);
   };
 
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('État de compareAll:', compareAll);
+      if (compareAll) {
+        console.log('Début de la récupération des étudiants');
+        const students = await etudiantService.getAllEtudiants();
+        console.log('Étudiants récupérés:', students);
+        setAllStudents(students);
+      }
       
       const demandesData = (await demandeService.getDemandesEnAttente() as unknown) as Demande[];
+      console.log('Demandes récupérées:', demandesData);
 
       const demandesWithMatches = await Promise.all(
         demandesData.map(async (demande) => {
           if (!demande.id) return { ...demande, matches: [], matchCount: 0 };
           
           let matchesData = await matchService.getMatchesByDemande(demande.id);
+          console.log('Matches pour demande', demande.id, ':', matchesData);
           
           if (!matchesData || matchesData.length === 0) {
             const generatedMatches = await matchService.generateMatchesForDemande(demande);
+            console.log('Nouveaux matches générés:', generatedMatches);
             
             if (generatedMatches && generatedMatches.length > 0) {
               matchesData = await matchService.getMatchesByDemande(demande.id);
@@ -110,7 +189,8 @@ const DashboardMatch: React.FC = () => {
           };
         })
       );
-
+      
+      console.log('Demandes avec matches:', demandesWithMatches);
       setDemandes(demandesWithMatches);
     } catch (err) {
       console.error('Erreur détaillée lors du chargement des données:', err);
@@ -156,6 +236,11 @@ const DashboardMatch: React.FC = () => {
     setSelectedDemande(null);
   };
 
+  const handleCompareAllChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Switch changé à:', event.target.checked);
+    setCompareAll(event.target.checked);
+  };
+
   const filteredDemandes = demandes.filter(demande => 
     (demande.description_projet?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (demande.entreprise?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
@@ -188,21 +273,21 @@ const DashboardMatch: React.FC = () => {
           </Alert>
         )}
 
-        <Paper sx={{ p: 3, mb: 3 }}>
-          <Grid container spacing={2} alignItems="center">
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Grid container spacing={2} alignItems="center">
             <Grid item xs={12}>
-              <TextField
-                fullWidth
+                <TextField
+                  fullWidth
                 label="Rechercher une demande"
-                value={searchTerm}
-                onChange={handleSearch}
-                InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                }}
-              />
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  InputProps={{
+                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  }}
+                />
+              </Grid>
             </Grid>
-          </Grid>
-        </Paper>
+          </Paper>
 
         <TableContainer component={Paper}>
           <Table>
@@ -235,7 +320,7 @@ const DashboardMatch: React.FC = () => {
                       {demande.competences_requises.map((comp, index) => (
                         <Chip
                           key={index}
-                          label={comp.nom}
+                          label={`${comp.nom} - ${comp.priorite}`}  
                           size="small"
                           color={comp.priorite === 'Essentiel' ? 'primary' : 'default'}
                         />
@@ -266,6 +351,7 @@ const DashboardMatch: React.FC = () => {
         onClose={handleCloseDetails}
         maxWidth="lg"
         fullWidth
+        onSubmit={(e) => e.preventDefault()}
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -298,135 +384,291 @@ const DashboardMatch: React.FC = () => {
                 </Box>
               </Box>
 
+              <Box component="form" onSubmit={(e) => e.preventDefault()}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={compareAll}
+                      onChange={handleCompareAllChange}
+                      color="secondary"
+                    />
+                  }
+                  label="Comparer avec tous les profils étudiants"
+                  sx={{ mb: 2 }}
+                />
+              </Box>
+
+              {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                  <CircularProgress />
+                </Box>
+              )}
+
+              {!loading && compareAll && allStudents.length === 0 && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Aucun profil étudiant disponible pour la comparaison
+                </Alert>
+              )}
+
               <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Étudiant</TableCell>
-                      <TableCell>Compétences</TableCell>
-                      <TableCell>Score</TableCell>
-                      <TableCell>Statut</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedDemande.matches.map((match) => (
-                      <TableRow key={match.id}>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <PersonIcon color="primary" />
-                            <Box>
-                              <Typography variant="subtitle1">
-                                {match.etudiant.profiles.prenom} {match.etudiant.profiles.nom}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {match.etudiant.profiles.email}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                            <Box>
-                              <Typography variant="caption" color="text.secondary" gutterBottom>
-                                Compétences techniques
-                              </Typography>
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {match.etudiant.competences_techniques.map((comp, index) => (
-                                  <Chip
-                                    key={index}
-                                    label={comp}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                  />
-                                ))}
-                              </Box>
-                            </Box>
-                            <Box>
-                              <Typography variant="caption" color="text.secondary" gutterBottom>
-                                Compétences soft
-                              </Typography>
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {match.etudiant.competences_soft.map((comp, index) => (
-                                  <Chip
-                                    key={index}
-                                    label={comp}
-                                    size="small"
-                                    color="secondary"
-                                    variant="outlined"
-                                  />
-                                ))}
-                              </Box>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="h6"
-                            color={
-                              (match.score || 0) >= 80
-                                ? 'success.main'
-                                : (match.score || 0) >= 60
-                                ? 'warning.main'
-                                : 'error.main'
-                            }
-                          >
-                            {match.score || 0}%
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={
-                              match.statut === 'proposé'
-                                ? 'En attente'
-                                : match.statut === 'accepté'
-                                ? 'Accepté'
-                                : 'Refusé'
-                            }
-                            color={
-                              match.statut === 'proposé'
-                                ? 'default'
-                                : match.statut === 'accepté'
-                                ? 'success'
-                                : 'error'
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            {match.statut === 'proposé' && (
-                              <>
-                                <Tooltip title="Accepter">
-                                  <IconButton
-                                    color="success"
-                                    onClick={() => handleContact(match.id)}
-                                  >
-                                    <CheckCircleIcon />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Refuser">
-                                  <IconButton
-                                    color="error"
-                                    onClick={() => handleReject(match.id)}
-                                  >
-                                    <CancelIcon />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                            <Tooltip title="Contacter">
-                              <IconButton color="primary">
-                                <EmailIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Étudiant</TableCell>
+                <TableCell>Compétences</TableCell>
+                <TableCell>Score</TableCell>
+                <TableCell>Statut</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+                    {compareAll 
+                      ? allStudents.map((student) => {
+                          const score = selectedDemande ? calculateScore(student, selectedDemande) : 0;
+                          return (
+                            <TableRow 
+                              key={student.id}
+                              sx={{
+                                bgcolor: score >= 70 ? 'success.light' : 
+                                        score >= 50 ? 'warning.light' : 
+                                        'error.light',
+                                opacity: 0.8
+                              }}
+                            >
+                              <TableCell>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <PersonIcon color="primary" />
+                                  <Box>
+                                    <Typography variant="subtitle1">
+                                      {student.profile?.nom} {student.profile?.prenom}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                      {student.profile?.telephone}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" gutterBottom>
+                                      Compétences techniques
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                      {student.competences_techniques.map((comp, index) => (
+                                        <Chip
+                                          key={index}
+                                          label={`${comp.nom} - ${comp.niveau}`}
+                                          size="small"
+                                          sx={{ bgcolor: '#F3E8FF', color: '#9333EA' }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  </Box>
+                                  <Box>
+                                    <Typography variant="caption" color="text.secondary" gutterBottom>
+                                      Soft skills
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                      {student.competences_soft.map((comp, index) => (
+                                        <Chip
+                                          key={index}
+                                          label={`${comp.nom} - ${comp.niveau}`}
+                                          size="small"
+                                          sx={{ bgcolor: '#FFE8F3', color: '#FF4D8D' }}
+                                        />
+                                      ))}
+                                    </Box>
+                                  </Box>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography
+                                  variant="h6"
+                                  color={
+                                    score >= 70
+                                      ? 'success.main'
+                                      : score >= 50
+                                      ? 'warning.main'
+                                      : 'error.main'
+                                  }
+                                >
+                                  {score}%
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Chip
+                                  label={score >= 70 ? 'Très compatible' : score >= 50 ? 'Compatible' : 'Peu compatible'}
+                                  color={score >= 70 ? 'success' : score >= 50 ? 'warning' : 'error'}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                  <Tooltip title="Créer un match">
+                                    <IconButton
+                                      color="primary"
+                                      onClick={async () => {
+                                        if (selectedDemande && selectedDemande.id) {
+                                          try {
+                                            await matchService.createMatch({
+                                              demande_id: selectedDemande.id,
+                                              etudiant_id: student.id,
+                                              statut: 'proposé',
+                                              notes_admin: `Score de compatibilité: ${score}%`
+                                            });
+                                            await loadData();
+                                            setNotification({
+                                              open: true,
+                                              message: 'Match créé avec succès',
+                                              severity: 'success'
+                                            });
+                                          } catch (error) {
+                                            console.error('Erreur lors de la création du match:', error);
+                                            setNotification({
+                                              open: true,
+                                              message: 'Erreur lors de la création du match',
+                                              severity: 'error'
+                                            });
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      <CheckCircleIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Contacter">
+                                    <IconButton 
+                                      color="primary"
+                                      onClick={() => {
+                                        window.location.href = `mailto:${student.profile?.email}`;
+                                      }}
+                                    >
+                                      <EmailIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Box>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      : selectedDemande.matches.map((match) => (
+                <TableRow key={match.id}>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <PersonIcon color="primary" />
+                      <Box>
+                        <Typography variant="subtitle1">
+                                    {match.etudiant.profile?.nom} {match.etudiant.profile?.prenom}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                                    {match.etudiant.profile?.telephone}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" gutterBottom>
+                                    Compétences techniques
+                                  </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {match.etudiant.competences_techniques.map((comp, index) => (
+                        <Chip
+                          key={index}
+                                        label={`${comp.nom} - ${comp.priorite}`}
+                                        size="small"
+                                        color="primary"
+                                        variant="outlined"
+                                      />
+                                    ))}
+                                  </Box>
+                                </Box>
+                                <Box>
+                                  <Typography variant="caption" color="text.secondary" gutterBottom>
+                                    Compétences soft
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {match.etudiant.competences_soft.map((comp, index) => (
+                                      <Chip
+                                        key={index}
+                                        label={`${comp.nom} - ${comp.priorite}`}
+                          size="small"
+                                        color="secondary"
+                                        variant="outlined"
+                        />
+                      ))}
+                                  </Box>
+                                </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="h6"
+                      color={
+                        (match.score || 0) >= 80
+                          ? 'success.main'
+                          : (match.score || 0) >= 60
+                          ? 'warning.main'
+                          : 'error.main'
+                      }
+                    >
+                      {match.score || 0}%
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={
+                        match.statut === 'proposé'
+                          ? 'En attente'
+                          : match.statut === 'accepté'
+                          ? 'Accepté'
+                          : 'Refusé'
+                      }
+                      color={
+                        match.statut === 'proposé'
+                          ? 'default'
+                          : match.statut === 'accepté'
+                          ? 'success'
+                          : 'error'
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      {match.statut === 'proposé' && (
+                        <>
+                          <Tooltip title="Accepter">
+                            <IconButton
+                              color="success"
+                              onClick={() => handleContact(match.id)}
+                            >
+                              <CheckCircleIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Refuser">
+                            <IconButton
+                              color="error"
+                              onClick={() => handleReject(match.id)}
+                            >
+                              <CancelIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
+                      <Tooltip title="Contacter">
+                        <IconButton color="primary">
+                          <EmailIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+                        ))
+                    }
+            </TableBody>
+          </Table>
+        </TableContainer>
             </>
           )}
         </DialogContent>
@@ -446,4 +688,4 @@ const DashboardMatch: React.FC = () => {
   );
 };
 
-export default DashboardMatch;
+export default DashboardMatch; 

@@ -11,10 +11,13 @@ const DashboardBackButton: React.FC = () => (
       startIcon={<ArrowBackIcon />}
       variant="outlined"
       sx={{
-        borderRadius: '25px',
-        background: 'white',
+        borderRadius: '50px',
+        color: '#9333EA',
+        borderColor: '#9333EA',
+        background: 'transparent',
         '&:hover': {
-          background: '#f5f5f5',
+          borderColor: '#7928CA',
+          background: 'rgba(147, 51, 234, 0.04)',
         },
       }}
     >

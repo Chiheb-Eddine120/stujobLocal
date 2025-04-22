@@ -55,7 +55,7 @@ const Contact: React.FC = () => {
     {
       icon: <EmailIcon />,
       title: 'Email',
-      content: 'contact@sujob.be',
+      content: 'contact@stujob.be',
     },
     {
       icon: <PhoneIcon />,

@@ -317,7 +317,7 @@ const Privacy: React.FC = () => {
               </ListItem>
             </List>
             <Typography variant="body1" sx={{ mt: 2, color: '#666' }}>
-              Pour exercer ces droits, veuillez nous contacter à l'adresse suivante : <Link href="mailto:privacy@sujob.be" sx={{ color: '#9333EA' }}>privacy@sujob.be</Link>
+              Pour exercer ces droits, veuillez nous contacter à l'adresse suivante : <Link href="mailto:privacy@stujob.be" sx={{ color: '#9333EA' }}>privacy@stujob.be</Link>
             </Typography>
           </Paper>
         </Grid>
@@ -388,7 +388,7 @@ const Privacy: React.FC = () => {
 
       <Box sx={{ mt: 6, textAlign: 'center' }}>
         <Typography variant="body1" sx={{ color: '#666' }}>
-          Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à l'adresse suivante : <Link href="mailto:contact@sujob.be" sx={{ color: '#9333EA' }}>contact@sujob.be</Link>
+          Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à l'adresse suivante : <Link href="mailto:contact@stujob.be" sx={{ color: '#9333EA' }}>contact@stujob.be</Link>
         </Typography>
       </Box>
     </Container>
