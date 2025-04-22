@@ -3,33 +3,19 @@ import {
   Container,
   Typography,
   Box,
-  Paper,
-  Grid,
-  Chip,
   Button,
   CircularProgress,
   Alert,
-  Link,
-  Dialog,
-  DialogTitle,
-  DialogContent,
 } from '@mui/material';
 import {
-  Person as PersonIcon,
-  School as SchoolIcon,
-  Work as WorkIcon,
-  Star as StarIcon,
   Edit as EditIcon,
-  Description as DescriptionIcon,
-  Mail as MailIcon,
-  Phone as PhoneIcon,
 } from '@mui/icons-material';
 import { authService } from '../services/authService';
 import { profileService } from '../services/profileService';
 import { etudiantService } from '../services/etudiantService';
 import StudentProfileForm from '../components/StudentProfileForm';
 import StudentProfileView from '../components/StudentProfileView';
-import { Profile, Etudiant, Competence, Experience } from '../types';
+import { Profile, Etudiant } from '../types';
 
 const EspaceEtudiant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -157,4 +143,4 @@ const EspaceEtudiant: React.FC = () => {
   );
 };
 
-export default EspaceEtudiant; 
+export default EspaceEtudiant;
