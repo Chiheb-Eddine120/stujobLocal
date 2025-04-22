@@ -1,6 +1,13 @@
 import { supabase } from './supabaseClient';
-import { Match, Demande, Etudiant, NiveauCompetence } from '../types';
-import { etudiantService } from './etudiantService';
+import { Match, Demande, Etudiant, NiveauCompetence, Profile, Competence } from '../types';
+//import { etudiantService } from './etudiantService';
+
+interface EtudiantWithProfile extends Etudiant {
+  profile: Profile;
+  competences: {
+    competence: Competence;
+  }[];
+}
 
 export const matchService = {
   async createMatch(match: Omit<Match, 'id' | 'created_at' | 'updated_at'>) {
@@ -86,13 +93,16 @@ export const matchService = {
     let score = 0;
 
     const competencesMatch = demande.competences_requises.filter(reqComp => 
-      etudiant.competences_techniques.includes(reqComp.nom)
+      etudiant.competences_techniques.some(comp => comp.nom === reqComp.nom)
     );
 
     const competencesScore = (competencesMatch.length / demande.competences_requises.length) * 60;
     score += competencesScore;
 
     const niveauScore = competencesMatch.reduce((acc, reqComp) => {
+      const etudiantComp = etudiant.competences_techniques.find(comp => comp.nom === reqComp.nom);
+      if (!etudiantComp?.niveau) return acc;
+
       const niveauValues: Record<NiveauCompetence, number> = {
         'Débutant': 1,
         'Intermédiaire': 2,
@@ -100,7 +110,7 @@ export const matchService = {
         'Expert': 4
       };
 
-      return acc + (niveauValues[reqComp.priorite as NiveauCompetence] / 4);
+      return acc + (niveauValues[etudiantComp.niveau] / 4);
     }, 0) * 20;
 
     score += niveauScore;
@@ -118,15 +128,13 @@ export const matchService = {
         return existingMatches;
       }
       
-      const competencesRequises = demande.competences_requises.map(comp => comp.nom);
+      const competencesRequises = demande.competences_requises.map(comp => ({ nom: comp.nom }));
       
       if (!competencesRequises.length) {
         return [];
       }
 
-      const etudiants = await etudiantService.searchEtudiants({
-        competences: competencesRequises
-      });
+      const etudiants = await this.searchEtudiants(competencesRequises);
 
       if (!etudiants.length) {
         return [];
@@ -170,5 +178,30 @@ export const matchService = {
       console.error('Erreur lors de la génération des matches:', error);
       throw error;
     }
+  },
+
+  async searchEtudiants(competencesRequises: { nom: string }[]): Promise<EtudiantWithProfile[]> {
+    try {
+      const competenceNoms = competencesRequises.map(comp => comp.nom);
+      console.log('Recherche d\'étudiants avec les compétences:', competenceNoms);
+
+      const { data: etudiants, error } = await supabase
+        .from('etudiants')
+        .select(`
+          *,
+          profile:profiles(*),
+          competences:etudiant_competences(
+            competence:competences(*)
+          )
+        `)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      return etudiants || [];
+    } catch (error) {
+      console.error('Erreur lors de la recherche des étudiants:', error);
+      return [];
+    }
   }
-}; 
+};
