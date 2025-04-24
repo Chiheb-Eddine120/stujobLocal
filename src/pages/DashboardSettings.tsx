@@ -309,7 +309,7 @@ const DashboardSettings: React.FC = () => {
           // Ajout du rôle dans la requête
           const { data: profiles, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role')
+            .select('id, nom, prenom, role')
             .in('id', userIds);
 
           if (error) {
@@ -323,7 +323,7 @@ const DashboardSettings: React.FC = () => {
           // Traiter d'abord les profils trouvés
           profiles?.forEach(profile => {
             const isAdmin = profile.role === 'admin';
-            namesMap[profile.id] = `${profile.first_name} ${profile.last_name}${isAdmin ? ' (Admin)' : ''}`;
+            namesMap[profile.id] = `${profile.prenom} ${profile.nom}${isAdmin ? ' (Admin)' : ''}`;
           });
 
           // Traiter les utilisateurs non trouvés
