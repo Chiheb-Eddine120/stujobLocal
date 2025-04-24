@@ -1,61 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
-import { authService, User } from '../services/authService';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useMaintenance } from '../hooks/useMaintenance';
+import { supabase } from '../services/supabase';
+import { UserRole } from '../types';
+import MaintenanceMode from '../pages/MaintenanceMode';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: User['role'];
+  requiredRole: UserRole;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasRequiredRole, setHasRequiredRole] = useState(true);
-  const location = useLocation();
+  const { isMaintenance, isLoading } = useMaintenance();
+  const [session, setSession] = React.useState<any>(null);
+  const [userRole, setUserRole] = React.useState<UserRole | null>(null);
+  const [isChecking, setIsChecking] = React.useState<boolean>(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
+  React.useEffect(() => {
+    const checkSession = async () => {
       try {
-        const authenticated = await authService.isAuthenticated();
-        setIsAuthenticated(authenticated);
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
 
-        if (authenticated && requiredRole) {
-          const hasRole = await authService.hasRole(requiredRole);
-          setHasRequiredRole(hasRole);
+        if (currentSession?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', currentSession.user.id)
+            .single();
+          setUserRole(profile?.role as UserRole);
         }
-      } catch (error) {
-        console.error('Erreur lors de la vérification de l\'authentification:', error);
-        setIsAuthenticated(false);
-        setHasRequiredRole(false);
+      } catch (err) {
+        console.error('Erreur de récupération de session:', err);
       } finally {
-        setIsLoading(false);
+        setIsChecking(false);
       }
     };
 
-    checkAuth();
-  }, [requiredRole]);
+    checkSession();
+  }, []);
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  if (isLoading || isChecking) {
+    return <div>Chargement...</div>;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // Maintenance active : seuls les admins peuvent accéder
+  if (isMaintenance && (!session || userRole !== 'admin')) {
+    return <MaintenanceMode />;
   }
 
-  if (requiredRole && !hasRequiredRole) {
+  if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userRole !== requiredRole) {
     return <Navigate to="/unauthorized" replace />;
   }
 

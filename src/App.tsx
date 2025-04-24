@@ -5,6 +5,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
+import MaintenanceMode from './pages/MaintenanceMode';
+import { useMaintenance } from './hooks/useMaintenance';
 import Home from './pages/Home';
 import DemandeForm from './pages/DemandeForm';
 import SuiviDemande from './pages/SuiviDemande';
@@ -24,6 +26,7 @@ import Register from './pages/Register';
 import Privacy from './pages/Privacy';
 import { UserRole } from './types';
 import DashboardSettings from './pages/DashboardSettings';
+import { useAuth } from './hooks/useAuth';
 
 const theme = createTheme({
   palette: {
@@ -107,112 +110,132 @@ const theme = createTheme({
 });
 
 const App: React.FC = () => {
+  const { isMaintenance, isLoading: isMaintenanceLoading } = useMaintenance();
+  const { session, userRole, isChecking: isAuthChecking } = useAuth();
+
+  if (isMaintenanceLoading || isAuthChecking) {
+    return <div>Chargement...</div>;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar />
-          <main style={{ flex: 1, paddingBottom: '20px' }}>
+          {isMaintenance && (!session || userRole !== 'admin') ? (
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route 
-                path="/demande" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <DemandeForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route 
-                path="/suivi" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <SuiviDemande />
-                  </ProtectedRoute>
-                }
-              />
-              <Route 
-                path="/suivi/:trackingNumber" 
-                element={
-                  <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                    <SuiviDemande />
-                  </ProtectedRoute>
-                }
-              />
-              <Route 
-                path="/etudiants" 
-                element={<Etudiants />}
-              />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
-              
-              {/* Routes du Dashboard */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardMenu />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/match" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardMatch />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/users" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardUsers />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/stats" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardStats />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/notifications" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardNotifications />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/dashboard/settings" 
-                element={
-                  <ProtectedRoute requiredRole={'admin' as UserRole}>
-                    <DashboardSettings />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/espace-etudiant" 
-                element={
-                  <ProtectedRoute requiredRole={'student' as UserRole}>
-                    <EspaceEtudiant />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<MaintenanceMode />} />
             </Routes>
-          </main>
-          <Footer />
-          <CookieConsent />
+          ) : (
+            <>
+              <Navbar />
+              <main style={{ flex: 1, paddingBottom: '20px' }}>
+                <Routes>
+                  {/* Routes publiques */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
+
+                  {/* Routes protégées */}
+                  <Route 
+                    path="/demande" 
+                    element={
+                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                        <DemandeForm />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route 
+                    path="/suivi" 
+                    element={
+                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                        <SuiviDemande />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route 
+                    path="/suivi/:trackingNumber" 
+                    element={
+                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
+                        <SuiviDemande />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route 
+                    path="/etudiants" 
+                    element={<Etudiants />}
+                  />
+
+                  {/* Routes Dashboard */}
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardMenu />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/match" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardMatch />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/users" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardUsers />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/stats" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardStats />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/notifications" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardNotifications />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/dashboard/settings" 
+                    element={
+                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                        <DashboardSettings />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/espace-etudiant" 
+                    element={
+                      <ProtectedRoute requiredRole={'student' as UserRole}>
+                        <EspaceEtudiant />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Redirection par défaut */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+              <Footer />
+              <CookieConsent />
+            </>
+          )}
         </div>
       </Router>
     </ThemeProvider>
