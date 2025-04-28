@@ -73,12 +73,6 @@ export const demandeService = {
 
   async updateDemandeStatus(id: string, status: Demande['status']): Promise<void> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Vous devez être connecté pour mettre à jour le statut');
-      }
-
       const { error } = await supabase
         .from('demandes')
         .update({ status })
@@ -96,12 +90,6 @@ export const demandeService = {
 
   async getDemandesEnAttente(): Promise<Demande[]> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Vous devez être connecté pour voir les demandes en attente');
-      }
-
       const { data, error } = await supabase
         .from('demandes')
         .select('*')
@@ -122,12 +110,6 @@ export const demandeService = {
 
   async updateFacturationStatus(id: string, status: Demande['facturation_status'], montant?: number): Promise<void> {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        throw new Error('Vous devez être connecté pour mettre à jour le statut de facturation');
-      }
-
       const updateData: Partial<Demande> = {
         facturation_status: status
       };

@@ -9,14 +9,21 @@ import {
   CircularProgress,
   Alert,
   IconButton,
+  Snackbar,
 } from '@mui/material';
 import { supabase } from '../services/supabase';
 import { useNavigate } from 'react-router-dom';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import LockIcon from '@mui/icons-material/Lock';
+import { useMaintenance } from '../hooks/useMaintenance';
+
+// Constantes pour la limitation des tentatives
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes en millisecondes
 
 const MaintenanceMode: React.FC = () => {
   const navigate = useNavigate();
+  const { isMaintenance } = useMaintenance();
   const [mounted, setMounted] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -25,21 +32,106 @@ const MaintenanceMode: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
 
+  // Fonction pour vérifier si le compte est bloqué
+  const checkLockStatus = () => {
+    const lockData = localStorage.getItem('adminAccessLock');
+    if (lockData) {
+      const { attempts, timestamp } = JSON.parse(lockData);
+      const now = Date.now();
+      const timeElapsed = now - timestamp;
+
+      if (attempts >= MAX_ATTEMPTS && timeElapsed < LOCKOUT_DURATION) {
+        setIsLocked(true);
+        setRemainingTime(Math.ceil((LOCKOUT_DURATION - timeElapsed) / 1000));
+        return true;
+      } else if (timeElapsed >= LOCKOUT_DURATION) {
+        // Réinitialiser le verrouillage si le délai est écoulé
+        localStorage.removeItem('adminAccessLock');
+        setIsLocked(false);
+        setRemainingTime(0);
+      }
+    }
+    return false;
+  };
+
+  // Fonction pour mettre à jour le nombre de tentatives
+  const updateAttempts = () => {
+    const lockData = localStorage.getItem('adminAccessLock');
+    const now = Date.now();
+    
+    if (lockData) {
+      const { attempts } = JSON.parse(lockData);
+      localStorage.setItem('adminAccessLock', JSON.stringify({
+        attempts: attempts + 1,
+        timestamp: now
+      }));
+    } else {
+      localStorage.setItem('adminAccessLock', JSON.stringify({
+        attempts: 1,
+        timestamp: now
+      }));
+    }
+  };
+
+  // Vérifier le statut du verrouillage au chargement
   useEffect(() => {
     setMounted(true);
+    checkLockStatus();
     return () => setMounted(false);
   }, []);
+
+  // Mettre à jour le temps restant
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLocked && remainingTime > 0) {
+      timer = setInterval(() => {
+        setRemainingTime(prev => {
+          if (prev <= 1) {
+            setIsLocked(false);
+            localStorage.removeItem('adminAccessLock');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isLocked, remainingTime]);
+
+  // Vérifier si le mode maintenance est toujours actif
+  useEffect(() => {
+    if (!isMaintenance && mounted) {
+      navigate('/');
+    }
+  }, [isMaintenance, mounted, navigate]);
 
   const handleAdminKeySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mounted) return;
     
+    if (checkLockStatus()) {
+      setError(`Trop de tentatives. Veuillez réessayer dans ${Math.floor(remainingTime / 60)}:${(remainingTime % 60).toString().padStart(2, '0')}`);
+      return;
+    }
+
     if (adminKey === import.meta.env.VITE_ADMIN_SECRET) {
       setShowLoginForm(true);
       setError(null);
+      // Réinitialiser les tentatives en cas de succès
+      localStorage.removeItem('adminAccessLock');
     } else {
-      setError('Clé secrète incorrecte');
+      updateAttempts();
+      const attemptsLeft = MAX_ATTEMPTS - (JSON.parse(localStorage.getItem('adminAccessLock') || '{"attempts":0}').attempts);
+      setError(`Clé secrète incorrecte. ${attemptsLeft} tentative(s) restante(s)`);
+      setSnackbar({ open: true, message: `Clé secrète incorrecte. ${attemptsLeft} tentative(s) restante(s)` });
+      
+      if (attemptsLeft <= 0) {
+        checkLockStatus();
+      }
     }
   };
 
@@ -51,7 +143,6 @@ const MaintenanceMode: React.FC = () => {
     setError(null);
 
     try {
-      // Connexion avec Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -59,7 +150,6 @@ const MaintenanceMode: React.FC = () => {
 
       if (authError) throw authError;
 
-      // Vérification du rôle admin
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('role')
@@ -73,12 +163,21 @@ const MaintenanceMode: React.FC = () => {
       }
 
       if (mounted) {
-        // Redirection vers le dashboard
-        navigate('/dashboard');
+        setSnackbar({ open: true, message: 'Connexion réussie' });
+        // Attendre un court instant pour que le message s'affiche
+        setTimeout(() => {
+          // Forcer la mise à jour de la session
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+              navigate('/dashboard', { replace: true });
+            }
+          });
+        }, 1000);
       }
     } catch (err: any) {
       if (mounted) {
         setError(err.message);
+        setSnackbar({ open: true, message: err.message });
       }
     } finally {
       if (mounted) {
@@ -233,6 +332,7 @@ const MaintenanceMode: React.FC = () => {
                   type="password"
                   value={adminKey}
                   onChange={(e) => setAdminKey(e.target.value)}
+                  disabled={isLocked}
                   sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {
@@ -244,6 +344,7 @@ const MaintenanceMode: React.FC = () => {
                   type="submit"
                   variant="contained"
                   fullWidth
+                  disabled={loading || isLocked}
                   sx={{
                     bgcolor: '#9333EA',
                     color: 'white',
@@ -257,7 +358,7 @@ const MaintenanceMode: React.FC = () => {
                     },
                   }}
                 >
-                  Valider
+                  {loading ? <CircularProgress size={24} /> : isLocked ? `Réessayer dans ${Math.floor(remainingTime / 60)}:${(remainingTime % 60).toString().padStart(2, '0')}` : 'Valider'}
                 </Button>
               </Box>
             )}
@@ -308,7 +409,7 @@ const MaintenanceMode: React.FC = () => {
                     },
                   }}
                 >
-                  {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Se connecter'}
+                  {loading ? <CircularProgress size={24} /> : 'Se connecter'}
                 </Button>
               </Box>
             )}
@@ -330,6 +431,13 @@ const MaintenanceMode: React.FC = () => {
           </Paper>
         </Box>
       </Container>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ open: false, message: '' })}
+        message={snackbar.message}
+      />
     </Box>
   );
 };

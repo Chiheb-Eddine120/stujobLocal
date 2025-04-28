@@ -7,10 +7,10 @@ import MaintenanceMode from '../pages/MaintenanceMode';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole: UserRole;
+  requiredRoles: UserRole[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles }) => {
   const { isMaintenance, isLoading } = useMaintenance();
   const [session, setSession] = React.useState<any>(null);
   const [userRole, setUserRole] = React.useState<UserRole | null>(null);
@@ -53,8 +53,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/login" replace />;
   }
 
-  if (userRole !== requiredRole) {
-    return <Navigate to="/unauthorized" replace />;
+  // Vérification des rôles autorisés
+  if (!session || !userRole || !requiredRoles.includes(userRole)) {
+    return <Navigate to="/unauthorized" />;
   }
 
   return <>{children}</>;

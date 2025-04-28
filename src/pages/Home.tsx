@@ -69,102 +69,52 @@ const Home: React.FC = () => {
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             color: 'transparent',
-            mb: 2
+            mb: 2,
+            mt: 3
           }}>
-          Trouvez un étudiant fiable,
-        </Typography>
-        <Typography variant="h3" component="h1" 
-          sx={{ 
-            fontWeight: 700,
-            background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            mb: 4
-          }}>
-          sans perdre de temps
+          Êtes-vous une entreprise à la recherche d'un étudiant ?
         </Typography>
         <Typography variant="body1" sx={{ mb: 4, color: '#666', maxWidth: '600px', mx: 'auto' }}>
-          Chez Stujob, nous vous simplifions la recherche d'un étudiant motivé et disponible. Dites-nous ce dont vous avez besoin, nous trouverons la bonne personne, sans perte de temps.
+          Chez Stujob, nous vous facilitons la recherche du candidat idéal, disponible et motivé pour vos besoins spécifiques. Dites-nous ce que vous recherchez et nous vous mettrons en relation avec la bonne personne, sans perdre de temps.
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-          {userRole === 'entreprise' || userRole === 'admin' ? (
-            <Button
-              component={RouterLink}
-              to="/demande"
-              variant="contained"
-              sx={{
-                bgcolor: '#9333EA',
-                borderRadius: '25px',
-                px: 6,
-                py: 2,
-                fontSize: '1.1rem',
-                '&:hover': {
-                  bgcolor: '#7928CA'
-                }
-              }}
-            >
-              Introduire une demande
-            </Button>
-          ) : userRole === 'student' ? (
-            <Button
-              component={RouterLink}
-              to="/espace-etudiant"
-              variant="contained"
-              sx={{
-                bgcolor: '#9333EA',
-                borderRadius: '25px',
-                px: 6,
-                py: 2,
-                fontSize: '1.1rem',
-                '&:hover': {
-                  bgcolor: '#7928CA'
-                }
-              }}
-            >
-              Vers mon espace étudiant
-            </Button>
-          ) : (
-            <>
-              <Button
-                component={RouterLink}
-                to="/demande"
-                variant="contained"
-                sx={{
-                  bgcolor: '#9333EA',
-                  borderRadius: '25px',
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  '&:hover': {
-                    bgcolor: '#7928CA'
-                  }
-                }}
-              >
-                Introduire une demande
-              </Button>
-              <Button
-                component={RouterLink}
-                to="/login"
-                variant="outlined"
-                sx={{
-                  borderColor: '#9333EA',
-                  color: '#9333EA',
-                  borderRadius: '25px',
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  '&:hover': {
-                    borderColor: '#7928CA',
-                    color: '#7928CA',
-                    bgcolor: 'rgba(147, 51, 234, 0.04)'
-                  }
-                }}
-              >
-                Se connecter
-              </Button>
-            </>
-          )}
+          <Button
+            component={RouterLink}
+            to="/demande"
+            variant="contained"
+            sx={{
+              bgcolor: '#9333EA',
+              borderRadius: '25px',
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              '&:hover': {
+                bgcolor: '#7928CA'
+              }
+            }}
+          >
+            Êtes-vous une entreprise ?
+          </Button>
+          <Button
+            component={RouterLink}
+            to="/suivi"
+            variant="outlined"
+            sx={{
+              borderColor: '#9333EA',
+              color: '#9333EA',
+              borderRadius: '25px',
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              '&:hover': {
+                borderColor: '#7928CA',
+                color: '#7928CA',
+                bgcolor: 'rgba(147, 51, 234, 0.04)'
+              }
+            }}
+          >
+            Suivre une demande
+          </Button>
         </Box>
       </Container>
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
@@ -24,9 +26,10 @@ import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Privacy from './pages/Privacy';
-import { UserRole } from './types';
 import DashboardSettings from './pages/DashboardSettings';
 import { useAuth } from './hooks/useAuth';
+import { Box, CircularProgress, Typography, Button } from '@mui/material';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const theme = createTheme({
   palette: {
@@ -110,16 +113,61 @@ const theme = createTheme({
 });
 
 const App: React.FC = () => {
-  const { isMaintenance, isLoading: isMaintenanceLoading } = useMaintenance();
+  const { isMaintenance, isLoading: isMaintenanceLoading, error: maintenanceError } = useMaintenance();
   const { session, userRole, isChecking: isAuthChecking } = useAuth();
 
   if (isMaintenanceLoading || isAuthChecking) {
-    return <div>Chargement...</div>;
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh' 
+      }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (maintenanceError) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        flexDirection: 'column',
+        gap: 2
+      }}>
+        <ErrorIcon color="error" sx={{ fontSize: 48 }} />
+        <Typography variant="h6" color="error">
+          {maintenanceError}
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => window.location.reload()}
+        >
+          Réessayer
+        </Button>
+      </Box>
+    );
   }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           {isMaintenance && (!session || userRole !== 'admin') ? (
@@ -143,27 +191,15 @@ const App: React.FC = () => {
                   {/* Routes protégées */}
                   <Route 
                     path="/demande" 
-                    element={
-                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                        <DemandeForm />
-                      </ProtectedRoute>
-                    }
+                    element={<DemandeForm />}
                   />
                   <Route 
                     path="/suivi" 
-                    element={
-                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                        <SuiviDemande />
-                      </ProtectedRoute>
-                    }
+                    element={<SuiviDemande />}
                   />
                   <Route 
                     path="/suivi/:trackingNumber" 
-                    element={
-                      <ProtectedRoute requiredRole={'entreprise' as UserRole}>
-                        <SuiviDemande />
-                      </ProtectedRoute>
-                    }
+                    element={<SuiviDemande />}
                   />
                   <Route 
                     path="/etudiants" 
@@ -174,7 +210,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardMenu />
                       </ProtectedRoute>
                     } 
@@ -182,7 +218,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard/match" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardMatch />
                       </ProtectedRoute>
                     } 
@@ -190,7 +226,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard/users" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardUsers />
                       </ProtectedRoute>
                     } 
@@ -198,7 +234,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard/stats" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardStats />
                       </ProtectedRoute>
                     } 
@@ -206,7 +242,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard/notifications" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardNotifications />
                       </ProtectedRoute>
                     } 
@@ -214,7 +250,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/dashboard/settings" 
                     element={
-                      <ProtectedRoute requiredRole={'admin' as UserRole}>
+                      <ProtectedRoute requiredRoles={['admin']}>
                         <DashboardSettings />
                       </ProtectedRoute>
                     } 
@@ -222,7 +258,7 @@ const App: React.FC = () => {
                   <Route 
                     path="/espace-etudiant" 
                     element={
-                      <ProtectedRoute requiredRole={'student' as UserRole}>
+                      <ProtectedRoute requiredRoles={['student']}>
                         <EspaceEtudiant />
                       </ProtectedRoute>
                     }

@@ -12,7 +12,14 @@ import {
   MenuItem,
   IconButton,
   CircularProgress,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  //useMediaQuery,
+  //useTheme,
 } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
@@ -25,6 +32,8 @@ const Navbar: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  //const theme = useTheme();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -67,6 +76,62 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawer = (
+    <Box sx={{ width: 250, pt: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <List>
+        {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
+          <>
+            <ListItem 
+              button 
+              component={RouterLink} 
+              to="/demande"
+              onClick={handleDrawerToggle}
+              sx={{ py: 2 }}
+            >
+              <ListItemText primary="Introduire une demande" />
+            </ListItem>
+            <ListItem 
+              button 
+              component={RouterLink} 
+              to="/suivi"
+              onClick={handleDrawerToggle}
+              sx={{ py: 2 }}
+            >
+              <ListItemText primary="Suivre une demande" />
+            </ListItem>
+          </>
+        )}
+        <ListItem 
+          button 
+          component={RouterLink} 
+          to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
+          onClick={handleDrawerToggle}
+          sx={{ py: 2 }}
+        >
+          <ListItemText primary={isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'} />
+        </ListItem>
+        {isAuthenticated && userRole === 'admin' && (
+          <ListItem 
+            button 
+            component={RouterLink} 
+            to="/dashboard"
+            onClick={handleDrawerToggle}
+            sx={{ py: 2 }}
+          >
+            <ListItemText primary="Dashboard" />
+          </ListItem>
+        )}
+      </List>
+      <Box sx={{ textAlign: 'center', pb: 2, color: 'white', opacity: 0.7, fontSize: 14 }}>
+        © {new Date().getFullYear()} Stujob
+      </Box>
+    </Box>
+  );
+
   const buttonStyle = {
     color: 'white',
     textTransform: 'none',
@@ -86,195 +151,232 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <AppBar 
-      position="static" 
-      elevation={0}
-      sx={{ 
-        background: 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
-        borderRadius: '15px',
-        mx: 3,
-        mt: 2,
-        position: 'relative',
-        maxWidth: 'calc(100% - 48px)',
-        left: 0,
-        right: 0,
-        margin: '16px auto',
-        '& .MuiToolbar-root': {
-          minHeight: '60px',
-          py: '30px',
-          px: 3
-        }
-      }}
-    >
-      <Container 
-        maxWidth={false}
-        sx={{
-          maxWidth: 'calc(100% - 32px)',
-          px: 2
+    <>
+      <AppBar 
+        position="static" 
+        elevation={0}
+        sx={{ 
+          background: 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
+          borderRadius: '15px',
+          mx: 3,
+          mt: 2,
+          position: 'relative',
+          maxWidth: 'calc(100% - 48px)',
+          left: 0,
+          right: 0,
+          margin: '16px auto',
+          '& .MuiToolbar-root': {
+            minHeight: '60px',
+            py: '30px',
+            px: 3
+          }
         }}
       >
-        <Toolbar sx={{ py: 0.5, justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography
-              variant="h6"
-              component={RouterLink}
-              to="/"
-              sx={{
-                textDecoration: 'none',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '1.5rem',
-                mr: 6,
-                display: 'flex',
-                alignItems: 'center',
-                '&:hover': {
-                  opacity: 0.9,
-                },
-                '&::after': {
-                  content: '""',
-                  display: 'inline-block',
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: 'white',
-                  transform: 'rotate(45deg)',
-                  marginLeft: '2px',
-                  marginBottom: '8px'
-                }
-              }}
-            >
-              StuJob
-            </Typography>
-
-            <Box sx={{ display: 'flex' }}>
-              {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
-                <>
-                  <Button
-                    component={RouterLink}
-                    to="/demande"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={buttonStyle}
-                  >
-                    Introduire une demande
-                  </Button>
-
-                  <Button
-                    component={RouterLink}
-                    to="/suivi"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={buttonStyle}
-                  >
-                    Suivre une demande
-                  </Button>
-                </>
-              )}
-
-              <Button
-                component={RouterLink}
-                to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
-                disableRipple
-                disableElevation
-                variant="text"
-                sx={buttonStyle}
+        <Container 
+          maxWidth={false}
+          sx={{
+            maxWidth: 'calc(100% - 32px)',
+            px: 2
+          }}
+        >
+          <Toolbar sx={{ py: 0.5, justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { md: 'none' } }}
               >
-                {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Espace étudiant'}
-              </Button>
-            </Box>
-          </Box>
+                <MenuIcon sx={{ fontSize: 32 }} />
+              </IconButton>
+              
+              <Typography
+                variant="h6"
+                component={RouterLink}
+                to="/"
+                sx={{
+                  textDecoration: 'none',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '1.5rem',
+                  mr: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&:hover': {
+                    opacity: 0.9,
+                  },
+                  '&::after': {
+                    content: '""',
+                    display: 'inline-block',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: 'white',
+                    transform: 'rotate(45deg)',
+                    marginLeft: '2px',
+                    marginBottom: '8px'
+                  }
+                }}
+              >
+                StuJob
+              </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {isLoading ? (
-              <CircularProgress size={24} sx={{ color: 'white' }} />
-            ) : (
-              <>
-                {isAuthenticated ? (
+              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
                   <>
-                    {userRole === 'admin' && (
-                      <Button
-                        component={RouterLink}
-                        to="/dashboard"
-                        startIcon={
-                          <DashboardIcon 
-                            sx={{
-                              transition: 'transform 0.3s ease',
-                              transform: 'rotate(0deg)',
-                              '.MuiButton-root:hover &': {
-                                transform: 'rotate(90deg)',
-                              },
-                            }}
-                          />
-                        }
+                    <Button
+                      component={RouterLink}
+                      to="/demande"
+                      disableRipple
+                      disableElevation
+                      variant="text"
+                      sx={buttonStyle}
+                    >
+                      Introduire une demande
+                    </Button>
+
+                    <Button
+                      component={RouterLink}
+                      to="/suivi"
+                      disableRipple
+                      disableElevation
+                      variant="text"
+                      sx={buttonStyle}
+                    >
+                      Suivre une demande
+                    </Button>
+                  </>
+                )}
+
+                <Button
+                  component={RouterLink}
+                  to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
+                  disableRipple
+                  disableElevation
+                  variant="text"
+                  sx={buttonStyle}
+                >
+                  {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'}
+                </Button>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+              {isLoading ? (
+                <CircularProgress size={24} sx={{ color: 'white' }} />
+              ) : (
+                <>
+                  {isAuthenticated ? (
+                    <>
+                      {userRole === 'admin' && (
+                        <Button
+                          component={RouterLink}
+                          to="/dashboard"
+                          startIcon={
+                            <DashboardIcon 
+                              sx={{
+                                transition: 'transform 0.3s ease',
+                                transform: 'rotate(0deg)',
+                                '.MuiButton-root:hover &': {
+                                  transform: 'rotate(90deg)',
+                                },
+                              }}
+                            />
+                          }
+                          sx={{
+                            ...buttonStyle,
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            '&:hover': {
+                              background: 'white',
+                              color: '#9333EA',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
+                            }
+                          }}
+                        >
+                          Dashboard
+                        </Button>
+                      )}
+                      <IconButton
+                        onClick={handleMenu}
                         sx={{
-                          ...buttonStyle,
-                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: 'white',
                           '&:hover': {
-                            background: 'white',
-                            color: '#9333EA',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
+                            background: 'rgba(255, 255, 255, 0.1)',
                           }
                         }}
                       >
-                        Dashboard
-                      </Button>
-                    )}
-                    <IconButton
-                      onClick={handleMenu}
+                        <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
+                          {userRole?.[0].toUpperCase()}
+                        </Avatar>
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleClose}
+                        PaperProps={{
+                          sx: {
+                            mt: 1.5,
+                            borderRadius: '12px',
+                            minWidth: 180,
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                          }
+                        }}
+                      >
+                        <MenuItem onClick={handleLogout} sx={{ py: 1 }}>
+                          <LogoutIcon sx={{ mr: 1, color: '#666' }} />
+                          Déconnexion
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  ) : (
+                    <Button
+                      component={RouterLink}
+                      to="/login"
+                      startIcon={<LoginIcon />}
                       sx={{
-                        color: 'white',
+                        ...buttonStyle,
+                        background: 'rgba(255, 255, 255, 0.1)',
                         '&:hover': {
-                          background: 'rgba(255, 255, 255, 0.1)',
+                          background: 'rgba(255, 255, 255, 0.2)',
                         }
                       }}
                     >
-                      <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
-                        {userRole?.[0].toUpperCase()}
-                      </Avatar>
-                    </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleClose}
-                      PaperProps={{
-                        sx: {
-                          mt: 1.5,
-                          borderRadius: '12px',
-                          minWidth: 180,
-                          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                        }
-                      }}
-                    >
-                      <MenuItem onClick={handleLogout} sx={{ py: 1 }}>
-                        <LogoutIcon sx={{ mr: 1, color: '#666' }} />
-                        Déconnexion
-                      </MenuItem>
-                    </Menu>
-                  </>
-                ) : (
-                  <Button
-                    component={RouterLink}
-                    to="/login"
-                    startIcon={<LoginIcon />}
-                    sx={{
-                      ...buttonStyle,
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      '&:hover': {
-                        background: 'rgba(255, 255, 255, 0.2)',
-                      }
-                    }}
-                  >
-                    Connexion
-                  </Button>
-                )}
-              </>
-            )}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+                      Connexion
+                    </Button>
+                  )}
+                </>
+              )}
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      <Drawer
+        variant="temporary"
+        anchor="left"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: 250,
+            background: 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
+            color: 'white',
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+            borderTopRightRadius: 20,
+            borderBottomRightRadius: 20,
+          },
+        }}
+      >
+        {drawer}
+      </Drawer>
+    </>
   );
 };
 

@@ -41,4 +41,60 @@ code {
   background: linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%);
   border-radius: 16px;
   color: white;
+}
+
+/* Styles pour les boutons CTA */
+.cta-button {
+  background-color: #007BFF;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  transform: scale(1.05);
+  background-color: #0056b3;
+}
+
+/* Badge étudiant */
+.student-badge {
+  background: linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Styles responsifs */
+@media (max-width: 400px) {
+  .card, .button, .input {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .navbar-menu {
+    padding: 12px;
+  }
+
+  .navbar-menu a {
+    padding: 12px 0;
+    min-height: 48px;
+  }
+}
+
+/* Animation pour les transitions */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 } 

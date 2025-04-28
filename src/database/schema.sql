@@ -114,9 +114,9 @@ create policy "Seuls les admins peuvent créer/modifier les matches"
 -- Ajout des politiques de sécurité pour la table demandes
 alter table demandes enable row level security;
 
-create policy "Les demandes sont visibles par les utilisateurs authentifiés"
+create policy "Les demandes sont visibles par tous"
   on demandes for select
-  using (auth.role() = 'authenticated');
+  using (true);
 
 create policy "Les admins peuvent gérer toutes les demandes"
   on demandes for all
@@ -127,6 +127,10 @@ create policy "Les admins peuvent gérer toutes les demandes"
       and profiles.role = 'admin'
     )
   );
+
+create policy "Les utilisateurs non authentifiés peuvent créer des demandes"
+  on demandes for insert
+  with check (true);
 
 -- Table demandes_entreprises
 create table demandes_entreprises (

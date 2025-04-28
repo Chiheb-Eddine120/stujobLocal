@@ -1,0 +1,233 @@
+# Fichiers de maintenance du site
+
+## Services principaux
+- src/services/settingsService.ts : Services de maintenance et gestion du mode maintenance
+- src/services/settings.ts : Fonctions de gestion des paramètres du site
+- src/services/supabase.ts : Configuration Supabase
+- src/services/supabaseClient.ts : Client Supabase pour la base de données
+
+## Composants React
+- src/components/MaintenanceMode.tsx : Page de maintenance
+- src/components/MaintenanceToggle.tsx : Basculement du mode maintenance
+- src/pages/MaintenanceMode.tsx : Page de maintenance
+
+## Hooks React
+- src/hooks/useMaintenance.ts : Hook de gestion de l'état de maintenance
+
+## Migrations SQL
+- supabase/migrations/20240000000000_create_settings_table.sql : Création table des paramètres
+- supabase/migrations/20240000000001_add_change_history.sql : Ajout historique des changements
+- supabase/migrations/20240000000002_fix_settings_table.sql : Correction table des paramètres  
+- supabase/migrations/20240000000003_fix_trigger.sql : Correction trigger
+
+## Fichiers SQL
+- src/sql/settings.sql : Requêtes SQL paramètres
+- src/sql/create_notifications_table.sql : Création table notifications
+- src/database/schema.sql : Schéma base de données
+
+## Types TypeScript
+- src/types/supabase.ts : Types Supabase
+- src/types/index.ts : Types de l'application
+
+## Autres services
+- src/services/statisticsService.ts : Services statistiques
+- src/services/profileService.ts : Services profils utilisateurs
+- src/services/notificationService.ts : Services notifications
+- src/services/matchService.ts : Services matchs étudiants/entreprises
+- src/services/etudiantService.ts : Services étudiants
+- src/services/demandeService.ts : Services demandes de recrutement
+- src/services/authService.ts : Services authentification
+- src/services/emailService.ts : Services emails
+
+## Utilitaires
+- src/lib/supabase.ts : Fonctions utilitaires Supabase
+
+## Fichiers principaux
+- src/App.tsx : Composant principal
+- src/main.tsx : Point d'entrée
+- src/index.tsx : Point d'entrée
+- src/index.css : Styles CSS
+- src/vite-env.d.ts : Types Vite
+
+## Configuration
+- vite.config.ts : Configuration Vite
+- tsconfig.json : Configuration TypeScript
+- tsconfig.node.json : Configuration TypeScript Node
+- package.json : Dépendances et scripts
+- netlify.toml : Configuration Netlify
+- README.md : Documentation
+- .env : Variables d'environnement
+- .gitignore : Fichiers ignorés
+- index.html : Template HTML
+
+## Dossiers
+- public/ : Fichiers statiques
+- node_modules/ : Dépendances
+- dist/ : Fichiers de production
+- .git/ : Fichiers Git
+- supabase/functions/send-email/ : Fonctions emails Supabase
+- supabase/functions/ : Fonctions Supabase
+- supabase/migrations/ : Migrations SQL
+- supabase/ : Configuration Supabase
+- src/ : Code source
+- src/components/ : Composants React
+- src/pages/ : Pages React
+- src/services/ : Services
+- src/hooks/ : Hooks React
+- src/types/ : Types TypeScript
+- src/sql/ : Requêtes SQL
+- src/database/ : Base de données
+- src/scripts/ : Scripts
+- src/lib/ : Bibliothèques
+
+## Pages React
+- src/pages/DashboardSettings.tsx : Paramètres tableau de bord
+- src/pages/DashboardStats.tsx : Statistiques tableau de bord
+- src/pages/DashboardUsers.tsx : Utilisateurs tableau de bord
+- src/pages/DashboardNotifications.tsx : Notifications tableau de bord
+- src/pages/DashboardMenu.tsx : Menu tableau de bord
+- src/pages/DashboardMatch.tsx : Matchs tableau de bord
+- src/pages/Home.tsx : Accueil
+- src/pages/Etudiants.tsx : Liste étudiants
+- src/pages/EspaceEtudiant.tsx : Espace étudiant
+- src/pages/DemandeForm.tsx : Formulaire demande
+- src/pages/Contact.tsx : Contact
+- src/pages/Login.tsx : Connexion
+- src/pages/Register.tsx : Inscription
+- src/pages/Unauthorized.tsx : Accès non autorisé
+- src/pages/About.tsx : À propos
+- src/pages/Privacy.tsx : Confidentialité
+- src/pages/SuiviDemande.tsx : Suivi demande
+- src/pages/brouillon.tsx : BrouillonParfait, je vais te préparer ça **proprement**, clair pour ton IA **et** pour toi !
+
+Je vais t’écrire :
+- 1. Un **nouveau `useMaintenance.ts`** robuste.
+- 2. Une **protection globale** dans `App.tsx`.
+- 3. Des **commentaires explicites** pour guider ton IA **et** tout développeur qui reprendra ton code.
+
+---
+
+## 1. Nouveau `src/hooks/useMaintenance.ts`
+```tsx
+import { useEffect, useState } from 'react';
+import { getMaintenanceStatus } from '../services/settings';
+
+/**
+ * Hook personnalisé pour récupérer l'état de maintenance du site.
+ * Appelle la base de données pour savoir si la maintenance est active.
+ */
+export function useMaintenance() {
+  const [isMaintenance, setIsMaintenance] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Fonction interne pour récupérer l'état de maintenance
+    async function fetchMaintenanceStatus() {
+      try {
+        const status = await getMaintenanceStatus(); // Doit retourner true ou false
+        setIsMaintenance(status);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du statut de maintenance:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMaintenanceStatus();
+
+    // OPTIONNEL : si besoin d'actualiser en temps réel toutes les X minutes :
+    // const interval = setInterval(fetchMaintenanceStatus, 30000); // toutes les 30 sec
+    // return () => clearInterval(interval);
+  }, []);
+
+  return { isMaintenance, loading };
+}
+```
+
+---
+
+## 2. `src/App.tsx` (modification principale)
+Dans ton `App.tsx`, **avant d'afficher les routes**, ajoute une vérification **globale** :
+
+```tsx
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useMaintenance } from './hooks/useMaintenance';
+import MaintenanceMode from './pages/MaintenanceMode';
+import { useAuth } from './hooks/useAuth'; // Supposé que tu as un hook d'authentification
+
+function App() {
+  const { isMaintenance, loading } = useMaintenance();
+  const { user } = useAuth(); // utilisateur actuel connecté
+
+  // Pendant le chargement du statut, tu peux afficher un loader
+  if (loading) {
+    return <div>Chargement...</div>;
+  }
+
+  // Si le site est en maintenance et que l'utilisateur n'est pas admin ➔ redirection vers la page Maintenance
+  if (isMaintenance && (!user || !user.isAdmin)) {
+    return <MaintenanceMode />;
+  }
+
+  return (
+    <Router>
+      <Routes>
+        {/* Tes routes normales ici */}
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+---
+
+## 3. Résumé pour ton IA ou autre développeur
+### 💬 Résumé expliquant **où** et **quoi vérifier** :
+
+- **`src/hooks/useMaintenance.ts`** : 
+  - Récupère l’état du mode maintenance depuis la base de données.
+  - S'assure que le statut est toujours à jour.
+
+- **`src/App.tsx`** :
+  - Pendant que l’état est en cours de chargement, le site affiche "Chargement...".
+  - Une fois l’état récupéré :
+    - Si le site est en maintenance **et** que l'utilisateur n'est **pas admin**, ➔ affiche `MaintenanceMode`.
+    - Sinon, continue d'afficher les routes normales.
+    
+- **Point critique pour corriger le problème actuel** :
+  - Il faut s'assurer que la fonction `getMaintenanceStatus()` dans `services/settings.ts` retourne correctement un `boolean`.
+  - Il faut vérifier que le hook `useAuth()` retourne bien le rôle ou la propriété `isAdmin` du user connecté.
+
+---
+
+## 🛠 Check-list rapide pour ton IA (ou toi) :
+
+| Vérification à faire | Endroit concerné | Priorité |
+|:---|:---|:---|
+| `getMaintenanceStatus()` retourne bien `true` ou `false` | `src/services/settings.ts` | Haute |
+| `useMaintenance()` récupère correctement l'état | `src/hooks/useMaintenance.ts` | Haute |
+| `App.tsx` vérifie `isMaintenance` et `user.isAdmin` | `src/App.tsx` | Très haute |
+| L’utilisateur connecté a bien un champ `isAdmin` | `src/hooks/useAuth.ts` (ou équivalent) | Haute |
+
+---
+
+Veux-tu aussi que je t’écrive :
+- un exemple de ce que `getMaintenanceStatus()` devrait ressembler dans `services/settings.ts` ?
+- ou un exemple de `ProtectedRoute.tsx` corrigé pour bien suivre la même logique ?
+
+Ça prendrait 2 minutes de plus si tu veux tout stabiliser d’un coup 🔥.  
+Veux-tu ? 🚀
+
+## Composants React
+- src/components/StudentProfileView.tsx : Vue profil étudiant
+- src/components/StudentProfileForm.tsx : Formulaire profil étudiant
+- src/components/ProtectedRoute.tsx : Route protégée
+- src/components/Navbar.tsx : Barre navigation
+- src/components/Footer.tsx : Pied de page
+- src/components/FAQ.tsx : FAQ
+- src/components/DashboardBackButton.tsx : Bouton retour tableau de bord
+- src/components/CookieConsent.tsx : Consentement cookies
+- src/components/Testimonials.tsx : Témoignages
+- src/components/Stats.tsx : Statistiques

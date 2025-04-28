@@ -51,7 +51,7 @@ const Etudiants: React.FC = () => {
   ];
 
   const handleJoinClick = (): void => {
-    navigate('/login');
+    navigate('/register');
   };
 
   return (
@@ -64,6 +64,27 @@ const Etudiants: React.FC = () => {
         <Typography variant="h6" align="center" color="text.secondary" sx={{ mb: 4 }}>
           Devenez un étudiant Stujob et accédez à des opportunités de travail flexibles
         </Typography>
+
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleJoinClick}
+            sx={{ 
+              px: 4, 
+              py: 2,
+              background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
+              borderRadius: '25px',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              '&:hover': {
+                background: 'linear-gradient(90deg, #7928CA 0%, #E6447E 100%)',
+              }
+            }}
+          >
+            Je suis étudiant, je veux faire partie du réseau
+          </Button>
+        </Box>
 
         <Grid container spacing={4} sx={{ mb: 6 }}>
           {features.map((feature, index) => (
