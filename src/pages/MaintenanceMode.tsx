@@ -379,7 +379,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="student"
-                      title="👨‍🎓 Etes vous un étudiant ?"
+                      title="Etes vous un étudiant ?"
                       icon={<SchoolIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('student')}
                     />
@@ -387,7 +387,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="entreprise"
-                      title="🏢 Etes vous une entreprise ?"
+                      title="Etes vous une entreprise ?"
                       icon={<BusinessIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('entreprise')}
                     />
