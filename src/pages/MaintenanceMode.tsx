@@ -370,7 +370,7 @@ export default function Maintenance() {
             }}
           >
             <Typography variant="h4" component="h2" sx={{ color: '#9333EA', mb: 4, fontWeight: 700 }}>
-              Maintenance en cours
+              Nous sommes en maintenance, mais bientôt de retour !
             </Typography>
 
             {!showAdminKeyForm && !showAdminLoginForm && (
@@ -432,7 +432,7 @@ export default function Maintenance() {
                         },
                       }}
                     >
-                      {loading ? <CircularProgress size={24} /> : 'Être notifié'}
+                      {loading ? <CircularProgress size={24} /> : 'S\'inscrire a la newsletter'}
                     </Button>
                   </Box>
                 ) : (
