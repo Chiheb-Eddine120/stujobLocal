@@ -252,20 +252,20 @@ export default function Maintenance() {
 
     const content = {
       student: {
-        title: "StuJob est votre partenaire pour :",
+        title: "StuJob vous permet de :",
         items: [
-          "Trouver des stages adaptés à votre formation",
-          "Connecter directement avec les entreprises",
-          "Gérer vos candidatures facilement",
+          "Trouver du travail rapidement",
+          "Trouver du travail en fonction de vos demandes",
+          "Gérer votre profil facilement",
           "Découvrir des opportunités exclusives"
         ]
       },
       company: {
-        title: "StuJob vous permet de :",
+        title: "StuJob est votre partenaire pour :",
         items: [
-          "Trouver facilement des étudiants qualifiés",
-          "Gérer vos offres de stage depuis un tableau de bord clair",
-          "Accélérer le processus de recrutement",
+          "Trouver facilement et rapidement des étudiants qualifiés",
+          "Un service sur mesure avec un suivi de qualité",
+          "Un gain en coût et en productivité",
           "Promouvoir votre entreprise auprès des jeunes talents"
         ]
       }
@@ -370,7 +370,7 @@ export default function Maintenance() {
             }}
           >
             <Typography variant="h4" component="h2" sx={{ color: '#9333EA', mb: 4, fontWeight: 700 }}>
-              Nous sommes en maintenance, mais bientôt de retour !
+              Nous sommes en maintenance, <br /> mais bientôt de retour !
             </Typography>
 
             {!showAdminKeyForm && !showAdminLoginForm && (
@@ -379,7 +379,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="student"
-                      title="👨‍🎓 Étudiant"
+                      title="👨‍🎓 Etes vous un étudiant ?"
                       icon={<SchoolIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('student')}
                     />
@@ -387,7 +387,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="entreprise"
-                      title="🏢 Entreprise"
+                      title="🏢 Etes vous une entreprise ?"
                       icon={<BusinessIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('entreprise')}
                     />
@@ -397,7 +397,7 @@ export default function Maintenance() {
                 <RoleDescription role={selectedRole} />
 
                 <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
-                  Laissez votre email pour être averti de notre retour et ne manquez pas nos nouvelles fonctionnalités !
+                Inscrivez vous dès maintenant pour recevoir une alerte par email dès la mise en ligne de notre plateforme et découvrir en avant-première toutes nos nouvelles fonctionnalités pour les étudiants et les entreprises !                
                 </Typography>
 
                 {!emailSent ? (
@@ -418,7 +418,7 @@ export default function Maintenance() {
                     <Button
                       type="submit"
                       variant="contained"
-                      disabled={loading}
+                      disabled={loading || !selectedRole}
                       sx={{
                         bgcolor: '#9333EA',
                         color: 'white',
@@ -430,10 +430,18 @@ export default function Maintenance() {
                         '&:hover': {
                           bgcolor: '#7E22CE',
                         },
+                        '&.Mui-disabled': {
+                          bgcolor: 'rgba(147, 51, 234, 0.5)',
+                        }
                       }}
                     >
                       {loading ? <CircularProgress size={24} /> : 'S\'inscrire a la newsletter'}
                     </Button>
+                    {!selectedRole && (
+                      <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mt: 1 }}>
+                        Veuillez sélectionner si vous êtes un étudiant ou une entreprise
+                      </Typography>
+                    )}
                   </Box>
                 ) : (
                   <Alert severity="success" sx={{ borderRadius: '15px' }}>
