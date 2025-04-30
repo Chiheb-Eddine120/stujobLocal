@@ -14,9 +14,17 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SupportIcon from '@mui/icons-material/Support';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const DashboardMenu: React.FC = () => {
   const menuItems = [
+    {
+      title: 'Pré-inscriptions',
+      description: 'Gérer les demandes de notification de lancement',
+      icon: <HowToRegIcon sx={{ fontSize: 40 }} />,
+      link: '/dashboard/pre-registrations',
+      color: '#E355A3',
+    },
     {
       title: 'Matching',
       description: 'Gérer les correspondances entre étudiants et entreprises',

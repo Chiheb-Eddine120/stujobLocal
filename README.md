@@ -16,6 +16,11 @@ Stujob est une plateforme web qui met en relation les entreprises cherchant à r
 - **Missions flexibles** : Opportunités adaptées à leur emploi du temps étudiant
 - **Processus simplifié** : Pas besoin de rechercher activement des missions, Stujob s'en charge
 
+### Pour les Administrateurs
+- **Mode Maintenance** : Possibilité d'activer/désactiver le mode maintenance du site
+- **Interface d'Administration** : Accès sécurisé avec authentification à deux niveaux
+- **Gestion des Paramètres** : Contrôle des paramètres système avec historique des modifications
+
 ## Architecture Technique
 
 ### Frontend
@@ -33,6 +38,8 @@ Stujob est une plateforme web qui met en relation les entreprises cherchant à r
   - Etudiants : Page d'inscription pour les étudiants
   - About : Présentation de l'entreprise
   - Contact : Formulaire de contact
+  - MaintenanceMode : Page affichée lors de la maintenance du site
+  - DashboardSettings : Interface d'administration des paramètres
 
 - **Composants** :
   - Navbar : Barre de navigation
@@ -65,6 +72,8 @@ Stujob est une plateforme web qui met en relation les entreprises cherchant à r
 - **UI** : Material-UI, CSS personnalisé
 - **Routing** : React Router
 - **Gestion d'État** : React Hooks
+- **Base de données** : Supabase (PostgreSQL)
+- **Authentification** : Supabase Auth
 - **Validation de Formulaire** : Validation native HTML5
 - **Responsive Design** : Grid et Flexbox de Material-UI
 
@@ -138,14 +147,24 @@ stujob-vitrine/
 │   └── manifest.json
 ├── src/
 │   ├── components/
-│   │   └── Navbar.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Stats.tsx
+│   │   ├── Testimonials.tsx
+│   │   ├── FAQ.tsx
+│   │   └── ProtectedRoute.tsx
 │   ├── pages/
 │   │   ├── Home.tsx
 │   │   ├── DemandeForm.tsx
 │   │   ├── SuiviDemande.tsx
 │   │   ├── Etudiants.tsx
 │   │   ├── About.tsx
-│   │   └── Contact.tsx
+│   │   ├── Contact.tsx
+│   │   ├── MaintenanceMode.tsx
+│   │   └── DashboardSettings.tsx
+│   ├── services/
+│   │   ├── supabase.ts
+│   │   └── settings.ts
 │   ├── App.tsx
 │   └── index.tsx
 ├── index.html
@@ -172,7 +191,27 @@ Les variables d'environnement doivent être préfixées par `VITE_` pour être a
 Exemple :
 ```env
 VITE_API_URL=http://api.example.com
+VITE_ADMIN_SECRET=votre_clé_secrète_admin  # Clé secrète pour l'accès administrateur
 ```
+
+### Variables requises pour l'administration
+- `VITE_ADMIN_SECRET` : Clé secrète pour l'accès à l'interface d'administration
+- `VITE_SUPABASE_URL` : URL de votre instance Supabase
+- `VITE_SUPABASE_ANON_KEY` : Clé anonyme Supabase
+
+### Mode Maintenance
+
+Le site inclut un mode maintenance qui peut être activé par les administrateurs. Lorsqu'il est activé :
+- Les utilisateurs non-administrateurs sont redirigés vers une page de maintenance
+- Les administrateurs peuvent toujours accéder au site après authentification
+- Un système de double authentification protège l'accès administrateur :
+  1. Validation d'une clé secrète
+  2. Connexion avec un compte administrateur vérifié
+
+Pour accéder au site en mode maintenance en tant qu'administrateur :
+1. Cliquer sur "Accès administrateur" sur la page de maintenance
+2. Entrer la clé secrète d'administration (`VITE_ADMIN_SECRET`)
+3. Se connecter avec un compte administrateur valide
 
 ## Contribution
 

@@ -8,33 +8,40 @@ import {
   Container,
   CircularProgress,
   Alert,
-  IconButton,
   Snackbar,
+  Grid,
 } from '@mui/material';
+import { Helmet } from 'react-helmet-async';
 import { supabase } from '../services/supabase';
 import { useNavigate } from 'react-router-dom';
-import ConstructionIcon from '@mui/icons-material/Construction';
-import LockIcon from '@mui/icons-material/Lock';
-import { useMaintenance } from '../hooks/useMaintenance';
+import SchoolIcon from '@mui/icons-material/School';
+import BusinessIcon from '@mui/icons-material/Business';
+//import ConstructionIcon from '@mui/icons-material/Construction';
+//import LockIcon from '@mui/icons-material/Lock';
 
 // Constantes pour la limitation des tentatives
 const MAX_ATTEMPTS = 3;
 const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes en millisecondes
 
-const MaintenanceMode: React.FC = () => {
+// Types pour le rôle sélectionné
+type Role = 'student' | 'entreprise' | null;
+
+export default function Maintenance() {
   const navigate = useNavigate();
-  const { isMaintenance } = useMaintenance();
   const [mounted, setMounted] = useState(false);
-  const [showAdminForm, setShowAdminForm] = useState(false);
-  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
+  const [showAdminKeyForm, setShowAdminKeyForm] = useState(false);
+  const [showAdminLoginForm, setShowAdminLoginForm] = useState(false);
   const [adminKey, setAdminKey] = useState('');
-  const [email, setEmail] = useState('');
+  const [emailAdmin, setEmailAdmin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [isLocked, setIsLocked] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<Role>(null);
 
   // Fonction pour vérifier si le compte est bloqué
   const checkLockStatus = () => {
@@ -49,7 +56,6 @@ const MaintenanceMode: React.FC = () => {
         setRemainingTime(Math.ceil((LOCKOUT_DURATION - timeElapsed) / 1000));
         return true;
       } else if (timeElapsed >= LOCKOUT_DURATION) {
-        // Réinitialiser le verrouillage si le délai est écoulé
         localStorage.removeItem('adminAccessLock');
         setIsLocked(false);
         setRemainingTime(0);
@@ -77,14 +83,28 @@ const MaintenanceMode: React.FC = () => {
     }
   };
 
-  // Vérifier le statut du verrouillage au chargement
   useEffect(() => {
     setMounted(true);
     checkLockStatus();
     return () => setMounted(false);
   }, []);
 
-  // Mettre à jour le temps restant
+  useEffect(() => {
+    let sequence: string[] = [];
+    const secretSequence = import.meta.env.VITE_ADMIN_ACCESS_SEQUENCE.split(',');
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      sequence.push(e.key);
+      sequence = sequence.slice(-secretSequence.length);
+      if (sequence.join(",") === secretSequence.join(",")) {
+        setShowAdminKeyForm(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isLocked && remainingTime > 0) {
@@ -102,12 +122,33 @@ const MaintenanceMode: React.FC = () => {
     return () => clearInterval(timer);
   }, [isLocked, remainingTime]);
 
-  // Vérifier si le mode maintenance est toujours actif
-  useEffect(() => {
-    if (!isMaintenance && mounted) {
-      navigate('/');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mounted) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('maintenance_notifications')
+        .insert([
+          {
+            email,
+            notified: false,
+            role: selectedRole
+          }
+        ]);
+
+      if (error) throw error;
+
+      setEmailSent(true);
+      setSnackbar({ open: true, message: 'Merci ! Vous serez prévenu dès notre retour.' });
+    } catch (err: any) {
+      setError(err.message);
+      setSnackbar({ open: true, message: "Une erreur s'est produite lors de l'enregistrement de votre email." });
+    } finally {
+      setLoading(false);
     }
-  }, [isMaintenance, mounted, navigate]);
+  };
 
   const handleAdminKeySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,10 +160,10 @@ const MaintenanceMode: React.FC = () => {
     }
 
     if (adminKey === import.meta.env.VITE_ADMIN_SECRET) {
-      setShowLoginForm(true);
       setError(null);
-      // Réinitialiser les tentatives en cas de succès
       localStorage.removeItem('adminAccessLock');
+      setShowAdminLoginForm(true);
+      setShowAdminKeyForm(false);
     } else {
       updateAttempts();
       const attemptsLeft = MAX_ATTEMPTS - (JSON.parse(localStorage.getItem('adminAccessLock') || '{"attempts":0}').attempts);
@@ -135,7 +176,7 @@ const MaintenanceMode: React.FC = () => {
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mounted) return;
     
@@ -144,7 +185,7 @@ const MaintenanceMode: React.FC = () => {
 
     try {
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailAdmin,
         password,
       });
 
@@ -164,14 +205,8 @@ const MaintenanceMode: React.FC = () => {
 
       if (mounted) {
         setSnackbar({ open: true, message: 'Connexion réussie' });
-        // Attendre un court instant pour que le message s'affiche
         setTimeout(() => {
-          // Forcer la mise à jour de la session
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-              navigate('/dashboard', { replace: true });
-            }
-          });
+          navigate('/dashboard', { replace: true });
         }, 1000);
       }
     } catch (err: any) {
@@ -184,6 +219,72 @@ const MaintenanceMode: React.FC = () => {
         setLoading(false);
       }
     }
+  };
+
+  const RoleCard = ({ role, title, icon, onClick }: { role: Role; title: string; icon: React.ReactNode; onClick: () => void }) => (
+    <Paper
+      elevation={selectedRole === role ? 3 : 1}
+      sx={{
+        p: 3,
+        textAlign: 'center',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        transform: selectedRole === role ? 'scale(1.02)' : 'scale(1)',
+        border: selectedRole === role ? '2px solid #9333EA' : '2px solid transparent',
+        '&:hover': {
+          transform: 'scale(1.02)',
+          boxShadow: '0 8px 20px rgba(147, 51, 234, 0.2)',
+        },
+      }}
+      onClick={onClick}
+    >
+      <Box sx={{ color: '#9333EA', mb: 2 }}>
+        {icon}
+      </Box>
+      <Typography variant="h6" sx={{ color: '#9333EA', fontWeight: 600 }}>
+        {title}
+      </Typography>
+    </Paper>
+  );
+
+  const RoleDescription = ({ role }: { role: Role }) => {
+    if (!role) return null;
+
+    const content = {
+      student: {
+        title: "StuJob est votre partenaire pour :",
+        items: [
+          "Trouver des stages adaptés à votre formation",
+          "Connecter directement avec les entreprises",
+          "Gérer vos candidatures facilement",
+          "Découvrir des opportunités exclusives"
+        ]
+      },
+      company: {
+        title: "StuJob vous permet de :",
+        items: [
+          "Trouver facilement des étudiants qualifiés",
+          "Gérer vos offres de stage depuis un tableau de bord clair",
+          "Accélérer le processus de recrutement",
+          "Promouvoir votre entreprise auprès des jeunes talents"
+        ]
+      }
+    };
+
+    const roleContent = role === 'student' ? content.student : content.company;
+
+    return (
+      <Box sx={{ mt: 4, textAlign: 'left' }}>
+        <Typography variant="h6" sx={{ color: '#666', mb: 2, fontWeight: 500 }}>
+          {roleContent.title}
+        </Typography>
+        <Box component="ul" sx={{ pl: 3, mb: 4, color: '#666' }}>
+          {roleContent.items.map((item, index) => (
+            <li key={index} style={{ marginBottom: '8px' }}>{item}</li>
+          ))}
+        </Box>
+      </Box>
+    );
   };
 
   if (!mounted) {
@@ -203,62 +304,53 @@ const MaintenanceMode: React.FC = () => {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Motif de fond */}
+    <>
+      <Helmet>
+        <title>Maintenance en cours | StuJob - La plateforme de stages pour étudiants</title>
+        <meta name="description" content="StuJob est en maintenance. Notre plateforme de mise en relation entre étudiants et entreprises pour des stages revient bientôt avec de nouvelles fonctionnalités pour faciliter votre recherche de stage." />
+        <meta name="keywords" content="stage étudiant, recherche stage, offre stage, plateforme stage, StuJob maintenance" />
+        <meta property="og:title" content="Maintenance en cours | StuJob - La plateforme de stages pour étudiants" />
+        <meta property="og:description" content="StuJob est en maintenance. Notre plateforme de mise en relation entre étudiants et entreprises pour des stages revient bientôt avec de nouvelles fonctionnalités." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Maintenance en cours | StuJob" />
+        <meta name="twitter:description" content="StuJob est en maintenance. Revenez bientôt pour découvrir notre plateforme de stages améliorée." />
+      </Helmet>
+
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          opacity: 0.1,
-          background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 50%)',
-          backgroundSize: '30px 30px',
-          backgroundPosition: '0 0, 15px 15px',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(45deg, #9333EA 0%, #E355A3 100%)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
-      />
-
-      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          {/* Logo STUJOB */}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Typography
             variant="h1"
             sx={{
               color: 'white',
               fontWeight: 700,
-              fontSize: '4rem',
+              fontSize: '3rem',
               textAlign: 'center',
-              display: 'flex',
+              mb: 4,
+              display: 'inline-flex',
               alignItems: 'center',
-              mb: 2,
+              position: 'relative',
+              justifyContent: 'center',
+              width: '100%',
               '&::after': {
                 content: '""',
                 display: 'inline-block',
-                width: '24px',
-                height: '24px',
+                width: '12px',
+                height: '12px',
                 backgroundColor: 'white',
                 transform: 'rotate(45deg)',
                 marginLeft: '8px',
-                marginBottom: '32px'
+                marginBottom: '24px'
               }
             }}
           >
@@ -277,59 +369,89 @@ const MaintenanceMode: React.FC = () => {
               textAlign: 'center',
             }}
           >
-            <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <IconButton
-                sx={{
-                  bgcolor: '#9333EA20',
-                  mb: 2,
-                  p: 2,
-                  '&:hover': { bgcolor: '#9333EA30' },
-                }}
-              >
-                <ConstructionIcon sx={{ fontSize: 40, color: '#9333EA' }} />
-              </IconButton>
-              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, color: '#9333EA' }}>
-                Maintenance en cours
-              </Typography>
-              <Typography variant="body1" sx={{ color: '#6B7280', maxWidth: '400px', mx: 'auto' }}>
-                Notre équipe travaille actuellement sur l'amélioration de nos services.
-                Nous serons de retour très bientôt !
-              </Typography>
-            </Box>
+            <Typography variant="h4" component="h2" sx={{ color: '#9333EA', mb: 4, fontWeight: 700 }}>
+              Maintenance en cours
+            </Typography>
 
-            {!showAdminForm && !showLoginForm && (
-              <Button
-                variant="contained"
-                onClick={() => setShowAdminForm(true)}
-                startIcon={<LockIcon />}
-                sx={{
-                  bgcolor: '#9333EA',
-                  color: 'white',
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: '50px',
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  fontWeight: 500,
-                  boxShadow: '0 4px 14px rgba(147, 51, 234, 0.3)',
-                  '&:hover': {
-                    bgcolor: '#7E22CE',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(147, 51, 234, 0.4)',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                Accès administrateur
-              </Button>
+            {!showAdminKeyForm && !showAdminLoginForm && (
+              <>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} sm={6}>
+                    <RoleCard
+                      role="student"
+                      title="👨‍🎓 Étudiant"
+                      icon={<SchoolIcon sx={{ fontSize: 40 }} />}
+                      onClick={() => setSelectedRole('student')}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <RoleCard
+                      role="entreprise"
+                      title="🏢 Entreprise"
+                      icon={<BusinessIcon sx={{ fontSize: 40 }} />}
+                      onClick={() => setSelectedRole('entreprise')}
+                    />
+                  </Grid>
+                </Grid>
+
+                <RoleDescription role={selectedRole} />
+
+                <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
+                  Laissez votre email pour être averti de notre retour et ne manquez pas nos nouvelles fonctionnalités !
+                </Typography>
+
+                {!emailSent ? (
+                  <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                      fullWidth
+                      type="email"
+                      required
+                      label="Votre email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '15px',
+                        },
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={loading}
+                      sx={{
+                        bgcolor: '#9333EA',
+                        color: 'white',
+                        py: 1.5,
+                        borderRadius: '15px',
+                        textTransform: 'none',
+                        fontSize: '1rem',
+                        fontWeight: 500,
+                        '&:hover': {
+                          bgcolor: '#7E22CE',
+                        },
+                      }}
+                    >
+                      {loading ? <CircularProgress size={24} /> : 'Être notifié'}
+                    </Button>
+                  </Box>
+                ) : (
+                  <Alert severity="success" sx={{ borderRadius: '15px' }}>
+                    Merci ! Vous serez prévenu dès notre retour.
+                  </Alert>
+                )}
+              </>
             )}
 
-            {showAdminForm && !showLoginForm && (
-              <Box component="form" onSubmit={handleAdminKeySubmit} sx={{ mt: 2 }}>
+            {showAdminKeyForm && !showAdminLoginForm && (
+              <Box component="form" onSubmit={handleAdminKeySubmit} sx={{ mt: 4 }}>
+                <Typography variant="h6" sx={{ color: '#9333EA', mb: 2 }}>
+                  Accès administrateur
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Clé secrète"
                   type="password"
+                  label="Clé secrète"
                   value={adminKey}
                   onChange={(e) => setAdminKey(e.target.value)}
                   disabled={isLocked}
@@ -363,14 +485,17 @@ const MaintenanceMode: React.FC = () => {
               </Box>
             )}
 
-            {showLoginForm && (
-              <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
+            {showAdminLoginForm && (
+              <Box component="form" onSubmit={handleAdminLogin} sx={{ mt: 4 }}>
+                <Typography variant="h6" sx={{ color: '#9333EA', mb: 2 }}>
+                  Connexion administrateur
+                </Typography>
                 <TextField
                   fullWidth
-                  label="Email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  label="Email"
+                  value={emailAdmin}
+                  onChange={(e) => setEmailAdmin(e.target.value)}
                   sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {
@@ -380,8 +505,8 @@ const MaintenanceMode: React.FC = () => {
                 />
                 <TextField
                   fullWidth
-                  label="Mot de passe"
                   type="password"
+                  label="Mot de passe"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   sx={{
@@ -420,26 +545,21 @@ const MaintenanceMode: React.FC = () => {
                 sx={{ 
                   mt: 2,
                   borderRadius: '15px',
-                  '& .MuiAlert-icon': {
-                    color: '#DC2626',
-                  },
                 }}
               >
                 {error}
               </Alert>
             )}
           </Paper>
-        </Box>
-      </Container>
+        </Container>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ open: false, message: '' })}
-        message={snackbar.message}
-      />
-    </Box>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={() => setSnackbar({ open: false, message: '' })}
+          message={snackbar.message}
+        />
+      </Box>
+    </>
   );
-};
-
-export default MaintenanceMode; 
+} 

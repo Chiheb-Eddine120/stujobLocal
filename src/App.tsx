@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ToastContainer } from 'react-toastify';
+import { HelmetProvider } from 'react-helmet-async';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -21,6 +22,7 @@ import DashboardMatch from './pages/DashboardMatch';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardStats from './pages/DashboardStats';
 import DashboardNotifications from './pages/DashboardNotifications';
+import DashboardPreRegistrations from './pages/DashboardPreRegistrations';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -154,127 +156,138 @@ const App: React.FC = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      <Router>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          {isMaintenance && (!session || userRole !== 'admin') ? (
-            <Routes>
-              <Route path="*" element={<MaintenanceMode />} />
-            </Routes>
-          ) : (
-            <>
-              <Navbar />
-              <main style={{ flex: 1, paddingBottom: '20px' }}>
-                <Routes>
-                  {/* Routes publiques */}
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/unauthorized" element={<Unauthorized />} />
+    <HelmetProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <Router>
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            {isMaintenance && (!session || userRole !== 'admin') ? (
+              <Routes>
+                <Route path="*" element={<MaintenanceMode />} />
+              </Routes>
+            ) : (
+              <>
+                <Navbar />
+                <main style={{ flex: 1, paddingBottom: '20px' }}>
+                  <Routes>
+                    {/* Routes publiques */}
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/unauthorized" element={<Unauthorized />} />
 
-                  {/* Routes protégées */}
-                  <Route 
-                    path="/demande" 
-                    element={<DemandeForm />}
-                  />
-                  <Route 
-                    path="/suivi" 
-                    element={<SuiviDemande />}
-                  />
-                  <Route 
-                    path="/suivi/:trackingNumber" 
-                    element={<SuiviDemande />}
-                  />
-                  <Route 
-                    path="/etudiants" 
-                    element={<Etudiants />}
-                  />
+                    {/* Routes protégées */}
 
-                  {/* Routes Dashboard */}
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardMenu />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard/match" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardMatch />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard/users" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardUsers />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard/stats" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardStats />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard/notifications" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardNotifications />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/dashboard/settings" 
-                    element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <DashboardSettings />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/espace-etudiant" 
-                    element={
-                      <ProtectedRoute requiredRoles={['student']}>
-                        <EspaceEtudiant />
-                      </ProtectedRoute>
-                    }
-                  />
+                    <Route 
+                      path="/demande" 
+                      element={<DemandeForm />}
+                    />
+                    <Route 
+                      path="/suivi" 
+                      element={<SuiviDemande />}
+                    />
+                    <Route 
+                      path="/suivi/:trackingNumber" 
+                      element={<SuiviDemande />}
+                    />
+                    <Route 
+                      path="/etudiants" 
+                      element={<Etudiants />}
+                    />
 
-                  {/* Redirection par défaut */}
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </main>
-              <Footer />
-              <CookieConsent />
-            </>
-          )}
-        </div>
-      </Router>
-    </ThemeProvider>
+                    {/* Routes Dashboard */}
+                    <Route 
+                      path="/dashboard" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardMenu />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/pre-registrations" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardPreRegistrations />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/match" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardMatch />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/users" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardUsers />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/stats" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardStats />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/notifications" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardNotifications />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/dashboard/settings" 
+                      element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <DashboardSettings />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/espace-etudiant" 
+                      element={
+                        <ProtectedRoute requiredRoles={['student']}>
+                          <EspaceEtudiant />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    {/* Redirection par défaut */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </main>
+                <Footer />
+                <CookieConsent />
+              </>
+            )}
+          </div>
+        </Router>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 };
 
