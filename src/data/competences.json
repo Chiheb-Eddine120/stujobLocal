@@ -1,0 +1,16 @@
+{
+    "competences": [
+      { "label": "Développement Web", "description": "HTML, CSS, JavaScript, frameworks (ex: React, Angular)" },
+      { "label": "Développement Mobile", "description": "Création d'applications avec Flutter ou React Native" },
+      { "label": "Base de données", "description": "Connaissance de MySQL, MongoDB, Firebase" },
+      { "label": "Analyse de données", "description": "Manipulation et visualisation avec Excel, Python, Power BI" },
+      { "label": "Design UX/UI", "description": "Conception d'interfaces avec Figma, Adobe XD" },
+      { "label": "Gestion de projet", "description": "Méthodologies Agile, gestion avec Trello ou Notion" },
+      { "label": "Stratégie Réseaux Sociaux", "description": "Création, planification et analyse de contenu" },
+      { "label": "Marketing digital", "description": "SEO, SEA, e-mail marketing, Google Analytics" },
+      { "label": "Intelligence Artificielle (Notions)", "description": "Introduction au machine learning et NLP avec Python" },
+      { "label": "Cloud Computing (Notions)", "description": "Découverte de Firebase et AWS" },
+      { "label": "DevOps (Notions)", "description": "Utilisation de GitHub Actions, CI/CD" }
+    ]
+  }
+  

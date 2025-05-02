@@ -152,7 +152,11 @@ export const etudiantService = {
     }
   },
 
-  async updateCompetence(etudiantId: string, competence: { nom: string; niveau: NiveauCompetence }): Promise<void> {
+  async updateCompetence(etudiantId: string, competence: { 
+    nom: string; 
+    niveau: NiveauCompetence;
+    description?: string;
+  }): Promise<void> {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -198,7 +202,7 @@ export const etudiantService = {
           )
         `);
 
-      // Recherche dans les compétences techniques et soft
+      // Recherche dans les compétences techniques
       if (criteres.competences?.length) {
         // Nettoyer et valider les compétences
         const validCompetences = criteres.competences
@@ -209,8 +213,7 @@ export const etudiantService = {
           const filters = validCompetences.flatMap(comp => {
             const jsonValue = JSON.stringify([comp]); // Crée ["React"] par exemple
             return [
-              `competences_techniques.cs.${jsonValue}`,
-              `competences_soft.cs.${jsonValue}`
+              `competences.cs.${jsonValue}`
             ];
           });
 
@@ -247,10 +250,8 @@ export const etudiantService = {
         filteredData = filteredData.filter(etudiant => {
           // Vérifier le niveau pour chaque compétence demandée
           return criteres.competences?.every(comp => {
-            const compTech = etudiant.competences_techniques.find((c: CompetenceWithLevel) => c.nom === comp);
-            const compSoft = etudiant.competences_soft.find((c: CompetenceWithLevel) => c.nom === comp);
+            const compTech = etudiant.competences.find((c: CompetenceWithLevel) => c.nom === comp);
             if (compTech?.niveau && niveauOrdre[compTech.niveau as NiveauCompetence] >= niveauMinValue) return true;
-            if (compSoft?.niveau && niveauOrdre[compSoft.niveau as NiveauCompetence] >= niveauMinValue) return true;
             return false;
           }) ?? true;
         });

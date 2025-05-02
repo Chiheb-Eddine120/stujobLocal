@@ -19,7 +19,7 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 const DashboardMenu: React.FC = () => {
   const menuItems = [
     {
-      title: 'Pré-inscriptions',
+      title: 'Newsletter',
       description: 'Gérer les demandes de notification de lancement',
       icon: <HowToRegIcon sx={{ fontSize: 40 }} />,
       link: '/dashboard/pre-registrations',

@@ -93,14 +93,14 @@ export const matchService = {
     let score = 0;
 
     const competencesMatch = demande.competences_requises.filter(reqComp => 
-      etudiant.competences_techniques.some(comp => comp.nom === reqComp.nom)
+      etudiant.competences.some(comp => comp.nom === reqComp.nom)
     );
 
     const competencesScore = (competencesMatch.length / demande.competences_requises.length) * 60;
     score += competencesScore;
 
     const niveauScore = competencesMatch.reduce((acc, reqComp) => {
-      const etudiantComp = etudiant.competences_techniques.find(comp => comp.nom === reqComp.nom);
+      const etudiantComp = etudiant.competences.find(comp => comp.nom === reqComp.nom);
       if (!etudiantComp?.niveau) return acc;
 
       const niveauValues: Record<NiveauCompetence, number> = {

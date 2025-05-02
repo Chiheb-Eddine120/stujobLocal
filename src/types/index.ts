@@ -10,6 +10,8 @@ export interface Competence {
   nom: string;
   priorite: NiveauPriorite;
   niveau?: NiveauCompetence;
+  description?: string;
+  label?: string;
 }
 
 export interface DemandeRecrutement {
@@ -49,20 +51,27 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface Disponibilite {
+  jour: string;
+  debut: string;
+  fin: string;
+}
+
 export interface Etudiant {
   id: string;
   profile_id: string;
   cv_url: string;
   lettre_motivation_url: string;
-  competences_techniques: Competence[];
-  competences_soft: Competence[];
+  competences: Competence[];
   experiences: Experience[];
-  disponibilite: string;
+  disponibilite: { disponibilites: Disponibilite[] };
   niveau_etudes: string;
   ecole: string;
   created_at: string;
   updated_at: string;
   profile?: Profile;
+  biographie?: string;
+  langues?: { nom: string; niveau: string }[];
 }
 
 export interface Demande {

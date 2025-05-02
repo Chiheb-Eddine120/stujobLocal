@@ -379,7 +379,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="student"
-                      title="Etes vous un étudiant ?"
+                      title="Je suis un étudiant ?"
                       icon={<SchoolIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('student')}
                     />
@@ -387,7 +387,7 @@ export default function Maintenance() {
                   <Grid item xs={12} sm={6}>
                     <RoleCard
                       role="entreprise"
-                      title="Etes vous une entreprise ?"
+                      title="Je suis une entreprise ?"
                       icon={<BusinessIcon sx={{ fontSize: 40 }} />}
                       onClick={() => setSelectedRole('entreprise')}
                     />
@@ -435,7 +435,7 @@ export default function Maintenance() {
                         }
                       }}
                     >
-                      {loading ? <CircularProgress size={24} /> : 'S\'inscrire a la newsletter'}
+                      {loading ? <CircularProgress size={24} /> : 'S\'inscrire à la newsletter'}
                     </Button>
                     {!selectedRole && (
                       <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mt: 1 }}>

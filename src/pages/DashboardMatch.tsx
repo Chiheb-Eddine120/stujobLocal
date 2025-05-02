@@ -115,41 +115,18 @@ const DashboardMatch: React.FC = () => {
     setNotification(prev => ({ ...prev, open: false }));
   };
 
-  const calculateScore = (etudiant: Etudiant, demande: Demande): number => {
+  const calculateMatchScore = (etudiant: Etudiant, requises: Competence[]) => {
     let score = 0;
-    let totalPoids = 0;
+    let total = requises.length;
 
-    // Parcourir les compétences requises
-    demande.competences_requises.forEach(requise => {
-      const poids = requise.priorite === 'Essentiel' ? 3 : requise.priorite === 'Important' ? 2 : 1;
-      totalPoids += poids;
-
-      // Chercher dans les compétences techniques
-      const techMatch = etudiant.competences_techniques.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
-      if (techMatch && techMatch.niveau) {
-        const niveauScore: Record<NiveauCompetence, number> = {
-          'Débutant': 0.25,
-          'Intermédiaire': 0.5,
-          'Avancé': 0.75,
-          'Expert': 1
-        };
-        score += poids * (niveauScore[techMatch.niveau as NiveauCompetence] || 0);
+    for (const requise of requises) {
+      const match = etudiant.competences.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
+      if (match) {
+        score += 1;
       }
+    }
 
-      // Chercher dans les compétences soft
-      const softMatch = etudiant.competences_soft.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
-      if (softMatch && softMatch.niveau) {
-        const niveauScore: Record<NiveauCompetence, number> = {
-          'Débutant': 0.25,
-          'Intermédiaire': 0.5,
-          'Avancé': 0.75,
-          'Expert': 1
-        };
-        score += poids * (niveauScore[softMatch.niveau as NiveauCompetence] || 0);
-      }
-    });
-
-    return Math.round((score / totalPoids) * 100);
+    return Math.round((score / total) * 100);
   };
 
   const loadData = async () => {
@@ -424,7 +401,7 @@ const DashboardMatch: React.FC = () => {
             <TableBody>
                     {compareAll 
                       ? allStudents.map((student) => {
-                          const score = selectedDemande ? calculateScore(student, selectedDemande) : 0;
+                          const score = selectedDemande ? calculateMatchScore(student, selectedDemande.competences_requises) : 0;
                           return (
                             <TableRow 
                               key={student.id}
@@ -449,37 +426,15 @@ const DashboardMatch: React.FC = () => {
                                 </Box>
                               </TableCell>
                               <TableCell>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                  <Box>
-                                    <Typography variant="caption" color="text.secondary" gutterBottom>
-                                      Compétences techniques
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                      {student.competences_techniques.map((comp, index) => (
-                                        <Chip
-                                          key={index}
-                                          label={`${comp.nom} - ${comp.niveau}`}
-                                          size="small"
-                                          sx={{ bgcolor: '#F3E8FF', color: '#9333EA' }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  </Box>
-                                  <Box>
-                                    <Typography variant="caption" color="text.secondary" gutterBottom>
-                                      Soft skills
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                      {student.competences_soft.map((comp, index) => (
-                                        <Chip
-                                          key={index}
-                                          label={`${comp.nom} - ${comp.niveau}`}
-                                          size="small"
-                                          sx={{ bgcolor: '#FFE8F3', color: '#FF4D8D' }}
-                                        />
-                                      ))}
-                                    </Box>
-                                  </Box>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                  {student.competences.map((comp, index) => (
+                                    <Chip
+                                      key={index}
+                                      label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
+                                      size="small"
+                                      sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
+                                    />
+                                  ))}
                                 </Box>
                               </TableCell>
                               <TableCell>
@@ -567,41 +522,17 @@ const DashboardMatch: React.FC = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                <Box>
-                                  <Typography variant="caption" color="text.secondary" gutterBottom>
-                                    Compétences techniques
-                                  </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {match.etudiant.competences_techniques.map((comp, index) => (
-                        <Chip
-                          key={index}
-                                        label={`${comp.nom} - ${comp.priorite}`}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                      />
-                                    ))}
-                                  </Box>
-                                </Box>
-                                <Box>
-                                  <Typography variant="caption" color="text.secondary" gutterBottom>
-                                    Compétences soft
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                    {match.etudiant.competences_soft.map((comp, index) => (
-                                      <Chip
-                                        key={index}
-                                        label={`${comp.nom} - ${comp.priorite}`}
-                          size="small"
-                                        color="secondary"
-                                        variant="outlined"
-                        />
-                      ))}
-                                  </Box>
-                                </Box>
-                    </Box>
-                  </TableCell>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                                {match.etudiant.competences.map((comp, index) => (
+                                  <Chip
+                                    key={index}
+                                    label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
+                                    size="small"
+                                    sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
+                                  />
+                                ))}
+                              </Box>
+                            </TableCell>
                   <TableCell>
                     <Typography
                       variant="h6"

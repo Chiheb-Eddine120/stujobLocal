@@ -6,31 +6,39 @@ import {
   Typography,
   Paper,
   Grid,
-  Chip,
+  //Chip,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
+  //Dialog,
+  //DialogTitle,
+  //DialogContent,
+  //DialogActions,
+  //Select,
   MenuItem,
-  FormControl,
-  InputLabel,
+  //FormControl,
+  //InputLabel,
   Stack,
+  Collapse,
+  Autocomplete,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
-import { Profile, Etudiant, Experience } from '../types';
+import { Profile, Etudiant, Experience, DocumentFile, Competence, Langue, Disponibilite } from '../types/etudiant';
+import FileUpload from './FileUpload';
+import CompetenceInput from './CompetenceInput';
+import LangueInput from './LangueInput';
+import DisponibiliteDialog from './DisponibiliteDialog';
+import { supabase } from '../services/supabaseClient';
 
 interface StudentProfileFormProps {
   profile: Profile;
   etudiant?: Etudiant;
   onSubmit: (data: Partial<Etudiant>) => Promise<void>;
 }
-
-const niveauxCompetence = ['Débutant', 'Intermédiaire', 'Avancé', 'Expert'];
 
 const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
   profile,
@@ -39,35 +47,55 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Partial<Etudiant>>({
     profile_id: profile.id,
-    competences_techniques: [],
-    competences_soft: [],
+    cv_file: { cv: undefined, lettre_motivation: undefined },
+    competences: [],
     experiences: [],
+    disponibilite: { disponibilites: [] },
+    langues: [],
+    biographie: '',
   });
-  const [newCompetence, setNewCompetence] = useState({ nom: '', niveau: '' });
+  const [editingExperienceIndex, setEditingExperienceIndex] = useState<number | null>(null);
+  const [editExperience, setEditExperience] = useState<Partial<Experience> | null>(null);
+  const [isAddingExperience, setIsAddingExperience] = useState(false);
   const [newExperience, setNewExperience] = useState<Partial<Experience>>({});
-  const [isCompetenceDialogOpen, setIsCompetenceDialogOpen] = useState(false);
-  const [isExperienceDialogOpen, setIsExperienceDialogOpen] = useState(false);
-  const [competenceType, setCompetenceType] = useState<'technique' | 'soft'>('technique');
+  const [langueError, setLangueError] = useState(false);
+  const [isDisponibiliteDialogOpen, setIsDisponibiliteDialogOpen] = useState(false);
+  const [isCurrentJob, setIsCurrentJob] = useState(false);
+  const [editIsCurrentJob, setEditIsCurrentJob] = useState(false);
+  const [biographieError, setBiographieError] = useState(false);
+
+  const MONTHS = [
+    { value: '01', label: 'Janvier' },
+    { value: '02', label: 'Février' },
+    { value: '03', label: 'Mars' },
+    { value: '04', label: 'Avril' },
+    { value: '05', label: 'Mai' },
+    { value: '06', label: 'Juin' },
+    { value: '07', label: 'Juillet' },
+    { value: '08', label: 'Août' },
+    { value: '09', label: 'Septembre' },
+    { value: '10', label: 'Octobre' },
+    { value: '11', label: 'Novembre' },
+    { value: '12', label: 'Décembre' },
+  ];
+  const CURRENT_YEAR = new Date().getFullYear();
+  const YEARS = Array.from({ length: 50 }, (_, i) => CURRENT_YEAR - 40 + i);
+
+  function splitYearMonth(val?: string) {
+    if (!val) return { year: '', month: '' };
+    const [year, month] = val.split('-');
+    return { year, month };
+  }
+
+  function joinYearMonth(year: string, month: string) {
+    return year && month ? `${year}-${month}` : '';
+  }
 
   useEffect(() => {
     if (etudiant) {
       setFormData({
         ...etudiant,
         profile_id: profile.id,
-      });
-    } else {
-      setFormData({
-        profile_id: profile.id,
-        cv_url: '',
-        lettre_motivation_url: '',
-        competences_techniques: [],
-        competences_soft: [],
-        experiences: [],
-        disponibilite: '',
-        niveau_etudes: '',
-        ecole: '',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       });
     }
   }, [profile, etudiant]);
@@ -80,49 +108,113 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
     }));
   };
 
-  const handleCompetenceDialogOpen = (type: 'technique' | 'soft') => {
-    setCompetenceType(type);
-    setNewCompetence({ nom: '', niveau: '' });
-    setIsCompetenceDialogOpen(true);
-  };
-
-  const handleAddCompetence = () => {
-    if (newCompetence.nom && newCompetence.niveau) {
-      const competenceField = competenceType === 'technique' 
-        ? 'competences_techniques' 
-        : 'competences_soft';
-      
-      setFormData(prev => ({
-        ...prev,
-        [competenceField]: [...(prev[competenceField] || []), newCompetence],
-      }));
-      setIsCompetenceDialogOpen(false);
-      setNewCompetence({ nom: '', niveau: '' });
+  const handleFileUpload = async (type: 'cv' | 'lettre_motivation', file: DocumentFile) => {
+    // Upload vers Supabase Storage (bucket 'cvs')
+    const filePath = `${profile.id}/${type}_${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from('cvs').upload(filePath, file as any, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type,
+    });
+    if (error) {
+      console.error('Erreur upload Supabase:', error);
+      return;
     }
-  };
-
-  const handleRemoveCompetence = (type: 'technique' | 'soft', index: number) => {
-    const field = type === 'technique' ? 'competences_techniques' : 'competences_soft';
+    // Récupérer l'URL publique
+    const { data: publicUrlData } = supabase.storage.from('cvs').getPublicUrl(filePath);
+    const publicUrl = publicUrlData.publicUrl;
     setFormData(prev => ({
       ...prev,
-      [field]: prev[field]?.filter((_, i) => i !== index),
+      cv_file: {
+        ...(prev.cv_file || { cv: undefined, lettre_motivation: undefined }),
+        [type]: {
+          url: publicUrl,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        },
+      },
     }));
   };
 
-  const handleExperienceDialogOpen = () => {
-    setNewExperience({});
-    setIsExperienceDialogOpen(true);
+  const handleFileDelete = (type: 'cv' | 'lettre_motivation') => {
+    setFormData(prev => ({
+      ...prev,
+      cv_file: {
+        ...(prev.cv_file || { cv: undefined, lettre_motivation: undefined }),
+        [type]: undefined,
+      },
+    }));
+  };
+
+  const handleCompetencesChange = (newCompetences: Competence[]) => {
+    setFormData(prev => ({
+      ...prev,
+      competences: newCompetences,
+    }));
+  };
+
+  const handleLanguesChange = (newLangues: Langue[]) => {
+    setFormData(prev => ({
+      ...prev,
+      langues: newLangues,
+    }));
+    if (newLangues.length > 0) setLangueError(false);
+  };
+
+  const handleEditExperience = (index: number) => {
+    setEditingExperienceIndex(index);
+    const exp = formData.experiences?.[index] || null;
+    setEditExperience(exp);
+    setEditIsCurrentJob(!exp?.date_fin);
+  };
+
+  const handleEditExperienceChange = (field: keyof Experience, value: string) => {
+    setEditExperience(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  const handleSaveEditExperience = () => {
+    if (editExperience && editExperience.titre && editExperience.entreprise && editStartYear && editStartMonth) {
+      setFormData(prev => ({
+        ...prev,
+        experiences: prev.experiences?.map((exp, i) => i === editingExperienceIndex ? {
+          ...editExperience,
+          date_debut: joinYearMonth(editStartYear, editStartMonth),
+          date_fin: editIsCurrentJob ? undefined : joinYearMonth(editEndYear, editEndMonth)
+        } as Experience : exp)
+      }));
+      setEditingExperienceIndex(null);
+      setEditExperience(null);
+      setEditIsCurrentJob(false);
+      setEditStartMonth(''); setEditStartYear(''); setEditEndMonth(''); setEditEndYear('');
+    }
+  };
+
+  const handleCancelEditExperience = () => {
+    setEditingExperienceIndex(null);
+    setEditExperience(null);
   };
 
   const handleAddExperience = () => {
-    if (newExperience.titre && newExperience.entreprise && newExperience.date_debut) {
+    if (newExperience.titre && newExperience.entreprise && startYear && startMonth) {
       setFormData(prev => ({
         ...prev,
-        experiences: [...(prev.experiences || []), newExperience as Experience],
+        experiences: [...(prev.experiences || []), {
+          ...newExperience,
+          date_debut: joinYearMonth(startYear, startMonth),
+          date_fin: isCurrentJob ? undefined : joinYearMonth(endYear, endMonth)
+        } as Experience],
       }));
-      setIsExperienceDialogOpen(false);
+      setIsAddingExperience(false);
       setNewExperience({});
+      setIsCurrentJob(false);
+      setStartMonth(''); setStartYear(''); setEndMonth(''); setEndYear('');
     }
+  };
+
+  const handleCancelAddExperience = () => {
+    setIsAddingExperience(false);
+    setNewExperience({});
   };
 
   const handleRemoveExperience = (index: number) => {
@@ -132,10 +224,52 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
     }));
   };
 
+  const handleDisponibilitesSave = (dispos: Disponibilite[]) => {
+    setFormData(prev => ({
+      ...prev,
+      disponibilite: { disponibilites: dispos },
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.langues || formData.langues.length === 0) {
+      setLangueError(true);
+      return;
+    }
+    if (!formData.biographie || formData.biographie.length < 30) {
+      setBiographieError(true);
+      return;
+    } else {
+      setBiographieError(false);
+    }
     await onSubmit(formData);
   };
+
+  const [startMonth, setStartMonth] = useState('');
+  const [startYear, setStartYear] = useState('');
+  const [endMonth, setEndMonth] = useState('');
+  const [endYear, setEndYear] = useState('');
+
+  const [editStartMonth, setEditStartMonth] = useState('');
+  const [editStartYear, setEditStartYear] = useState('');
+  const [editEndMonth, setEditEndMonth] = useState('');
+  const [editEndYear, setEditEndYear] = useState('');
+
+  useEffect(() => {
+    if (isAddingExperience) {
+      setStartMonth(''); setStartYear(''); setEndMonth(''); setEndYear('');
+    }
+  }, [isAddingExperience]);
+
+  useEffect(() => {
+    if (editExperience) {
+      const { year: sy, month: sm } = splitYearMonth(editExperience.date_debut);
+      setEditStartYear(sy || ''); setEditStartMonth(sm || '');
+      const { year: ey, month: em } = splitYearMonth(editExperience.date_fin);
+      setEditEndYear(ey || ''); setEditEndMonth(em || '');
+    }
+  }, [editExperience]);
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
@@ -212,65 +346,122 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
       </Paper>
 
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            Compétences techniques
-          </Typography>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={() => handleCompetenceDialogOpen('technique')}
-          >
-            Ajouter
-          </Button>
-        </Box>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {formData.competences_techniques?.map((comp, index) => (
-            <Chip
-              key={index}
-              label={`${comp.nom} - ${comp.niveau}`}
-              onDelete={() => handleRemoveCompetence('technique', index)}
-              sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
-            />
-          ))}
-        </Box>
+        <Typography variant="h6" gutterBottom>
+          Biographie
+        </Typography>
+        <TextField
+          fullWidth
+          multiline
+          minRows={4}
+          label="Présentez-vous en quelques lignes (30 caractères minimum)"
+          name="biographie"
+          value={formData.biographie || ''}
+          onChange={handleInputChange}
+          error={biographieError}
+          helperText={biographieError ? 'La biographie doit contenir au moins 30 caractères.' : ''}
+          required
+        />
       </Paper>
+
+      <CompetenceInput
+        competences={formData.competences || []}
+        onCompetencesChange={handleCompetencesChange}
+      />
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            Soft skills
-          </Typography>
+          <Typography variant="h6">Expériences</Typography>
           <Button
             startIcon={<AddIcon />}
-            onClick={() => handleCompetenceDialogOpen('soft')}
+            onClick={() => setIsAddingExperience(v => !v)}
+            variant={isAddingExperience ? 'outlined' : 'contained'}
           >
-            Ajouter
+            {isAddingExperience ? 'Annuler' : 'Ajouter une expérience'}
           </Button>
         </Box>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {formData.competences_soft?.map((comp, index) => (
-            <Chip
-              key={index}
-              label={`${comp.nom} - ${comp.niveau}`}
-              onDelete={() => handleRemoveCompetence('soft', index)}
-              sx={{ bgcolor: '#FF4D8D20', color: '#FF4D8D' }}
-            />
-          ))}
-        </Box>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            Expériences
-          </Typography>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={handleExperienceDialogOpen}
-          >
-            Ajouter
-          </Button>
-        </Box>
+        <Collapse in={isAddingExperience}>
+          <Box sx={{ p: 2, mb: 2, border: '1px solid #E0E0E0', borderRadius: 2, background: '#FAF7FF' }}>
+            <Stack spacing={2}>
+              <TextField
+                fullWidth
+                label="Titre du poste"
+                value={newExperience.titre || ''}
+                onChange={e => setNewExperience(prev => ({ ...prev, titre: e.target.value }))}
+              />
+              <TextField
+                fullWidth
+                label="Entreprise"
+                value={newExperience.entreprise || ''}
+                onChange={e => setNewExperience(prev => ({ ...prev, entreprise: e.target.value }))}
+              />
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  select
+                  label="Mois de début"
+                  value={startMonth}
+                  onChange={e => setStartMonth(e.target.value)}
+                  sx={{ width: 160 }}
+                >
+                  {MONTHS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+                </TextField>
+                <Autocomplete
+                  freeSolo
+                  options={YEARS.map(String)}
+                  value={startYear}
+                  onInputChange={(_, value) => setStartYear(value)}
+                  onChange={(_, value) => setStartYear(value || '')}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Année de début" sx={{ width: 120 }} />
+                  )}
+                />
+              </Stack>
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  select
+                  label="Mois de fin"
+                  value={isCurrentJob ? '' : endMonth}
+                  onChange={e => setEndMonth(e.target.value)}
+                  sx={{ width: 160 }}
+                  disabled={isCurrentJob}
+                >
+                  {MONTHS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+                </TextField>
+                <Autocomplete
+                  freeSolo
+                  options={YEARS.map(String)}
+                  value={isCurrentJob ? '' : endYear}
+                  onInputChange={(_, value) => setEndYear(value)}
+                  onChange={(_, value) => setEndYear(value || '')}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Année de fin" sx={{ width: 120 }} disabled={isCurrentJob} />
+                  )}
+                  disabled={isCurrentJob}
+                />
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <input
+                    type="checkbox"
+                    checked={isCurrentJob}
+                    onChange={e => setIsCurrentJob(e.target.checked)}
+                    style={{ marginRight: 4 }}
+                  />
+                  Toujours en poste
+                </label>
+              </Stack>
+              <TextField
+                fullWidth
+                label="Description"
+                value={newExperience.description || ''}
+                onChange={e => setNewExperience(prev => ({ ...prev, description: e.target.value }))}
+                multiline
+                rows={3}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                <Button onClick={handleCancelAddExperience} variant="outlined">Annuler</Button>
+                <Button onClick={handleAddExperience} variant="contained" disabled={!(newExperience.titre && newExperience.entreprise && startYear && startMonth)}>Ajouter</Button>
+              </Box>
+            </Stack>
+          </Box>
+        </Collapse>
         {formData.experiences?.map((exp, index) => (
           <Box
             key={index}
@@ -279,25 +470,118 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
               mb: 2,
               border: '1px solid #E0E0E0',
               borderRadius: 2,
-              position: 'relative'
+              position: 'relative',
+              background: editingExperienceIndex === index ? '#F3E8FF' : 'white',
+              transition: 'background 0.2s'
             }}
           >
-            <IconButton
-              size="small"
-              onClick={() => handleRemoveExperience(index)}
-              sx={{ position: 'absolute', right: 8, top: 8 }}
-            >
-              <DeleteIcon />
-            </IconButton>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              {exp.titre}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {exp.entreprise} • {exp.date_debut} - {exp.date_fin || 'Présent'}
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              {exp.description}
-            </Typography>
+            {editingExperienceIndex === index ? (
+              <Stack spacing={2}>
+                <TextField
+                  fullWidth
+                  label="Titre du poste"
+                  value={editExperience?.titre || ''}
+                  onChange={e => handleEditExperienceChange('titre', e.target.value)}
+                />
+                <TextField
+                  fullWidth
+                  label="Entreprise"
+                  value={editExperience?.entreprise || ''}
+                  onChange={e => handleEditExperienceChange('entreprise', e.target.value)}
+                />
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    select
+                    label="Mois de début"
+                    value={editStartMonth}
+                    onChange={e => setEditStartMonth(e.target.value)}
+                    sx={{ width: 160 }}
+                  >
+                    {MONTHS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+                  </TextField>
+                  <Autocomplete
+                    freeSolo
+                    options={YEARS.map(String)}
+                    value={editStartYear}
+                    onInputChange={(_, value) => setEditStartYear(value)}
+                    onChange={(_, value) => setEditStartYear(value || '')}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Année de début" sx={{ width: 120 }} />
+                    )}
+                  />
+                </Stack>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    select
+                    label="Mois de fin"
+                    value={editIsCurrentJob ? '' : editEndMonth}
+                    onChange={e => setEditEndMonth(e.target.value)}
+                    sx={{ width: 160 }}
+                    disabled={editIsCurrentJob}
+                  >
+                    {MONTHS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+                  </TextField>
+                  <Autocomplete
+                    freeSolo
+                    options={YEARS.map(String)}
+                    value={editIsCurrentJob ? '' : editEndYear}
+                    onInputChange={(_, value) => setEditEndYear(value)}
+                    onChange={(_, value) => setEditEndYear(value || '')}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Année de fin" sx={{ width: 120 }} disabled={editIsCurrentJob} />
+                    )}
+                    disabled={editIsCurrentJob}
+                  />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <input
+                      type="checkbox"
+                      checked={editIsCurrentJob}
+                      onChange={e => setEditIsCurrentJob(e.target.checked)}
+                      style={{ marginRight: 4 }}
+                    />
+                    Toujours en poste
+                  </label>
+                </Stack>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={editExperience?.description || ''}
+                  onChange={e => handleEditExperienceChange('description', e.target.value)}
+                  multiline
+                  rows={3}
+                />
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                  <Button onClick={handleCancelEditExperience} startIcon={<CloseIcon />} variant="outlined">Annuler</Button>
+                  <Button onClick={handleSaveEditExperience} startIcon={<SaveIcon />} variant="contained" disabled={!(editExperience?.titre && editExperience?.entreprise && editStartYear && editStartMonth)}>Enregistrer</Button>
+                </Box>
+              </Stack>
+            ) : (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={() => handleRemoveExperience(index)}
+                  sx={{ position: 'absolute', right: 8, top: 8 }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => handleEditExperience(index)}
+                  sx={{ position: 'absolute', right: 40, top: 8 }}
+                >
+                  <EditIcon />
+                </IconButton>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {exp.titre}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {exp.entreprise} • {exp.date_debut} - {exp.date_fin || 'Présent'}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {exp.description}
+                </Typography>
+              </>
+            )}
           </Box>
         ))}
       </Paper>
@@ -308,23 +592,12 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="URL du CV"
-              name="cv_url"
-              value={formData.cv_url || ''}
-              onChange={handleInputChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="URL de la lettre de motivation"
-              name="lettre_motivation_url"
-              value={formData.lettre_motivation_url || ''}
-              onChange={handleInputChange}
-              required
+            <FileUpload
+              type="cv"
+              currentFile={formData.cv_file?.cv}
+              onUpload={(file) => handleFileUpload('cv', file)}
+              onDelete={() => handleFileDelete('cv')}
+              userId={profile.id}
             />
           </Grid>
         </Grid>
@@ -334,15 +607,29 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
         <Typography variant="h6" gutterBottom>
           Disponibilité
         </Typography>
-        <TextField
-          fullWidth
-          label="Disponibilité"
-          name="disponibilite"
-          value={formData.disponibilite || ''}
-          onChange={handleInputChange}
-          required
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Button variant="outlined" onClick={() => setIsDisponibiliteDialogOpen(true)}>
+            Éditer mes disponibilités
+          </Button>
+          <Typography variant="body2" color="text.secondary">
+            {formData.disponibilite?.disponibilites?.length
+              ? formData.disponibilite.disponibilites.map(d => `${d.jour}: ${d.debut}-${d.fin}`).join(', ')
+              : 'Aucune disponibilité renseignée'}
+          </Typography>
+        </Box>
+        <DisponibiliteDialog
+          open={isDisponibiliteDialogOpen}
+          disponibilites={formData.disponibilite?.disponibilites || []}
+          onClose={() => setIsDisponibiliteDialogOpen(false)}
+          onSave={handleDisponibilitesSave}
         />
       </Paper>
+
+      <LangueInput
+        langues={formData.langues || []}
+        onLanguesChange={handleLanguesChange}
+        error={langueError}
+      />
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button
@@ -357,88 +644,6 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
           Enregistrer
         </Button>
       </Box>
-
-      {/* Dialog pour ajouter une compétence */}
-      <Dialog open={isCompetenceDialogOpen} onClose={() => setIsCompetenceDialogOpen(false)}>
-        <DialogTitle>
-          Ajouter une {competenceType === 'technique' ? 'compétence technique' : 'soft skill'}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Nom"
-              value={newCompetence.nom}
-              onChange={(e) => setNewCompetence(prev => ({ ...prev, nom: e.target.value }))}
-            />
-            <FormControl fullWidth>
-              <InputLabel>Niveau</InputLabel>
-              <Select
-                value={newCompetence.niveau}
-                label="Niveau"
-                onChange={(e) => setNewCompetence(prev => ({ ...prev, niveau: e.target.value }))}
-              >
-                {niveauxCompetence.map((niveau) => (
-                  <MenuItem key={niveau} value={niveau}>
-                    {niveau}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsCompetenceDialogOpen(false)}>Annuler</Button>
-          <Button onClick={handleAddCompetence} variant="contained">Ajouter</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog pour ajouter une expérience */}
-      <Dialog open={isExperienceDialogOpen} onClose={() => setIsExperienceDialogOpen(false)}>
-        <DialogTitle>Ajouter une expérience</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Titre du poste"
-              value={newExperience.titre || ''}
-              onChange={(e) => setNewExperience(prev => ({ ...prev, titre: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Entreprise"
-              value={newExperience.entreprise || ''}
-              onChange={(e) => setNewExperience(prev => ({ ...prev, entreprise: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Date de début"
-              value={newExperience.date_debut || ''}
-              onChange={(e) => setNewExperience(prev => ({ ...prev, date_debut: e.target.value }))}
-              placeholder="YYYY-MM"
-            />
-            <TextField
-              fullWidth
-              label="Date de fin"
-              value={newExperience.date_fin || ''}
-              onChange={(e) => setNewExperience(prev => ({ ...prev, date_fin: e.target.value }))}
-              placeholder="YYYY-MM (optionnel)"
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={newExperience.description || ''}
-              onChange={(e) => setNewExperience(prev => ({ ...prev, description: e.target.value }))}
-              multiline
-              rows={3}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsExperienceDialogOpen(false)}>Annuler</Button>
-          <Button onClick={handleAddExperience} variant="contained">Ajouter</Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
