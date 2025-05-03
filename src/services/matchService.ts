@@ -4,9 +4,7 @@ import { Match, Demande, Etudiant, NiveauCompetence, Profile, Competence } from 
 
 interface EtudiantWithProfile extends Etudiant {
   profile: Profile;
-  competences: {
-    competence: Competence;
-  }[];
+  competences: Competence[];
 }
 
 export const matchService = {

@@ -19,10 +19,11 @@ export interface CVFile {
 }
 
 export interface Competence {
-  label: string;
-  niveau: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
-  is_custom?: boolean;
+  nom: string;
+  priorite: 'Essentiel' | 'Important' | 'Optionnel';
+  niveau?: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert';
   description?: string;
+  label?: string;
 }
 
 export interface Experience {
