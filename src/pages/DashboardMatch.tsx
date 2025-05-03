@@ -120,7 +120,7 @@ const DashboardMatch: React.FC = () => {
     let total = requises.length;
 
     for (const requise of requises) {
-      const match = etudiant.competences.find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
+      const match = (etudiant.competences || []).find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
       if (match) {
         score += 1;
       }
@@ -222,7 +222,7 @@ const DashboardMatch: React.FC = () => {
     (demande.description_projet?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (demande.entreprise?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     demande.competences_requises.some((comp: Competence) => 
-      comp.nom.toLowerCase().includes(searchTerm.toLowerCase())
+      (comp.nom || '').toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -427,7 +427,7 @@ const DashboardMatch: React.FC = () => {
                               </TableCell>
                               <TableCell>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                  {student.competences.map((comp, index) => (
+                                  {(student.competences || []).map((comp, index) => (
                                     <Chip
                                       key={index}
                                       label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
@@ -467,7 +467,7 @@ const DashboardMatch: React.FC = () => {
                                           try {
                                             await matchService.createMatch({
                                               demande_id: selectedDemande.id,
-                                              etudiant_id: student.id,
+                                              etudiant_id: student.id ?? '',
                                               statut: 'proposé',
                                               notes_admin: `Score de compatibilité: ${score}%`
                                             });
@@ -523,7 +523,7 @@ const DashboardMatch: React.FC = () => {
                   </TableCell>
                   <TableCell>
                               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                {match.etudiant.competences.map((comp, index) => (
+                                {(match.etudiant.competences || []).map((comp, index) => (
                                   <Chip
                                     key={index}
                                     label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
