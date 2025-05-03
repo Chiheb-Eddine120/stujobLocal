@@ -16,7 +16,7 @@ import { etudiantService } from '../services/etudiantService';
 import StudentProfileForm from '../components/StudentProfileForm';
 import StudentProfileView from '../components/StudentProfileView';
 import { Profile } from '../types';
-import { Etudiant, Langue } from '../types/etudiant';
+import { Etudiant } from '../types/etudiant';
 
 const EspaceEtudiant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -48,8 +48,8 @@ const EspaceEtudiant: React.FC = () => {
           ...etudiantData,
           langues: etudiantData.langues?.map(langue => ({
             nom: langue.nom,
-            niveau: langue.niveau as Langue['niveau']
-          }))
+            niveau: langue.niveau as 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
+          })) || []
         };
         setEtudiant(convertedEtudiant);
       }

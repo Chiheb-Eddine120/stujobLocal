@@ -18,7 +18,8 @@ import {
   Phone as PhoneIcon,
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
-import { Profile, Etudiant } from '../types';
+import { Profile } from '../types';
+import { Etudiant } from '../types/etudiant';
 
 interface StudentProfileViewProps {
   profile: Profile;
@@ -96,20 +97,22 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ profile, etudia
             Documents
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Link 
-              href={etudiant.cv_url}
-              target="_blank"
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                color: '#9333EA',
-                textDecoration: 'none',
-                '&:hover': { textDecoration: 'underline' }
-              }}
-            >
-              <DescriptionIcon sx={{ mr: 1 }} />
-              Voir CV
-            </Link>
+            {etudiant.cv_file?.cv && (
+              <Link 
+                href={etudiant.cv_file.cv.url}
+                target="_blank"
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  color: '#9333EA',
+                  textDecoration: 'none',
+                  '&:hover': { textDecoration: 'underline' }
+                }}
+              >
+                <DescriptionIcon sx={{ mr: 1 }} />
+                Voir CV
+              </Link>
+            )}
           </Box>
         </Paper>
 
@@ -191,77 +194,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ profile, etudia
         </Paper>
 
         {/* Expériences */}
-        <Paper 
-          elevation={0}
-          sx={{ 
-            p: 3, 
-            borderRadius: 4,
-            background: '#FDF8FF',
-            border: '1px solid #F3E8FF',
-            mb: 3
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <WorkIcon sx={{ color: '#9333EA', mr: 2 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Expériences
-            </Typography>
-          </Box>
-          <Box sx={{ pl: 4 }}>
-            {etudiant.experiences.map((exp, index) => (
-              <Box key={index} sx={{ mb: index !== etudiant.experiences.length - 1 ? 3 : 0 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {exp.titre}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {exp.entreprise} • {exp.date_debut} - {exp.date_fin || 'Présent'}
-                </Typography>
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                  {exp.description}
-                </Typography>
-                {index !== etudiant.experiences.length - 1 && (
-                  <Divider sx={{ my: 2 }} />
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Paper>
-
-        {/* Compétences */}
-        <Paper 
-          elevation={0}
-          sx={{ 
-            p: 3, 
-            borderRadius: 4,
-            background: '#FDF8FF',
-            border: '1px solid #F3E8FF'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-            <StarIcon sx={{ color: '#FF4D8D', mr: 2 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Compétences
-            </Typography>
-          </Box>
-          <Box sx={{ pl: 4 }}>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {etudiant.competences.map((comp, index) => (
-                <Chip
-                  key={index}
-                  label={`${comp.label || comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
-                  sx={{ 
-                    bgcolor: '#FF4D8D20',
-                    color: '#FF4D8D',
-                    border: '1px solid #FF4D8D40'
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* Langues */}
-        {etudiant.langues && etudiant.langues.length > 0 && (
+        {etudiant.experiences && etudiant.experiences.length > 0 && (
           <Paper 
             elevation={0}
             sx={{ 
@@ -269,23 +202,72 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ profile, etudia
               borderRadius: 4,
               background: '#FDF8FF',
               border: '1px solid #F3E8FF',
-              mt: 3
+              mb: 3
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <StarIcon sx={{ color: '#9333EA', mr: 2 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <WorkIcon sx={{ color: '#9333EA', mr: 2 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Langues
+                Expériences
               </Typography>
             </Box>
-            <Box sx={{ pl: 4, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {etudiant.langues.map((langue, idx) => (
-                <Chip
-                  key={idx}
-                  label={`${langue.nom} - ${langue.niveau}`}
-                  sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
-                />
+            <Box sx={{ pl: 4 }}>
+              {etudiant.experiences?.map((exp, index) => (
+                <Box key={index} sx={{ mb: index !== (etudiant.experiences?.length ?? 0) - 1 ? 3 : 0 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {exp.titre}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {exp.entreprise} • {exp.date_debut} - {exp.date_fin || 'Présent'}
+                  </Typography>
+                  {exp.description && (
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                      {exp.description}
+                    </Typography>
+                  )}
+                  {index !== (etudiant.experiences?.length ?? 0) - 1 && (
+                    <Divider sx={{ my: 2 }} />
+                  )}
+                </Box>
               ))}
+            </Box>
+          </Paper>
+        )}
+
+        {/* Compétences */}
+        {etudiant.competences && etudiant.competences.length > 0 && (
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 3, 
+              borderRadius: 4,
+              background: '#FDF8FF',
+              border: '1px solid #F3E8FF'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <StarIcon sx={{ color: '#FF4D8D', mr: 2 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Compétences
+              </Typography>
+            </Box>
+            <Box sx={{ pl: 4 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {etudiant.competences.map((comp, index) => (
+                  <Chip
+                    key={index}
+                    label={`${comp.nom}${comp.niveau ? ` - ${comp.niveau}` : ''}`}
+                    sx={{ 
+                      bgcolor: '#F3E8FF',
+                      color: '#9333EA',
+                      '&:hover': {
+                        bgcolor: '#9333EA',
+                        color: 'white'
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
           </Paper>
         )}

@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
-import { Etudiant, Experience, NiveauCompetence } from '../types';
+import { NiveauCompetence } from '../types';
+import { Etudiant, Experience } from '../types/etudiant';
 
 export interface CompetenceWithLevel {
   nom: string;

@@ -80,7 +80,7 @@ export interface Etudiant {
   disponibilite?: {
     disponibilites: Disponibilite[];
   };
-  langues?: { nom: string; niveau: string }[];
+  langues?: { nom: string; niveau: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' }[];
   biographie?: string;
   niveau_etudes?: string;
   ecole?: string;
