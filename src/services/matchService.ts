@@ -91,14 +91,14 @@ export const matchService = {
     let score = 0;
 
     const competencesMatch = demande.competences_requises.filter(reqComp => 
-      etudiant.competences.some(comp => comp.nom === reqComp.nom)
+      etudiant.competences?.some(comp => comp.nom === reqComp.nom) || false
     );
 
     const competencesScore = (competencesMatch.length / demande.competences_requises.length) * 60;
     score += competencesScore;
 
     const niveauScore = competencesMatch.reduce((acc, reqComp) => {
-      const etudiantComp = etudiant.competences.find(comp => comp.nom === reqComp.nom);
+      const etudiantComp = etudiant.competences?.find(comp => comp.nom === reqComp.nom);
       if (!etudiantComp?.niveau) return acc;
 
       const niveauValues: Record<NiveauCompetence, number> = {
@@ -121,6 +121,10 @@ export const matchService = {
 
   async generateMatchesForDemande(demande: Demande, minScore: number = 60) {
     try {
+      if (!demande.id) {
+        throw new Error('ID de demande manquant');
+      }
+
       const existingMatches = await this.getMatchesByDemande(demande.id);
       if (existingMatches && existingMatches.length > 0) {
         return existingMatches;
@@ -155,8 +159,11 @@ export const matchService = {
       const createdMatches = await Promise.all(
         potentialMatches.map(async ({ etudiant, score }) => {
           try {
+            if (!etudiant.id) {
+              throw new Error('ID d\'étudiant manquant');
+            }
             const match = await this.createMatch({
-              demande_id: demande.id!,
+              demande_id: demande.id,
               etudiant_id: etudiant.id,
               statut: 'proposé',
               notes_admin: `Score de compatibilité: ${score}%`
@@ -196,7 +203,7 @@ export const matchService = {
 
       if (error) throw error;
 
-      return etudiants || [];
+      return (etudiants || []) as EtudiantWithProfile[];
     } catch (error) {
       console.error('Erreur lors de la recherche des étudiants:', error);
       return [];
