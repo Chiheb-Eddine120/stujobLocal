@@ -16,7 +16,7 @@ import { etudiantService } from '../services/etudiantService';
 import StudentProfileForm from '../components/StudentProfileForm';
 import StudentProfileView from '../components/StudentProfileView';
 import { Profile } from '../types';
-import { Etudiant } from '../types/etudiant';
+import { Etudiant, Langue } from '../types/etudiant';
 
 const EspaceEtudiant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -42,8 +42,17 @@ const EspaceEtudiant: React.FC = () => {
       setProfile(profileData);
 
       const etudiantData = await etudiantService.getEtudiant(profileData.id);
-      setEtudiant(etudiantData);
-
+      if (etudiantData) {
+        // Convertir les langues au bon format
+        const convertedEtudiant: Etudiant = {
+          ...etudiantData,
+          langues: etudiantData.langues?.map(langue => ({
+            nom: langue.nom,
+            niveau: langue.niveau as Langue['niveau']
+          }))
+        };
+        setEtudiant(convertedEtudiant);
+      }
     } catch (err) {
       console.error('Erreur lors du chargement des données:', err);
       setError('Impossible de charger vos informations. Veuillez réessayer plus tard.');

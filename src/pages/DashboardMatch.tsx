@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import { demandeService } from '../services/demandeService';
 import { matchService } from '../services/matchService';
-import { Demande, Etudiant, Match, NiveauCompetence, Competence } from '../types';
+import { Demande, Etudiant, Match, Competence } from '../types';
 import DashboardBackButton from '../components/DashboardBackButton';
 import { etudiantService } from '../services/etudiantService';
 

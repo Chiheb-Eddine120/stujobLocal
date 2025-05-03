@@ -35,9 +35,9 @@ export interface DemandeRecrutement {
 export interface Experience {
   titre: string;
   entreprise: string;
-  description: string;
   date_debut: string;
   date_fin?: string;
+  description?: string;
 }
 
 export interface Profile {
@@ -58,20 +58,35 @@ export interface Disponibilite {
 }
 
 export interface Etudiant {
-  id: string;
+  id?: string;
   profile_id: string;
-  cv_url: string;
-  lettre_motivation_url: string;
-  competences: Competence[];
-  experiences: Experience[];
-  disponibilite: { disponibilites: Disponibilite[] };
-  niveau_etudes: string;
-  ecole: string;
-  created_at: string;
-  updated_at: string;
-  profile?: Profile;
-  biographie?: string;
+  cv_file?: {
+    cv?: {
+      url: string;
+      name: string;
+      size: number;
+      type: string;
+    };
+    lettre_motivation?: {
+      url: string;
+      name: string;
+      size: number;
+      type: string;
+    };
+  };
+  competences?: Competence[];
+  competence_description?: { [key: string]: string };
+  experiences?: Experience[];
+  disponibilite?: {
+    disponibilites: Disponibilite[];
+  };
   langues?: { nom: string; niveau: string }[];
+  biographie?: string;
+  niveau_etudes?: string;
+  ecole?: string;
+  created_at?: string;
+  updated_at?: string;
+  profile?: Profile;
 }
 
 export interface Demande {
