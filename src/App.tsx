@@ -29,6 +29,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Privacy from './pages/Privacy';
 import DashboardSettings from './pages/DashboardSettings';
+import NotFound from './pages/NotFound';
 import { useAuth } from './hooks/useAuth';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -276,8 +277,8 @@ const App: React.FC = () => {
                       }
                     />
 
-                    {/* Redirection par défaut */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    {/* Route 404 */}
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
                 <Footer />

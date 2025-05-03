@@ -22,11 +22,16 @@ import {
   SelectChangeEvent,
   IconButton,
   Snackbar,
+  Autocomplete,
+  Tooltip,
 } from '@mui/material';
 import { demandeService } from '../services/demandeService';
-import { Demande, NiveauPriorite, Competence, NiveauUrgence, Secteur } from '../types';
+import { Demande, Secteur } from '../types';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import AddIcon from '@mui/icons-material/Add';
+//import AddIcon from '@mui/icons-material/Add';
+import competencesData from '../data/competences.json';
+import citiesData from '../data/restructured_cities1.json';
+import CityAutocomplete from '../components/CityAutocomplete';
 
 const sectors: Secteur[] = [
   'Restauration',
@@ -36,38 +41,26 @@ const sectors: Secteur[] = [
   'Autre',
 ];
 
-const competencesPredefinies = [
-  'Communication',
-  'Travail en équipe',
-  'Autonomie',
-  'Résolution de problèmes',
-  'Gestion du temps',
-  'Leadership',
-  'Créativité',
-  'Analyse',
-  'Organisation',
-  'Adaptabilité',
-] as const;
-
-const niveauxPriorite: NiveauPriorite[] = ['Essentiel', 'Important', 'Optionnel'];
-const niveauxUrgence: NiveauUrgence[] = ['Normal', 'Urgent', 'Très urgent'];
+const niveauxPriorite = ['Obligatoire', 'Flexible', 'Optionnel'] as const;
 
 const DemandeForm: React.FC = () => {
   const [formData, setFormData] = useState<Omit<Demande, 'id' | 'created_at'>>({
     entreprise: '',
+    numero_entreprise: '',
+    adresse: '',
     secteur: 'Autre' as Secteur,
-    profil: '',
-    urgence: 'Normal' as NiveauUrgence,
-    ville: '',
     email: '',
-    telephone: '',
+    priorite: 'Flexible',
+    delai_recrutement: '',
+    duree_mission: '',
+    profil: '',
+    nombre_personnes: 1,
     remarques: '',
     status: 'en_attente',
-    description_projet: '',
-    competences_requises: [],
-    niveau_priorite: 'Important' as NiveauPriorite,
-    duree_mission: '',
-    date_debut_souhaitee: '',
+    description_demande: '',
+    suggestions_competences: [],
+    telephone: '',
+    ville: '',
   });
 
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -75,10 +68,6 @@ const DemandeForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [showLegalDialog, setShowLegalDialog] = useState<boolean>(false);
-  const [newCompetence, setNewCompetence] = useState<Competence>({
-    nom: '',
-    priorite: 'Important' as NiveauPriorite,
-  });
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -89,19 +78,11 @@ const DemandeForm: React.FC = () => {
     }));
   };
 
-  const handleUrgenceChange = (e: SelectChangeEvent<NiveauUrgence>) => {
-    const value = e.target.value as NiveauUrgence;
+  const handlePrioriteChange = (e: SelectChangeEvent) => {
+    const value = e.target.value as 'Obligatoire' | 'Flexible' | 'Optionnel';
     setFormData((prev) => ({
       ...prev,
-      urgence: value,
-    }));
-  };
-
-  const handlePrioriteChange = (e: SelectChangeEvent<NiveauPriorite>) => {
-    const value = e.target.value as NiveauPriorite;
-    setFormData((prev) => ({
-      ...prev,
-      niveau_priorite: value,
+      priorite: value,
     }));
   };
 
@@ -112,47 +93,19 @@ const DemandeForm: React.FC = () => {
     }));
   };
 
-  const handleCompetenceTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewCompetence((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleCompetencePrioriteChange = (e: SelectChangeEvent<NiveauPriorite>) => {
-    const value = e.target.value as NiveauPriorite;
-    setNewCompetence((prev) => ({
-      ...prev,
-      priorite: value,
-    }));
-  };
-
-  const handleAddCompetence = () => {
-    if (newCompetence.nom) {
+  const handleSelectPredefinedCompetence = (competence: string) => {
+    if (!formData.suggestions_competences.includes(competence)) {
       setFormData((prev) => ({
         ...prev,
-        competences_requises: [...prev.competences_requises, { ...newCompetence }],
+        suggestions_competences: [...prev.suggestions_competences, competence],
       }));
-      setNewCompetence({ nom: '', priorite: 'Important' as NiveauPriorite });
     }
   };
 
   const handleRemoveCompetence = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      competences_requises: prev.competences_requises.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleSelectPredefinedCompetence = (competence: string) => {
-    const newComp: Competence = {
-      nom: competence,
-      priorite: 'Important' as NiveauPriorite,
-    };
-    setFormData((prev) => ({
-      ...prev,
-      competences_requises: [...prev.competences_requises, newComp],
+      suggestions_competences: prev.suggestions_competences.filter((_, i) => i !== index),
     }));
   };
 
@@ -310,8 +263,9 @@ const DemandeForm: React.FC = () => {
             {error}
           </Alert>
         )}
+
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={8}>
+          <Grid item xs={12}>
             <TextField
               required
               fullWidth
@@ -323,7 +277,42 @@ const DemandeForm: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              label="Numéro d'entreprise / TVA"
+              name="numero_entreprise"
+              value={formData.numero_entreprise}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <CityAutocomplete
+              citiesData={citiesData}
+              formData={formData}
+              setFormData={setFormData}
+              inputStyles={inputStyles}
+              required
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              label="Adresse complète"
+              name="adresse"
+              value={formData.adresse}
+              onChange={handleTextChange}
+              sx={inputStyles}
+              placeholder="Rue, numéro, boîte"
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Secteur</InputLabel>
               <Select
@@ -341,187 +330,6 @@ const DemandeForm: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#1F1F1F', fontWeight: 600 }}>
-              Compétences recherchées
-            </Typography>
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                {competencesPredefinies.map((comp) => (
-                  <Chip
-                    key={comp}
-                    label={comp}
-                    onClick={() => handleSelectPredefinedCompetence(comp)}
-                    sx={{
-                      borderRadius: '20px',
-                      bgcolor: '#F3E8FF',
-                      color: '#9333EA',
-                      '&:hover': {
-                        bgcolor: '#9333EA',
-                        color: 'white',
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                <TextField
-                  fullWidth
-                  label="Compétence"
-                  name="nom"
-                  value={newCompetence.nom}
-                  onChange={handleCompetenceTextChange}
-                  sx={inputStyles}
-                />
-                <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Priorité</InputLabel>
-                  <Select
-                    value={newCompetence.priorite}
-                    onChange={handleCompetencePrioriteChange}
-                    label="Priorité"
-                    sx={selectStyles}
-                  >
-                    {niveauxPriorite.map((niveau) => (
-                      <MenuItem key={niveau} value={niveau}>
-                        {niveau}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <Button
-                  onClick={handleAddCompetence}
-                  variant="contained"
-                  sx={{
-                    background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
-                    borderRadius: '12px',
-                    minWidth: '48px',
-                    height: '48px',
-                    p: 0,
-                    '&:hover': {
-                      background: 'linear-gradient(90deg, #7928CA 0%, #E6447E 100%)',
-                    }
-                  }}
-                >
-                  <AddIcon />
-                </Button>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              {formData.competences_requises.map((comp, index) => (
-                <Chip
-                  key={index}
-                  label={`${comp.nom} (${comp.priorite})`}
-                  onDelete={() => handleRemoveCompetence(index)}
-                  sx={{
-                    borderRadius: '20px',
-                    bgcolor: '#FDF8FF',
-                    color: '#9333EA',
-                    border: '1px solid #9333EA',
-                  }}
-                />
-              ))}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="Description du projet"
-              name="description_projet"
-              value={formData.description_projet}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Niveau de priorité</InputLabel>
-              <Select
-                value={formData.niveau_priorite}
-                onChange={handlePrioriteChange}
-                label="Niveau de priorité"
-                sx={selectStyles}
-              >
-                {niveauxPriorite.map((niveau) => (
-                  <MenuItem key={niveau} value={niveau}>
-                    {niveau}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Urgence</InputLabel>
-              <Select
-                value={formData.urgence}
-                onChange={handleUrgenceChange}
-                label="Urgence"
-                sx={selectStyles}
-              >
-                {niveauxUrgence.map((niveau) => (
-                  <MenuItem key={niveau} value={niveau}>
-                    {niveau}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label="Durée de la mission"
-              name="duree_mission"
-              value={formData.duree_mission}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              type="date"
-              label="Date de début souhaitée"
-              name="date_debut_souhaitee"
-              value={formData.date_debut_souhaitee}
-              onChange={handleTextChange}
-              InputLabelProps={{ shrink: true }}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label="Profil recherché"
-              name="profil"
-              value={formData.profil}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label="Ville ou zone géographique"
-              name="ville"
-              value={formData.ville}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
           <Grid item xs={12} sm={6}>
             <TextField
               required
@@ -536,12 +344,135 @@ const DemandeForm: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Priorité</InputLabel>
+              <Select
+                value={formData.priorite}
+                onChange={handlePrioriteChange}
+                label="Priorité"
+                sx={selectStyles}
+              >
+                {niveauxPriorite.map((niveau) => (
+                  <MenuItem key={niveau} value={niveau}>
+                    {niveau}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
             <TextField
               required
               fullWidth
-              label="Téléphone"
+              label="Délai de recrutement"
+              name="delai_recrutement"
+              value={formData.delai_recrutement}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              label="Durée de mission"
+              name="duree_mission"
+              value={formData.duree_mission}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              required
+              fullWidth
+              type="number"
+              label="Nombre de personnes à recruter"
+              name="nombre_personnes"
+              value={formData.nombre_personnes}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Téléphone (optionnel)"
               name="telephone"
               value={formData.telephone}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#1F1F1F', fontWeight: 600 }}>
+              Suggestions de compétences
+            </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                {competencesData.competences.map((comp) => (
+                  <Tooltip 
+                    key={comp.label} 
+                    title={comp.description}
+                    arrow
+                    placement="top"
+                  >
+                    <Chip
+                      label={comp.label}
+                      onClick={() => handleSelectPredefinedCompetence(comp.label)}
+                      sx={{
+                        borderRadius: '20px',
+                        bgcolor: '#F3E8FF',
+                        color: '#9333EA',
+                        '&:hover': {
+                          bgcolor: '#9333EA',
+                          color: 'white',
+                        }
+                      }}
+                    />
+                  </Tooltip>
+                ))}
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {formData.suggestions_competences.map((comp, index) => {
+                  const competenceInfo = competencesData.competences.find(c => c.label === comp);
+                  return (
+                    <Tooltip 
+                      key={index} 
+                      title={competenceInfo?.description}
+                      arrow
+                      placement="top"
+                    >
+                      <Chip
+                        label={comp}
+                        onDelete={() => handleRemoveCompetence(index)}
+                        sx={{
+                          borderRadius: '20px',
+                          bgcolor: '#FDF8FF',
+                          color: '#9333EA',
+                          border: '1px solid #9333EA',
+                        }}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Description de la demande"
+              name="description_demande"
+              value={formData.description_demande}
               onChange={handleTextChange}
               sx={inputStyles}
             />
@@ -600,7 +531,6 @@ const DemandeForm: React.FC = () => {
           background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
-          //color: 'transparent',
         }}>
           Conditions légales
         </DialogTitle>

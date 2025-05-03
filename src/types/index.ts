@@ -77,22 +77,22 @@ export interface Etudiant {
 export interface Demande {
   id: string;
   entreprise: string;
+  numero_entreprise: string;
+  adresse: string;
   secteur: Secteur;
-  profil: string;
-  urgence: NiveauUrgence;
-  ville: string;
   email: string;
-  telephone: string;
+  priorite: 'Obligatoire' | 'Flexible' | 'Optionnel';
+  delai_recrutement: string;
+  duree_mission: string;
+  profil: string;
+  nombre_personnes: number;
   remarques: string;
   status: 'en_attente' | 'en_traitement' | 'etudiant_trouve' | 'termine';
-  description_projet: string;
-  competences_requises: Competence[];
-  niveau_priorite: NiveauPriorite;
-  duree_mission: string;
-  date_debut_souhaitee: string;
+  description_demande: string;
+  suggestions_competences: string[];
   created_at: string;
-  facturation_status?: 'en_attente' | 'en_cours' | 'termine';
-  facturation_montant?: number;
+  telephone?: string;
+  ville: string;
 }
 
 export interface Match {
@@ -103,4 +103,10 @@ export interface Match {
   notes_admin: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface City {
+  name: string;
+  postalCode: string;
+  province: string;
 } 

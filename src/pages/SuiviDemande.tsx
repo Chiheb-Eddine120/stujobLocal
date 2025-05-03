@@ -249,11 +249,11 @@ const SuiviDemande: React.FC = () => {
                 px: 2,
                 py: 1,
                 borderRadius: '20px',
-                bgcolor: getStatusBackground(demande.facturation_status || 'en_attente'),
-                color: getStatusColor(demande.facturation_status || 'en_attente'),
-                fontWeight: 500,
-              }}>
-                {demande.facturation_status || 'En attente'}
+                  bgcolor: getStatusBackground(demande.status || 'en_attente'),
+                  color: getStatusColor(demande.status || 'en_attente'),
+                  fontWeight: 500,
+                }}>
+                  {demande.status || 'En attente'}
               </Box>
             </Grid>
 

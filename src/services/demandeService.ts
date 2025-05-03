@@ -18,8 +18,6 @@ export const demandeService = {
       .from('demandes')
       .insert([{
         ...demande,
-        facturation_status: 'en_attente',
-        facturation_montant: 0
       }])
       .select()
       .single();
@@ -107,29 +105,4 @@ export const demandeService = {
       throw error;
     }
   },
-
-  async updateFacturationStatus(id: string, status: Demande['facturation_status'], montant?: number): Promise<void> {
-    try {
-      const updateData: Partial<Demande> = {
-        facturation_status: status
-      };
-
-      if (montant !== undefined) {
-        updateData.facturation_montant = montant;
-      }
-
-      const { error } = await supabase
-        .from('demandes')
-        .update(updateData)
-        .eq('id', id);
-
-      if (error) {
-        console.error('Erreur Supabase:', error);
-        throw new Error('Erreur lors de la mise à jour du statut de facturation');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut de facturation:', error);
-      throw error;
-    }
-  }
 }; 
