@@ -16,6 +16,7 @@ import { supabase } from '../services/supabase';
 import { useNavigate } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 import BusinessIcon from '@mui/icons-material/Business';
+import { setMaintenanceMode } from '../services/settings';
 //import ConstructionIcon from '@mui/icons-material/Construction';
 //import LockIcon from '@mui/icons-material/Lock';
 
@@ -30,7 +31,6 @@ export default function Maintenance() {
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
   const [showAdminKeyForm, setShowAdminKeyForm] = useState(false);
   const [showAdminLoginForm, setShowAdminLoginForm] = useState(false);
   const [adminKey, setAdminKey] = useState('');
@@ -42,6 +42,16 @@ export default function Maintenance() {
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<Role>(null);
+
+  // Nouvelle fonction pour vérifier le secret côté serveur
+  const verifyAdminSecret = async (adminSecret: string) => {
+    const response = await fetch('/.netlify/functions/secure-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminSecret })
+    });
+    return response.ok;
+  };
 
   // Fonction pour vérifier si le compte est bloqué
   const checkLockStatus = () => {
@@ -128,23 +138,43 @@ export default function Maintenance() {
     
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('maintenance_notifications')
-        .insert([
-          {
-            email,
-            notified: false,
-            role: selectedRole
-          }
-        ]);
+      // 1. Vérifier la clé secrète côté serveur
+      const isSecretValid = await verifyAdminSecret(password);
+      if (!isSecretValid) {
+        setError('Clé secrète incorrecte');
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
+      // 2. Vérifier si l'utilisateur est admin
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-      setEmailSent(true);
-      setSnackbar({ open: true, message: 'Merci ! Vous serez prévenu dès notre retour.' });
+      if (signInError) throw signInError;
+
+      // 3. Vérifier le rôle admin
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      if (profile.role !== 'admin') {
+        setError('Accès refusé : vous n\'êtes pas administrateur');
+        setLoading(false);
+        return;
+      }
+
+      // 4. Désactiver le mode maintenance et rediriger
+      await setMaintenanceMode(false);
+      navigate('/');
     } catch (err: any) {
-      setError(err.message);
-      setSnackbar({ open: true, message: "Une erreur s'est produite lors de l'enregistrement de votre email." });
+      console.error(err);
+      setError('Une erreur est survenue lors de la connexion');
     } finally {
       setLoading(false);
     }
@@ -159,7 +189,7 @@ export default function Maintenance() {
       return;
     }
 
-    if (adminKey === import.meta.env.VITE_ADMIN_SECRET) {
+    if (adminKey === import.meta.env.ADMIN_SECRET) {
       setError(null);
       localStorage.removeItem('adminAccessLock');
       setShowAdminLoginForm(true);
@@ -400,54 +430,61 @@ export default function Maintenance() {
                 Inscrivez vous dès maintenant pour recevoir une alerte par email dès la mise en ligne de notre plateforme et découvrir en avant-première toutes nos nouvelles fonctionnalités pour les étudiants et les entreprises !                
                 </Typography>
 
-                {!emailSent ? (
-                  <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      type="email"
-                      required
-                      label="Votre email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '15px',
-                        },
-                      }}
-                    />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      disabled={loading || !selectedRole}
-                      sx={{
-                        bgcolor: '#9333EA',
-                        color: 'white',
-                        py: 1.5,
+                <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    type="email"
+                    required
+                    label="Votre email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
                         borderRadius: '15px',
-                        textTransform: 'none',
-                        fontSize: '1rem',
-                        fontWeight: 500,
-                        '&:hover': {
-                          bgcolor: '#7E22CE',
-                        },
-                        '&.Mui-disabled': {
-                          bgcolor: 'rgba(147, 51, 234, 0.5)',
-                        }
-                      }}
-                    >
-                      {loading ? <CircularProgress size={24} /> : 'S\'inscrire à la newsletter'}
-                    </Button>
-                    {!selectedRole && (
-                      <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mt: 1 }}>
-                        Veuillez sélectionner si vous êtes un étudiant ou une entreprise
-                      </Typography>
-                    )}
-                  </Box>
-                ) : (
-                  <Alert severity="success" sx={{ borderRadius: '15px' }}>
-                    Merci ! Vous serez prévenu dès notre retour.
-                  </Alert>
-                )}
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    type="password"
+                    required
+                    label="Mot de passe"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '15px',
+                      },
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loading || !selectedRole}
+                    sx={{
+                      bgcolor: '#9333EA',
+                      color: 'white',
+                      py: 1.5,
+                      borderRadius: '15px',
+                      textTransform: 'none',
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      '&:hover': {
+                        bgcolor: '#7E22CE',
+                      },
+                      '&.Mui-disabled': {
+                        bgcolor: 'rgba(147, 51, 234, 0.5)',
+                      }
+                    }}
+                  >
+                    {loading ? <CircularProgress size={24} /> : 'Se connecter'}
+                  </Button>
+                  {!selectedRole && (
+                    <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', mt: 1 }}>
+                      Veuillez sélectionner si vous êtes un étudiant ou une entreprise
+                    </Typography>
+                  )}
+                </Box>
               </>
             )}
 

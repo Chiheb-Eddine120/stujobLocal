@@ -177,7 +177,7 @@ export const authService = {
     try {
       // Vérifier si on essaie de promouvoir en admin
       if (userData.role === 'admin') {
-        const adminSecret = import.meta.env.VITE_ADMIN_SECRET;
+        const adminSecret = import.meta.env.ADMIN_SECRET;
         if (!adminPassword || adminPassword !== adminSecret) {
           throw new Error('Mot de passe administrateur invalide');
         }
