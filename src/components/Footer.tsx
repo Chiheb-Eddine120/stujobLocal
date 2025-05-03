@@ -63,6 +63,9 @@ const Footer: React.FC = () => {
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <IconButton 
                   aria-label="LinkedIn"
+                  href="https://www.linkedin.com/company/stujob-official?trk=blended-typeahead"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   sx={{ 
                     color: 'white',
                     p: 1,
@@ -79,6 +82,9 @@ const Footer: React.FC = () => {
                 </IconButton>
                 <IconButton 
                   aria-label="Instagram"
+                  href="https://www.instagram.com/stujob_official?igsh=MWVtYmtsYmV5NHUzeA=="
+                  target="_blank"
+                  rel="noopener noreferrer"
                   sx={{ 
                     color: 'white',
                     p: 1,
@@ -95,6 +101,9 @@ const Footer: React.FC = () => {
                 </IconButton>
                 <IconButton 
                   aria-label="Facebook"
+                  href="https://www.facebook.com/share/16gQdq1Z8d/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   sx={{ 
                     color: 'white',
                     p: 1,
@@ -163,4 +172,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;
