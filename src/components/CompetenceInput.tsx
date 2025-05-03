@@ -15,7 +15,7 @@ import {
 //import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { Competence } from '../types/etudiant';
+import { Competence } from '../types';
 import competencesData from '../data/competences.json';
 
 interface CompetenceInputProps {
@@ -29,7 +29,8 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<Competence[]>([]);
   const [newCompetence, setNewCompetence] = useState<Competence>({
-    label: '',
+    nom: '',
+    priorite: 'Important',
     niveau: 'Débutant',
     description: '',
   });
@@ -37,20 +38,19 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
   const [isAddingNew, setIsAddingNew] = useState(false);
 
   useEffect(() => {
-    setSuggestions(competencesData.competences.map(comp => ({
-      ...comp,
-      niveau: 'Débutant' as const
-    })));
+    const mappedSuggestions = competencesData.competences.map(comp => ({
+      nom: comp.label,
+      priorite: 'Important' as const,
+      niveau: 'Débutant' as const,
+      description: comp.description || ''
+    }));
+    setSuggestions(mappedSuggestions);
   }, []);
 
   const handleAddCompetence = () => {
-    if (newCompetence.label.trim() && (newCompetence.description || '').trim()) {
-      const competence: Competence = {
-        ...newCompetence,
-        is_custom: !suggestions.some(s => s.label === newCompetence.label),
-      };
-      onCompetencesChange([...competences, competence]);
-      setNewCompetence({ label: '', niveau: 'Débutant', description: '' });
+    if (newCompetence.nom.trim() && (newCompetence.description || '').trim()) {
+      onCompetencesChange([...competences, newCompetence]);
+      setNewCompetence({ nom: '', priorite: 'Important', niveau: 'Débutant', description: '' });
       setIsAddingNew(false);
     }
   };
@@ -81,7 +81,7 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
           <Box key={index} sx={{ mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip
-                label={`${competence.label} - ${competence.niveau}`}
+                label={`${competence.nom} - ${competence.niveau}`}
                 onDelete={() => handleRemoveCompetence(index)}
                 onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
                 sx={{ 
@@ -122,14 +122,14 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
             freeSolo
             options={suggestions}
             getOptionLabel={(option) => 
-              typeof option === 'string' ? option : option.label
+              typeof option === 'string' ? option : option.nom
             }
-            value={newCompetence.label}
+            value={newCompetence.nom}
             onChange={(_, newValue) => {
               if (typeof newValue === 'string') {
-                setNewCompetence(prev => ({ ...prev, label: newValue }));
+                setNewCompetence(prev => ({ ...prev, nom: newValue }));
               } else if (newValue) {
-                setNewCompetence(prev => ({ ...prev, label: newValue.label }));
+                setNewCompetence(prev => ({ ...prev, nom: newValue.nom }));
               }
             }}
             renderInput={(params) => (
@@ -169,7 +169,7 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
           <IconButton
             color="primary"
             onClick={() => setIsAddingNew(!isAddingNew)}
-            disabled={!newCompetence.label.trim()}
+            disabled={!newCompetence.nom.trim()}
           >
             {isAddingNew ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>

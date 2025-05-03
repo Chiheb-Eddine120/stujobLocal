@@ -15,7 +15,8 @@ import { profileService } from '../services/profileService';
 import { etudiantService } from '../services/etudiantService';
 import StudentProfileForm from '../components/StudentProfileForm';
 import StudentProfileView from '../components/StudentProfileView';
-import { Profile, Etudiant } from '../types';
+import { Profile } from '../types';
+import { Etudiant } from '../types/etudiant';
 
 const EspaceEtudiant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
