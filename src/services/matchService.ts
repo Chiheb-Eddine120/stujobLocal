@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Match, Demande, Etudiant, NiveauCompetence, Profile, Competence } from '../types';
+import { Match, Demande, Etudiant, Profile, Competence } from '../types';
 //import { etudiantService } from './etudiantService';
 
 interface EtudiantWithProfile extends Etudiant {
@@ -89,34 +89,25 @@ export const matchService = {
 
   async calculateMatchScore(demande: Demande, etudiant: Etudiant): Promise<number> {
     let score = 0;
-
-    const competencesMatch = demande.competences_requises.filter(reqComp => 
-      etudiant.competences?.some(comp => comp.nom === reqComp.nom) || false
-    );
-
-    const competencesScore = (competencesMatch.length / demande.competences_requises.length) * 60;
-    score += competencesScore;
-
-    const niveauScore = competencesMatch.reduce((acc, reqComp) => {
-      const etudiantComp = etudiant.competences?.find(comp => comp.nom === reqComp.nom);
-      if (!etudiantComp?.niveau) return acc;
-
-      const niveauValues: Record<NiveauCompetence, number> = {
-        'Débutant': 1,
-        'Intermédiaire': 2,
-        'Avancé': 3,
-        'Expert': 4
-      };
-
-      return acc + (niveauValues[etudiantComp.niveau] / 4);
-    }, 0) * 20;
-
-    score += niveauScore;
-
-    const disponibiliteScore = etudiant.disponibilite ? 20 : 0;
-    score += disponibiliteScore;
-
-    return Math.round(score);
+    // On prend les suggestions_competences comme référence
+    const requises = demande.suggestions_competences || [];
+    if (!etudiant.competences || etudiant.competences.length === 0 || requises.length === 0) {
+      return 0;
+    }
+    for (const requise of requises) {
+      const match = etudiant.competences.some(comp => {
+        if (!comp) return false;
+        if (typeof comp === 'string') {
+          return (comp as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+        }
+        if (typeof comp === 'object' && comp.label) {
+          return (comp.label as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+        }
+        return false;
+      });
+      if (match) score += 1;
+    }
+    return Math.round((score / requises.length) * 100);
   },
 
   async generateMatchesForDemande(demande: Demande, minScore: number = 60) {
@@ -125,12 +116,16 @@ export const matchService = {
         throw new Error('ID de demande manquant');
       }
 
+      if (!demande.suggestions_competences || demande.suggestions_competences.length === 0) {
+        throw new Error('Aucune compétence suggérée définie pour cette demande');
+      }
+
       const existingMatches = await this.getMatchesByDemande(demande.id);
       if (existingMatches && existingMatches.length > 0) {
         return existingMatches;
       }
       
-      const competencesRequises = demande.competences_requises.map(comp => ({ nom: comp.nom }));
+      const competencesRequises = demande.suggestions_competences.map(nom => ({ nom }));
       
       if (!competencesRequises.length) {
         return [];
@@ -194,16 +189,20 @@ export const matchService = {
         .from('etudiants')
         .select(`
           *,
-          profile:profiles(*),
-          competences:etudiant_competences(
-            competence:competences(*)
-          )
-        `)
-        .eq('is_active', true);
+          profile:profiles(*)
+        `);
 
       if (error) throw error;
 
-      return (etudiants || []) as EtudiantWithProfile[];
+      // Filtrer les étudiants qui ont les compétences requises
+      const etudiantsFiltres = etudiants?.filter(etudiant => {
+        const competencesEtudiant = etudiant.competences || [];
+        return competenceNoms.some(nom => 
+          competencesEtudiant.some((comp: Competence) => comp.nom === nom)
+        );
+      }) || [];
+
+      return etudiantsFiltres as EtudiantWithProfile[];
     } catch (error) {
       console.error('Erreur lors de la recherche des étudiants:', error);
       return [];

@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import { demandeService } from '../services/demandeService';
 import { matchService } from '../services/matchService';
-import { Demande, Etudiant, Match, Competence } from '../types';
+import { Demande, Etudiant, Match } from '../types';
 import DashboardBackButton from '../components/DashboardBackButton';
 import { etudiantService } from '../services/etudiantService';
 
@@ -115,15 +115,26 @@ const DashboardMatch: React.FC = () => {
     setNotification(prev => ({ ...prev, open: false }));
   };
 
-  const calculateMatchScore = (etudiant: Etudiant, requises: Competence[]) => {
+  const calculateMatchScore = (etudiant: Etudiant, requises: string[]) => {
+    if (!etudiant.competences || etudiant.competences.length === 0 || !requises || requises.length === 0) {
+      return 0;
+    }
+
     let score = 0;
     let total = requises.length;
 
     for (const requise of requises) {
-      const match = (etudiant.competences || []).find(comp => comp.nom.toLowerCase() === requise.nom.toLowerCase());
-      if (match) {
-        score += 1;
-      }
+      const match = etudiant.competences.some(comp => {
+        if (!comp) return false;
+        if (typeof comp === 'string') {
+          return (comp as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+        }
+        if (typeof comp === 'object' && comp.label) {
+          return (comp.label as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+        }
+        return false;
+      });
+      if (match) score += 1;
     }
 
     return Math.round((score / total) * 100);
@@ -147,23 +158,28 @@ const DashboardMatch: React.FC = () => {
         demandesData.map(async (demande) => {
           if (!demande.id) return { ...demande, matches: [], matchCount: 0 };
           
-          let matchesData = await matchService.getMatchesByDemande(demande.id);
-          console.log('Matches pour demande', demande.id, ':', matchesData);
-          
-          if (!matchesData || matchesData.length === 0) {
-            const generatedMatches = await matchService.generateMatchesForDemande(demande);
-            console.log('Nouveaux matches générés:', generatedMatches);
+          try {
+            let matchesData = await matchService.getMatchesByDemande(demande.id);
+            console.log('Matches pour demande', demande.id, ':', matchesData);
             
-            if (generatedMatches && generatedMatches.length > 0) {
-              matchesData = await matchService.getMatchesByDemande(demande.id);
+            if (!matchesData || matchesData.length === 0) {
+              const generatedMatches = await matchService.generateMatchesForDemande(demande);
+              console.log('Nouveaux matches générés:', generatedMatches);
+              
+              if (generatedMatches && generatedMatches.length > 0) {
+                matchesData = await matchService.getMatchesByDemande(demande.id);
+              }
             }
+            
+            return {
+              ...demande,
+              matches: matchesData as MatchWithEtudiant[],
+              matchCount: matchesData?.length || 0
+            };
+          } catch (err) {
+            console.error(`Erreur lors du traitement de la demande ${demande.id}:`, err);
+            return { ...demande, matches: [], matchCount: 0 };
           }
-          
-          return {
-            ...demande,
-            matches: matchesData as MatchWithEtudiant[],
-            matchCount: matchesData?.length || 0
-          };
         })
       );
       
@@ -221,8 +237,8 @@ const DashboardMatch: React.FC = () => {
   const filteredDemandes = demandes.filter(demande => 
     (demande.description_projet?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (demande.entreprise?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    demande.competences_requises.some((comp: Competence) => 
-      (comp.nom || '').toLowerCase().includes(searchTerm.toLowerCase())
+    demande.suggestions_competences.some((comp: string) => 
+      comp.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -294,12 +310,12 @@ const DashboardMatch: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {demande.competences_requises.map((comp, index) => (
+                      {demande.suggestions_competences.map((comp, index) => (
                         <Chip
                           key={index}
-                          label={`${comp.nom} - ${comp.priorite}`}  
+                          label={comp}
                           size="small"
-                          color={comp.priorite === 'Essentiel' ? 'primary' : 'default'}
+                          color="default"
                         />
                       ))}
                     </Box>
@@ -351,11 +367,12 @@ const DashboardMatch: React.FC = () => {
                   {selectedDemande.description_projet}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                  {selectedDemande.competences_requises.map((comp, index) => (
+                  {selectedDemande.suggestions_competences.map((comp, index) => (
                     <Chip
                       key={index}
-                      label={`${comp.nom} (${comp.priorite})`}
-                      color={comp.priorite === 'Essentiel' ? 'primary' : 'default'}
+                      label={comp}
+                      size="small"
+                      color="default"
                     />
                   ))}
                 </Box>
@@ -401,7 +418,7 @@ const DashboardMatch: React.FC = () => {
             <TableBody>
                     {compareAll 
                       ? allStudents.map((student) => {
-                          const score = selectedDemande ? calculateMatchScore(student, selectedDemande.competences_requises) : 0;
+                          const score = selectedDemande ? calculateMatchScore(student, selectedDemande.suggestions_competences) : 0;
                           return (
                             <TableRow 
                               key={student.id}
@@ -427,14 +444,19 @@ const DashboardMatch: React.FC = () => {
                               </TableCell>
                               <TableCell>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                  {(student.competences || []).map((comp, index) => (
-                                    <Chip
-                                      key={index}
-                                      label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
-                                      size="small"
-                                      sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
-                                    />
-                                  ))}
+                                  {(student.competences || []).map((comp, index) => {
+                                    const nom = typeof comp === 'string' ? comp : comp?.label ?? 'Inconnu';
+                                    const niveau = typeof comp === 'object' && comp?.niveau ? comp.niveau : '';
+                                    const description = typeof comp === 'object' && comp?.description ? ` (${comp.description})` : '';
+                                    return (
+                                      <Chip
+                                        key={index}
+                                        label={`${nom}${niveau ? ' - ' + niveau : ''}${description}`}
+                                        size="small"
+                                        sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
+                                      />
+                                    );
+                                  })}
                                 </Box>
                               </TableCell>
                               <TableCell>
@@ -523,14 +545,19 @@ const DashboardMatch: React.FC = () => {
                   </TableCell>
                   <TableCell>
                               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                                {(match.etudiant.competences || []).map((comp, index) => (
-                                  <Chip
-                                    key={index}
-                                    label={`${comp.nom} - ${comp.niveau}${comp.description ? ` (${comp.description})` : ''}`}
-                                    size="small"
-                                    sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
-                                  />
-                                ))}
+                                {(match.etudiant.competences || []).map((comp, index) => {
+                                  const nom = typeof comp === 'string' ? comp : comp?.label ?? 'Inconnu';
+                                  const niveau = typeof comp === 'object' && comp?.niveau ? comp.niveau : '';
+                                  const description = typeof comp === 'object' && comp?.description ? ` (${comp.description})` : '';
+                                  return (
+                                    <Chip
+                                      key={index}
+                                      label={`${nom}${niveau ? ' - ' + niveau : ''}${description}`}
+                                      size="small"
+                                      sx={{ bgcolor: '#9333EA20', color: '#9333EA' }}
+                                    />
+                                  );
+                                })}
                               </Box>
                             </TableCell>
                   <TableCell>
