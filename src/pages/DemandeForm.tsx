@@ -61,8 +61,8 @@ const DemandeForm: React.FC = () => {
     suggestions_competences: [],
     telephone: '',
     ville: '',
-    competences_requises: [],
     code_demande: '',
+    competences_requises: [],
   });
 
   const [submitted, setSubmitted] = useState<boolean>(false);
