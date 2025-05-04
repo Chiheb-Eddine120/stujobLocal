@@ -80,6 +80,16 @@ function formatDate(dateString: string) {
   }
 }
 
+const generateTrackingNumber = () => {
+  // Caractères autorisés (sans 0, O, I, l)
+  const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 12; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
 const SuiviDemande: React.FC = () => {
   const { trackingNumber: demandeId } = useParams<{ trackingNumber: string }>();
   const navigate = useNavigate();
