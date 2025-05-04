@@ -91,6 +91,7 @@ export interface Etudiant {
 
 export interface Demande {
   id: string;
+  code_demande: string;
   entreprise: string;
   numero_entreprise: string;
   adresse: string;

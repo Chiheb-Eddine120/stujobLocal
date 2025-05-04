@@ -62,6 +62,7 @@ const DemandeForm: React.FC = () => {
     telephone: '',
     ville: '',
     competences_requises: [],
+    code_demande: '',
   });
 
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -122,7 +123,7 @@ const DemandeForm: React.FC = () => {
 
     try {
       const result = await demandeService.createDemande(formData);
-      setTrackingNumber(result.id);
+      setTrackingNumber(result.code_demande);
       setSubmitted(true);
     } catch (err) {
       setError('Une erreur est survenue lors de l\'envoi de votre demande. Veuillez réessayer.');
