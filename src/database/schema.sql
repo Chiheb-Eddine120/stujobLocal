@@ -67,7 +67,7 @@ create policy "Les étudiants peuvent modifier leur propre profil"
 -- Table demandes (modification de la table existante)
 alter table demandes 
   add column if not exists description_projet text,
-  add column if not exists competences_requises jsonb default '[]'::jsonb,
+  add column if not exists suggestions_competences jsonb default '[]'::jsonb,
   add column if not exists niveau_priorite text,
   add column if not exists duree_mission text,
   add column if not exists date_debut_souhaitee date,

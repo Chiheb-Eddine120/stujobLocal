@@ -110,7 +110,6 @@ export interface Demande {
   telephone?: string;
   ville: string;
   description_projet?: string;
-  competences_requises: Competence[];
 }
 
 export interface Match {
