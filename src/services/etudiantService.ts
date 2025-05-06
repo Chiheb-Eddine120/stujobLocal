@@ -79,13 +79,13 @@ export const etudiantService = {
   async getAllEtudiants() {
     try {
       // Vérifier l'authentification
-      const { data: { session } } = await supabase.auth.getSession();
+      await supabase.auth.getSession();
       
       // D'abord, comptons les étudiants
-      const { count, error: countError } = await supabase
+      const { error: countError } = await supabase
         .from('etudiants')
         .select('*', { count: 'exact', head: true });
-        
+      
       if (countError) {
         throw countError;
       }
