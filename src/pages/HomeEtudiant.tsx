@@ -56,7 +56,7 @@ const HomeEtudiant: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
             component={RouterLink}
-            to="/rejoindre-reseau"
+            to="/etudiants"
             variant="contained"
             sx={{
               bgcolor: '#9333EA',

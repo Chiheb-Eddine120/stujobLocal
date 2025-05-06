@@ -201,35 +201,46 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                 <MenuIcon sx={{ fontSize: 32 }} />
               </IconButton>
               
-              <Typography
-                variant="h6"
-                component={RouterLink}
-                to="/"
-                sx={{
-                  textDecoration: 'none',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '1.5rem',
-                  mr: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:hover': {
-                    opacity: 0.9,
-                  },
-                  '&::after': {
-                    content: '""',
-                    display: 'inline-block',
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: 'white',
-                    transform: 'rotate(45deg)',
-                    marginLeft: '2px',
-                    marginBottom: '8px'
-                  }
-                }}
-              >
-                StuJob
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mr: 6 }}>
+                <Typography
+                  variant="h6"
+                  component={RouterLink}
+                  to="/"
+                  sx={{
+                    textDecoration: 'none',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '1.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    '&:hover': { opacity: 0.9 },
+                    '&::after': {
+                      content: '""',
+                      display: 'inline-block',
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: 'white',
+                      transform: 'rotate(45deg)',
+                      marginLeft: '2px',
+                      marginBottom: '8px'
+                    }
+                  }}
+                >
+                  StuJob
+                </Typography>
+                <span
+                  style={{
+                    fontFamily: "'Pacifico', cursive",
+                    fontSize: 18,
+                    color: 'white',
+                    marginLeft: 2,
+                    marginTop: -4,
+                    letterSpacing: 1,
+                  }}
+                >
+                  {modeAccueil === 'entreprise' ? 'For Partners' : 'For Students'}
+                </span>
+              </Box>
 
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                 {modeAccueil === 'entreprise' && (
