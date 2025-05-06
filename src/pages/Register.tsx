@@ -21,7 +21,6 @@ const Register: React.FC = () => {
     confirmPassword: '',
     nom: '',
     prenom: '',
-    telephone: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -44,7 +43,6 @@ const Register: React.FC = () => {
         {
           nom: formData.nom,
           prenom: formData.prenom,
-          telephone: formData.telephone,
         }
       );
       navigate('/login', { state: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' } });
@@ -100,16 +98,6 @@ const Register: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  disabled={loading}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Téléphone"
-                  value={formData.telephone}
-                  onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
                   disabled={loading}
                 />
               </Grid>

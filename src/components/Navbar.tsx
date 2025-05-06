@@ -39,6 +39,12 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   //const theme = useTheme();
 
+  console.log('NAVBAR DEBUG:');
+  console.log('  modeAccueil:', modeAccueil);
+  console.log('  pathname:', window.location.pathname);
+  console.log('  isAuthenticated:', isAuthenticated);
+  console.log('  userRole:', userRole);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -87,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const drawer = (
     <Box sx={{ width: 250, pt: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
       <List>
-        {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
+        {modeAccueil === 'entreprise' && (
           <>
             <ListItem 
               button 
@@ -261,44 +267,6 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                   >
                     Rejoindre notre espace étudiant
                   </Button>
-                )}
-                {!modeAccueil && (
-                  <>
-                    {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
-                      <>
-                        <Button
-                          component={RouterLink}
-                          to="/demande"
-                          disableRipple
-                          disableElevation
-                          variant="text"
-                          sx={buttonStyle}
-                        >
-                          Introduire une demande
-                        </Button>
-                        <Button
-                          component={RouterLink}
-                          to="/suivi"
-                          disableRipple
-                          disableElevation
-                          variant="text"
-                          sx={buttonStyle}
-                        >
-                          Suivre une demande
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      component={RouterLink}
-                      to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
-                      disableRipple
-                      disableElevation
-                      variant="text"
-                      sx={buttonStyle}
-                    >
-                      {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'}
-                    </Button>
-                  </>
                 )}
               </Box>
             </Box>

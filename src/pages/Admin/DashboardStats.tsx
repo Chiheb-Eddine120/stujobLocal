@@ -5,7 +5,6 @@ import {
   Paper,
   Typography,
   Box,
-  CircularProgress,
   Alert,
 } from '@mui/material';
 import {
@@ -30,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { statisticsService } from '../../services/statisticsService';
 import DashboardBackButton from '../../components/DashboardBackButton';
+import LoadingSpinner from '../../components/loading/LoadingSpinner';
 
 interface StatCardProps {
   title: string;
@@ -103,11 +103,7 @@ const DashboardStats: React.FC = () => {
   }, []);
 
   if (loading) {
-    return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Container>
-    );
+    return <LoadingSpinner text="Chargement des statistiques..." />;
   }
 
   if (error) {

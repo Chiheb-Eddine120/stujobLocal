@@ -3,7 +3,7 @@ export interface Profile {
   prenom: string;
   nom: string;
   email: string;
-  telephone: string;
+  telephone?: string;
 }
 
 export interface DocumentFile {

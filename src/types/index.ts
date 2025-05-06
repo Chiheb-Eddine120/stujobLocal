@@ -46,7 +46,7 @@ export interface Profile {
   email: string;
   nom: string;
   prenom: string;
-  telephone: string;
+  telephone?: string;
   created_at: string;
   updated_at: string;
 }

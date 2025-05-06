@@ -14,7 +14,7 @@ create table profiles (
   email text unique not null,
   nom text,
   prenom text,
-  telephone text,
+  telephone text null,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

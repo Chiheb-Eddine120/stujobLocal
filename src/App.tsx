@@ -31,10 +31,11 @@ import Privacy from './pages/Privacy';
 import DashboardSettings from './pages/Admin/DashboardSettings';
 import NotFound from './pages/NotFound';
 import { useAuth } from './hooks/useAuth';
-import { Box, CircularProgress, Typography, Button } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import HomeEtudiant from './pages/HomeEtudiant';
 import RoleSwitchBar from './components/RoleSwitchBar';
+import LoadingSpinner from './components/loading/LoadingSpinner';
 
 const theme = createTheme({
   palette: {
@@ -118,25 +119,88 @@ const theme = createTheme({
 });
 
 function getModeAccueil(pathname: string): 'entreprise' | 'etudiant' | undefined {
-  if (["/", "/demande", "/suivi", "/suivi/:trackingNumber"].some(p => pathname.startsWith(p))) {
+  // Routes pour les entreprises
+  const entrepriseRoutes = [
+    '/',
+    '/demande',
+    '/suivi',
+    '/suivi/:trackingNumber',
+    '/about',
+    '/contact',
+    '/privacy',
+    '/terms'
+  ];
+
+  // Routes pour les étudiants
+  const etudiantRoutes = [
+    '/espace-etudiant',
+    '/profil-etudiant',
+    '/etudiants',
+    '/home-etudiant'
+  ];
+
+  // Routes du dashboard (admin)
+  const adminRoutes = [
+    '/dashboard',
+    '/dashboard/pre-registrations',
+    '/dashboard/match',
+    '/dashboard/users',
+    '/dashboard/stats',
+    '/dashboard/notifications',
+    '/dashboard/settings'
+  ];
+
+  // Vérifier si la route actuelle correspond à une route d'entreprise
+  if (entrepriseRoutes.some(route => {
+    if (route.includes(':')) {
+      // Gérer les routes avec des paramètres
+      const routePattern = new RegExp('^' + route.replace(/:[^/]+/g, '[^/]+') + '$');
+      return routePattern.test(pathname);
+    }
+    return route === pathname;
+  })) {
     return 'entreprise';
   }
-  if (["/espace-etudiant", "/profil-etudiant", "/etudiants"].some(p => pathname.startsWith(p))) {
+
+  // Vérifier si la route actuelle correspond à une route d'étudiant
+  if (etudiantRoutes.includes(pathname)) {
     return 'etudiant';
   }
-  return undefined;
+
+  // Pour les routes admin, retourner undefined car elles ont leur propre navigation
+  if (adminRoutes.includes(pathname)) {
+    return undefined;
+  }
+
+  // Pour les autres routes, retourner le mode par défaut (entreprise)
+  return 'entreprise';
 }
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const [selectedRole, setSelectedRole] = React.useState<'etudiant' | 'entreprise'>('entreprise');
-  const modeAccueil = location.pathname === '/' ? selectedRole : getModeAccueil(location.pathname);
+  const [selectedRole, setSelectedRole] = React.useState<'etudiant' | 'entreprise'>(() => {
+    return (localStorage.getItem('selectedRole') as 'etudiant' | 'entreprise') || 'entreprise';
+  });
+
+  // Le modeAccueil est maintenant toujours basé sur le selectedRole
+  const modeAccueil = selectedRole;
+
+  // Le RoleSwitchBar sera affiché sur toutes les pages sauf le dashboard
+  const showRoleSwitch = !location.pathname.startsWith('/dashboard');
+
+  // Nouvelle fonction pour changer le rôle et le stocker
+  const handleRoleChange = (role: 'etudiant' | 'entreprise') => {
+    setSelectedRole(role);
+    localStorage.setItem('selectedRole', role);
+  };
+
   return (
     <>
       <Navbar modeAccueil={modeAccueil} />
+      {showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
       <main style={{ flex: 1, paddingBottom: '20px' }}>
         <Routes>
-          <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} setSelectedRole={setSelectedRole} />} />
+          <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} />} />
           <Route path="/home-etudiant" element={<HomeEtudiant />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -172,16 +236,7 @@ const App: React.FC = () => {
   const { session, userRole, isChecking: isAuthChecking } = useAuth();
 
   if (isMaintenanceLoading || isAuthChecking) {
-    return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh' 
-      }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner text="Chargement de StuJob..." />;
   }
 
   if (maintenanceError) {
@@ -240,19 +295,16 @@ const App: React.FC = () => {
   );
 };
 
-// HomeSwitcher reçoit maintenant selectedRole et setSelectedRole en props
+// HomeSwitcher reçoit maintenant selectedRole en props
 interface HomeSwitcherProps {
   selectedRole: 'etudiant' | 'entreprise';
-  setSelectedRole: (role: 'etudiant' | 'entreprise') => void;
 }
-const HomeSwitcher: React.FC<HomeSwitcherProps> = ({ selectedRole, setSelectedRole }) => {
+
+const HomeSwitcher: React.FC<HomeSwitcherProps> = ({ selectedRole }) => {
   return (
-    <>
-      <RoleSwitchBar selectedRole={selectedRole} onChange={setSelectedRole} />
-      <main style={{ flex: 1, paddingBottom: '20px' }}>
-        {selectedRole === 'etudiant' ? <HomeEtudiant /> : <Home />}
-      </main>
-    </>
+    <main style={{ flex: 1, paddingBottom: '20px' }}>
+      {selectedRole === 'etudiant' ? <HomeEtudiant /> : <Home />}
+    </main>
   );
 };
 

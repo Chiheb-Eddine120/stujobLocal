@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Button, Box, Grid, Paper } from '@mui/material';
+import { Container, Typography, Button, Box, Grid, Paper, Card, CardContent, CardMedia } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkIcon from '@mui/icons-material/Work';
-import SchoolIcon from '@mui/icons-material/School';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { authService } from '../services/authService';
 
 const Home: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const checkUserRole = async () => {
       try {
         const isAuthenticated = await authService.isAuthenticated();
         if (isAuthenticated) {
-          const user = await authService.getCurrentUser();
-          setUserRole(user?.role || null);
+          await authService.getCurrentUser();
         }
       } catch (error) {
         console.error('Erreur lors de la vérification du rôle:', error);
@@ -30,7 +28,7 @@ const Home: React.FC = () => {
   const faqItems = [
     {
       question: "Qui peut faire appel à Stujob ?",
-      answer: "Toute personne ou entreprise ayant besoin des services d'un étudiant."
+      answer: "Toute entreprise ayant besoin des services d'un étudiant."
     },
     {
       question: "Quelles missions sont possibles ?",
@@ -42,7 +40,7 @@ const Home: React.FC = () => {
     },
     {
       question: "Qui peut utiliser Stujob ?",
-      answer: "Le service est ouvert aux entreprises et aux particuliers."
+      answer: "Le service est ouvert aux entreprises de toutes tailles."
     },
     {
       question: "Vais-je devoir lire des CV ?",
@@ -62,7 +60,7 @@ const Home: React.FC = () => {
     <Box sx={{ bgcolor: '#ffffff' }}>
       {/* Hero Section */}
       <Container maxWidth="lg" sx={{ pt: 8, pb: 6, textAlign: 'center' }}>
-        <Typography variant="h3" component="h1" 
+        <Typography variant="h2" component="h1" 
           sx={{ 
             fontWeight: 700,
             background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
@@ -72,10 +70,10 @@ const Home: React.FC = () => {
             mb: 2,
             mt: 3
           }}>
-          Êtes-vous une entreprise à la recherche d'un étudiant ?
+          Stujob : Votre partenaire pour l'emploi étudiant
         </Typography>
-        <Typography variant="body1" sx={{ mb: 4, color: '#666', maxWidth: '600px', mx: 'auto' }}>
-          Chez Stujob, nous vous facilitons la recherche du candidat idéal, disponible et motivé pour vos besoins spécifiques. Dites-nous ce que vous recherchez et nous vous mettrons en relation avec la bonne personne, sans perdre de temps.
+        <Typography variant="h5" sx={{ mb: 4, color: '#666', maxWidth: '800px', mx: 'auto' }}>
+          La plateforme qui connecte les entreprises aux meilleurs talents étudiants
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
@@ -93,12 +91,14 @@ const Home: React.FC = () => {
               }
             }}
           >
-            Êtes-vous une entreprise ?
+            Créer une demande
           </Button>
           <Button
-            component={RouterLink}
-            to="/suivi"
+            component="a"
+            href="https://calendly.com/contact-stujob"
+            target="_blank"
             variant="outlined"
+            startIcon={<CalendarTodayIcon />}
             sx={{
               borderColor: '#9333EA',
               color: '#9333EA',
@@ -113,168 +113,279 @@ const Home: React.FC = () => {
               }
             }}
           >
-            Suivre une demande
+            Prendre rendez-vous
           </Button>
         </Box>
       </Container>
 
-      {/* Features Section */}
+      {/* Qui sommes-nous Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h2" component="h2" 
-          sx={{ 
-            textAlign: 'center', 
-            mb: 8,
-            color: '#1F1F1F',
-            fontSize: '2.5rem',
-            fontWeight: 600
-          }}>
-          Nos services
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6} lg={3}>
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: 4, 
-                height: '100%',
-                background: '#FDF8FF',
-                borderRadius: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 2
-              }}
-            >
-              <Box sx={{ 
-                color: '#9333EA',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: '#F3E8FF'
-              }}>
-                <WorkIcon />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F1F1F' }}>
-                Offres d'emploi
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Trouvez des opportunités adaptées à votre profil et à vos compétences
-              </Typography>
-            </Paper>
+        <Grid container spacing={6} alignItems="center">
+          <Grid item xs={12} md={6}>
+            <Typography variant="h3" sx={{ mb: 4, color: '#1F1F1F' }}>
+              Qui sommes-nous ?
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3, color: '#666' }}>
+              Stujob est une plateforme innovante spécialisée dans la mise en relation entre entreprises et étudiants. Notre mission est de faciliter l'accès au marché du travail pour les étudiants tout en offrant aux entreprises un accès privilégié à des talents prometteurs.
+            </Typography>
+            <Typography variant="body1" sx={{ color: '#666' }}>
+              Notre approche unique repose sur une compréhension approfondie des besoins spécifiques de chaque entreprise, tant au niveau des compétences techniques que des valeurs culturelles. Nous nous efforçons de trouver l'étudiant idéal qui correspondra parfaitement à votre vision et à vos exigences.
+            </Typography>
           </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: 4, 
-                height: '100%',
-                background: '#FDF8FF',
-                borderRadius: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 2
-              }}
-            >
-              <Box sx={{ 
-                color: '#FF4D8D',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: '#FFE8F3'
-              }}>
-                <SchoolIcon />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F1F1F' }}>
-                Profils étudiants
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Découvrez des talents prometteurs pour votre projet d'entreprise
-              </Typography>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: 4, 
-                height: '100%',
-                background: '#FDF8FF',
-                borderRadius: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 2
-              }}
-            >
-              <Box sx={{ 
-                color: '#FF6B6B',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: '#FFE8E8'
-              }}>
-                <HandshakeIcon />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F1F1F' }}>
-                Mise en relation
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Notre algorithme vous aide à trouver le candidat idéal pour vos besoins
-              </Typography>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: 4, 
-                height: '100%',
-                background: '#FDF8FF',
-                borderRadius: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 2
-              }}
-            >
-              <Box sx={{ 
-                color: '#9333EA',
-                fontSize: '2rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: '#F3E8FF'
-              }}>
-                <TrendingUpIcon />
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F1F1F' }}>
-                Suivi personnalisé
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Accompagnement tout au long du processus de recrutement
-              </Typography>
-            </Paper>
+          <Grid item xs={12} md={6}>
+            <Card elevation={0} sx={{ borderRadius: 4, overflow: 'hidden' }}>
+              <CardMedia
+                component="img"
+                height="400"
+                image="/images/team-meeting.jpg"
+                alt="Équipe Stujob"
+                sx={{ objectFit: 'cover' }}
+              />
+            </Card>
           </Grid>
         </Grid>
+      </Container>
+
+      {/* Nos Services Section */}
+      <Container maxWidth="lg" sx={{ py: 8, bgcolor: '#FDF8FF' }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', mb: 6, color: '#1F1F1F' }}>
+          Nos Services
+        </Typography>
+        <Typography variant="body1" sx={{ textAlign: 'center', mb: 6, maxWidth: '800px', mx: 'auto', color: '#666' }}>
+          Nous ne nous contentons pas de faire correspondre des compétences. Nous analysons en profondeur vos besoins, votre culture d'entreprise et vos valeurs pour trouver l'étudiant qui s'intégrera parfaitement dans votre équipe.
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent' }}>
+              <CardContent>
+                <Box sx={{ 
+                  color: '#9333EA',
+                  fontSize: '2rem',
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '16px',
+                  backgroundColor: '#F3E8FF'
+                }}>
+                  <WorkIcon />
+                </Box>
+                <Typography variant="h5" sx={{ mb: 2, color: '#1F1F1F' }}>
+                  Recrutement Ciblé
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Nous sélectionnons les meilleurs profils étudiants selon vos critères spécifiques et vos besoins.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent' }}>
+              <CardContent>
+                <Box sx={{ 
+                  color: '#FF4D8D',
+                  fontSize: '2rem',
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '16px',
+                  backgroundColor: '#FFE8F3'
+                }}>
+                  <HandshakeIcon />
+                </Box>
+                <Typography variant="h5" sx={{ mb: 2, color: '#1F1F1F' }}>
+                  Accompagnement Personnalisé
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Un suivi personnalisé tout au long du processus de recrutement pour garantir votre satisfaction.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent' }}>
+              <CardContent>
+                <Box sx={{ 
+                  color: '#FF6B6B',
+                  fontSize: '2rem',
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '16px',
+                  backgroundColor: '#FFE8E8'
+                }}>
+                  <TrendingUpIcon />
+                </Box>
+                <Typography variant="h5" sx={{ mb: 2, color: '#1F1F1F' }}>
+                  Solutions Flexibles
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Des solutions adaptées à vos besoins, que ce soit pour un stage, un CDD ou un CDI.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Comment ça marche Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', mb: 6, color: '#1F1F1F' }}>
+          Comment ça marche ?
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: '#FDF8FF', borderRadius: 4 }}>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="h4" sx={{ color: '#9333EA', mb: 2 }}>1</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Créez votre demande</Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Décrivez votre besoin et vos critères de sélection
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: '#FDF8FF', borderRadius: 4 }}>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="h4" sx={{ color: '#FF4D8D', mb: 2 }}>2</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Nous sélectionnons</Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Notre équipe analyse et sélectionne les meilleurs profils
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: '#FDF8FF', borderRadius: 4 }}>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="h4" sx={{ color: '#FF6B6B', mb: 2 }}>3</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Vous recrutez</Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Rencontrez les candidats présélectionnés et faites votre choix
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Pourquoi nous Section */}
+      <Container maxWidth="lg" sx={{ py: 8, bgcolor: '#FDF8FF' }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', mb: 6, color: '#1F1F1F' }}>
+          Pourquoi choisir Stujob ?
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'white', borderRadius: 4 }}>
+              <CardContent>
+                <Typography variant="h5" sx={{ mb: 3, color: '#9333EA' }}>
+                  Notre différence
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Expertise dans le recrutement étudiant
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Sélection rigoureuse basée sur les compétences ET les valeurs
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Accompagnement personnalisé
+                </Typography>
+                <Typography variant="body1">
+                  • Tarifs compétitifs et transparents
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'white', borderRadius: 4 }}>
+              <CardContent>
+                <Typography variant="h5" sx={{ mb: 3, color: '#FF4D8D' }}>
+                  Avantages par rapport aux autres solutions
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Plus rapide qu'une agence d'intérim traditionnelle
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Plus fiable qu'une marketplace classique
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  • Meilleure qualité de profils
+                </Typography>
+                <Typography variant="body1">
+                  • Service sur-mesure adapté à vos besoins
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Partenaires Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" sx={{ textAlign: 'center', mb: 6, color: '#1F1F1F' }}>
+          Nos Partenaires
+        </Typography>
+        <Grid container spacing={4} justifyContent="center">
+          {/* Ajoutez ici les logos de vos partenaires */}
+          <Grid item xs={6} md={3}>
+            <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent' }}>
+              <CardMedia
+                component="img"
+                height="100"
+                image="/images/partner1.png"
+                alt="Partenaire 1"
+                sx={{ objectFit: 'contain' }}
+              />
+            </Card>
+          </Grid>
+          {/* Répétez pour d'autres partenaires */}
+        </Grid>
+      </Container>
+
+      {/* CTA Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Paper elevation={0} sx={{ 
+          p: 6, 
+          textAlign: 'center', 
+          borderRadius: 4,
+          background: 'linear-gradient(135deg, #9333EA11 0%, #FF4D8D11 100%)',
+          mb: 8 
+        }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Prêt à trouver l'étudiant idéal ?
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', color: '#666' }}>
+            Découvrez comment notre approche personnalisée peut vous aider à trouver le candidat parfait, qui correspondra à la fois à vos besoins techniques et à votre culture d'entreprise.
+          </Typography>
+          <Button
+            component="a"
+            href="https://calendly.com/contact-stujob"
+            target="_blank"
+            variant="contained"
+            startIcon={<CalendarTodayIcon />}
+            sx={{
+              bgcolor: '#9333EA',
+              borderRadius: '25px',
+              px: 6,
+              py: 2,
+              fontSize: '1.1rem',
+              '&:hover': {
+                bgcolor: '#7928CA'
+              }
+            }}
+          >
+            Prendre rendez-vous
+          </Button>
+        </Paper>
       </Container>
 
       {/* FAQ Section */}
@@ -391,81 +502,6 @@ const Home: React.FC = () => {
             ))}
           </Grid>
         </Grid>
-      </Container>
-
-      {/* Section CTA */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Paper elevation={0} sx={{ 
-          p: 6, 
-          textAlign: 'center', 
-          borderRadius: 4,
-          background: 'linear-gradient(135deg, #9333EA11 0%, #FF4D8D11 100%)',
-          mb: 8 
-        }}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            Prêt à commencer ?
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', color: '#666' }}>
-            Que vous soyez une entreprise à la recherche de talents ou un étudiant cherchant une opportunité, Stujob est là pour vous accompagner dans votre démarche.
-          </Typography>
-          {!userRole && (
-            <Button
-              component={RouterLink}
-              to="/login"
-              variant="contained"
-              sx={{
-                bgcolor: '#9333EA',
-                borderRadius: '25px',
-                px: 6,
-                py: 2,
-                fontSize: '1.1rem',
-                '&:hover': {
-                  bgcolor: '#7928CA'
-                }
-              }}
-            >
-              Se connecter
-            </Button>
-          )}
-          {(userRole === 'entreprise' || userRole === 'admin') && (
-            <Button
-              component={RouterLink}
-              to="/demande"
-              variant="contained"
-              sx={{
-                bgcolor: '#9333EA',
-                borderRadius: '25px',
-                px: 6,
-                py: 2,
-                fontSize: '1.1rem',
-                '&:hover': {
-                  bgcolor: '#7928CA'
-                }
-              }}
-            >
-              Créer une demande
-            </Button>
-          )}
-          {userRole === 'student' && (
-            <Button
-              component={RouterLink}
-              to="/espace-etudiant"
-              variant="contained"
-              sx={{
-                bgcolor: '#9333EA',
-                borderRadius: '25px',
-                px: 6,
-                py: 2,
-                fontSize: '1.1rem',
-                '&:hover': {
-                  bgcolor: '#7928CA'
-                }
-              }}
-            >
-              Accéder à mon espace
-            </Button>
-          )}
-        </Paper>
       </Container>
     </Box>
   );

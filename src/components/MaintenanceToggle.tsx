@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Switch, FormControlLabel, Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Switch, FormControlLabel, Box, Typography, Alert } from '@mui/material';
 import { getMaintenanceMode, setMaintenanceMode } from '../services/settings';
+import LoadingSpinner from './loading/LoadingSpinner';
 
 const MaintenanceToggle: React.FC = () => {
   const [isMaintenance, setIsMaintenance] = useState<boolean>(false);
@@ -43,11 +44,7 @@ const MaintenanceToggle: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner text="Chargement du mode maintenance..." />;
   }
 
   return (
