@@ -46,8 +46,6 @@ const Contact: React.FC = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Ici, vous pourriez ajouter la logique pour envoyer l'email
-    console.log('Données du formulaire:', formData);
     setSubmitted(true);
   };
 

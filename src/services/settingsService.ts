@@ -67,9 +67,6 @@ export const settingsService = {
 
   async updateSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
     try {
-      console.log('=== DÉBUT MISE À JOUR PARAMÈTRES ===');
-      console.log('1. Paramètres à mettre à jour:', settings);
-
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -101,7 +98,6 @@ export const settingsService = {
 
       // Créer une copie des paramètres sans l'id
       const { id, ...settingsWithoutId } = settings;
-      console.log('2. Paramètres sans ID:', settingsWithoutId);
 
       const { data, error } = await supabase
         .from('settings')
@@ -114,12 +110,9 @@ export const settingsService = {
         .single();
 
       if (error) {
-        console.error('❌ Erreur lors de la mise à jour:', error);
         throw error;
       }
 
-      console.log('3. Réponse après mise à jour:', data);
-      console.log('=== FIN MISE À JOUR PARAMÈTRES ===');
       return data as SiteSettings;
     } catch (error) {
       console.error('❌ Erreur dans updateSettings:', error);
@@ -129,10 +122,7 @@ export const settingsService = {
 
   async getSettingsHistory(): Promise<SettingsChange[]> {
     try {
-      console.log('=== DÉBUT RÉCUPÉRATION HISTORIQUE ===');
-      
       // 1. Récupération des données
-      console.log('1. Envoi de la requête à Supabase...');
       const { data, error } = await supabase
         .from('settings')
         .select('id, change_history, updated_at')
@@ -140,25 +130,17 @@ export const settingsService = {
         .limit(1);
 
       if (error) {
-        console.error('❌ Erreur Supabase:', error);
         throw error;
       }
 
-      console.log('2. Réponse brute de Supabase:', data);
-      
       if (!data || data.length === 0) {
-        console.log('❌ Aucune donnée trouvée dans la table settings');
         return [];
       }
 
       const settings = data[0];
-      console.log('3. Premier enregistrement:', settings);
-      console.log('4. Type de change_history:', typeof settings.change_history);
-      console.log('5. Valeur de change_history:', settings.change_history);
 
       // Vérifier si change_history existe et n'est pas null
       if (!settings?.change_history) {
-        console.log('❌ Pas d\'historique dans les données');
         return [];
       }
 
@@ -199,8 +181,6 @@ export const settingsService = {
         }))
         .sort((a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime());
 
-      console.log('8. Historique final formaté:', history);
-      console.log('=== FIN RÉCUPÉRATION HISTORIQUE ===');
       return history;
     } catch (error) {
       console.error('❌ Erreur dans getSettingsHistory:', error);

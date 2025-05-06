@@ -39,12 +39,6 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   //const theme = useTheme();
 
-  console.log('NAVBAR DEBUG:');
-  console.log('  modeAccueil:', modeAccueil);
-  console.log('  pathname:', window.location.pathname);
-  console.log('  isAuthenticated:', isAuthenticated);
-  console.log('  userRole:', userRole);
-
   useEffect(() => {
     const checkAuth = async () => {
       try {

@@ -78,21 +78,15 @@ export const etudiantService = {
 
   async getAllEtudiants() {
     try {
-      console.log('Récupération de tous les étudiants...');
-      
       // Vérifier l'authentification
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Session:', session ? 'Connecté' : 'Non connecté');
       
       // D'abord, comptons les étudiants
       const { count, error: countError } = await supabase
         .from('etudiants')
         .select('*', { count: 'exact', head: true });
         
-      console.log('Nombre total d\'étudiants:', count);
-      
       if (countError) {
-        console.error('Erreur lors du comptage:', countError);
         throw countError;
       }
 
@@ -111,22 +105,11 @@ export const etudiantService = {
         `);
 
       if (error) {
-        console.error('Erreur lors de la récupération des étudiants:', error);
         throw error;
-      }
-
-      if (!data) {
-        console.log('Aucune donnée retournée par Supabase');
-      } else if (data.length === 0) {
-        console.log('La table etudiants est vide');
-      } else {
-        console.log('Nombre d\'étudiants trouvés:', data.length);
-        console.log('Premier étudiant:', data[0]);
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur complète dans getAllEtudiants:', error);
       throw error;
     }
   },
@@ -144,11 +127,9 @@ export const etudiantService = {
         .insert([{ ...experience, etudiant_id: etudiantId }]);
 
       if (error) {
-        console.error('Erreur Supabase:', error);
         throw new Error('Erreur lors de l\'ajout de l\'expérience');
       }
     } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'expérience:', error);
       throw error;
     }
   },
@@ -170,11 +151,9 @@ export const etudiantService = {
         .upsert([{ ...competence, etudiant_id: etudiantId }]);
 
       if (error) {
-        console.error('Erreur Supabase:', error);
         throw new Error('Erreur lors de la mise à jour de la compétence');
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de la compétence:', error);
       throw error;
     }
   },
@@ -220,8 +199,6 @@ export const etudiantService = {
 
           const orClause = filters.join(',');
           query = query.or(orClause);
-
-          console.log('Recherche avec les filtres:', orClause);
         }
       }
 
@@ -240,7 +217,6 @@ export const etudiantService = {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Erreur Supabase:', error);
         throw new Error('Erreur lors de la recherche d\'étudiants');
       }
 
@@ -260,7 +236,6 @@ export const etudiantService = {
 
       return filteredData;
     } catch (error) {
-      console.error('Erreur lors de la recherche d\'étudiants:', error);
       throw error;
     }
   }

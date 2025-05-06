@@ -91,10 +91,8 @@ const DashboardMatch: React.FC = () => {
         try {
           setLoading(true);
           const students = await etudiantService.getAllEtudiants();
-          console.log('Étudiants chargés:', students);
           setAllStudents(students);
         } catch (error) {
-          console.error('Erreur chargement étudiants:', error);
           setNotification({
             open: true,
             message: 'Erreur lors du chargement des étudiants',
@@ -143,16 +141,12 @@ const DashboardMatch: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      console.log('État de compareAll:', compareAll);
       if (compareAll) {
-        console.log('Début de la récupération des étudiants');
         const students = await etudiantService.getAllEtudiants();
-        console.log('Étudiants récupérés:', students);
         setAllStudents(students);
       }
       
       const demandesData = (await demandeService.getDemandesEnAttente() as unknown) as Demande[];
-      console.log('Demandes récupérées:', demandesData);
 
       const demandesWithMatches = await Promise.all(
         demandesData.map(async (demande) => {
@@ -160,11 +154,9 @@ const DashboardMatch: React.FC = () => {
           
           try {
             let matchesData = await matchService.getMatchesByDemande(demande.id);
-            console.log('Matches pour demande', demande.id, ':', matchesData);
             
             if (!matchesData || matchesData.length === 0) {
               const generatedMatches = await matchService.generateMatchesForDemande(demande);
-              console.log('Nouveaux matches générés:', generatedMatches);
               
               if (generatedMatches && generatedMatches.length > 0) {
                 matchesData = await matchService.getMatchesByDemande(demande.id);
@@ -177,16 +169,13 @@ const DashboardMatch: React.FC = () => {
               matchCount: matchesData?.length || 0
             };
           } catch (err) {
-            console.error(`Erreur lors du traitement de la demande ${demande.id}:`, err);
             return { ...demande, matches: [], matchCount: 0 };
           }
         })
       );
       
-      console.log('Demandes avec matches:', demandesWithMatches);
       setDemandes(demandesWithMatches);
     } catch (err) {
-      console.error('Erreur détaillée lors du chargement des données:', err);
       setNotification({
         open: true,
         message: 'Erreur lors du chargement des données',
@@ -207,7 +196,6 @@ const DashboardMatch: React.FC = () => {
       await loadData();
     } catch (err) {
       setError('Erreur lors de la mise en relation');
-      console.error('Erreur:', err);
     }
   };
 
@@ -217,7 +205,6 @@ const DashboardMatch: React.FC = () => {
       await loadData();
     } catch (err) {
       setError('Erreur lors du refus du match');
-      console.error('Erreur:', err);
     }
   };
 
@@ -230,7 +217,6 @@ const DashboardMatch: React.FC = () => {
   };
 
   const handleCompareAllChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('Switch changé à:', event.target.checked);
     setCompareAll(event.target.checked);
   };
 
@@ -500,7 +486,6 @@ const DashboardMatch: React.FC = () => {
                                               severity: 'success'
                                             });
                                           } catch (error) {
-                                            console.error('Erreur lors de la création du match:', error);
                                             setNotification({
                                               open: true,
                                               message: 'Erreur lors de la création du match',

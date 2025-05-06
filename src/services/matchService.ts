@@ -183,7 +183,6 @@ export const matchService = {
   async searchEtudiants(competencesRequises: { nom: string }[]): Promise<EtudiantWithProfile[]> {
     try {
       const competenceNoms = competencesRequises.map(comp => comp.nom);
-      console.log('Recherche d\'étudiants avec les compétences:', competenceNoms);
 
       const { data: etudiants, error } = await supabase
         .from('etudiants')
