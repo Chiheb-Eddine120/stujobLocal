@@ -118,64 +118,6 @@ const theme = createTheme({
   },
 });
 
-function getModeAccueil(pathname: string): 'entreprise' | 'etudiant' | undefined {
-  // Routes pour les entreprises
-  const entrepriseRoutes = [
-    '/',
-    '/demande',
-    '/suivi',
-    '/suivi/:trackingNumber',
-    '/about',
-    '/contact',
-    '/privacy',
-    '/terms'
-  ];
-
-  // Routes pour les étudiants
-  const etudiantRoutes = [
-    '/espace-etudiant',
-    '/profil-etudiant',
-    '/etudiants',
-    '/home-etudiant'
-  ];
-
-  // Routes du dashboard (admin)
-  const adminRoutes = [
-    '/dashboard',
-    '/dashboard/pre-registrations',
-    '/dashboard/match',
-    '/dashboard/users',
-    '/dashboard/stats',
-    '/dashboard/notifications',
-    '/dashboard/settings'
-  ];
-
-  // Vérifier si la route actuelle correspond à une route d'entreprise
-  if (entrepriseRoutes.some(route => {
-    if (route.includes(':')) {
-      // Gérer les routes avec des paramètres
-      const routePattern = new RegExp('^' + route.replace(/:[^/]+/g, '[^/]+') + '$');
-      return routePattern.test(pathname);
-    }
-    return route === pathname;
-  })) {
-    return 'entreprise';
-  }
-
-  // Vérifier si la route actuelle correspond à une route d'étudiant
-  if (etudiantRoutes.includes(pathname)) {
-    return 'etudiant';
-  }
-
-  // Pour les routes admin, retourner undefined car elles ont leur propre navigation
-  if (adminRoutes.includes(pathname)) {
-    return undefined;
-  }
-
-  // Pour les autres routes, retourner le mode par défaut (entreprise)
-  return 'entreprise';
-}
-
 const AppContent: React.FC = () => {
   const location = useLocation();
   const [selectedRole, setSelectedRole] = React.useState<'etudiant' | 'entreprise'>(() => {
