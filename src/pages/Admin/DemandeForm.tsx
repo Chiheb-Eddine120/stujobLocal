@@ -25,13 +25,13 @@ import {
   //Autocomplete,
   Tooltip,
 } from '@mui/material';
-import { demandeService } from '../services/demandeService';
-import { Demande, Secteur } from '../types';
+import { demandeService } from '../../services/demandeService';
+import { Demande, Secteur } from '../../types';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 //import AddIcon from '@mui/icons-material/Add';
-import competencesData from '../data/competences.json';
-import citiesData from '../data/restructured_cities1.json';
-import CityAutocomplete from '../components/CityAutocomplete';
+import competencesData from '../../data/competences.json';
+import citiesData from '../../data/restructured_cities1.json';
+import CityAutocomplete from '../../components/CityAutocomplete';
 
 const sectors: Secteur[] = [
   'Restauration',

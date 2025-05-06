@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ToastContainer } from 'react-toastify';
@@ -11,28 +11,30 @@ import CookieConsent from './components/CookieConsent';
 import MaintenanceMode from './pages/MaintenanceMode';
 import { useMaintenance } from './hooks/useMaintenance';
 import Home from './pages/Home';
-import DemandeForm from './pages/DemandeForm';
+import DemandeForm from './pages/Admin/DemandeForm';
 import SuiviDemande from './pages/SuiviDemande';
 import Etudiants from './pages/Etudiants';
 import EspaceEtudiant from './pages/EspaceEtudiant';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import DashboardMenu from './pages/DashboardMenu';
-import DashboardMatch from './pages/DashboardMatch';
-import DashboardUsers from './pages/DashboardUsers';
-import DashboardStats from './pages/DashboardStats';
-import DashboardNotifications from './pages/DashboardNotifications';
-import DashboardPreRegistrations from './pages/DashboardPreRegistrations';
+import DashboardMenu from './pages/Admin/DashboardMenu';
+import DashboardMatch from './pages/Admin/DashboardMatch';
+import DashboardUsers from './pages/Admin/DashboardUsers';
+import DashboardStats from './pages/Admin/DashboardStats';
+import DashboardNotifications from './pages/Admin/DashboardNotifications';
+import DashboardPreRegistrations from './pages/Admin/DashboardPreRegistrations';
 import Login from './pages/Login';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Register';
 import Privacy from './pages/Privacy';
-import DashboardSettings from './pages/DashboardSettings';
+import DashboardSettings from './pages/Admin/DashboardSettings';
 import NotFound from './pages/NotFound';
 import { useAuth } from './hooks/useAuth';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
+import HomeEtudiant from './pages/HomeEtudiant';
+import RoleSwitchBar from './components/RoleSwitchBar';
 
 const theme = createTheme({
   palette: {
@@ -115,6 +117,56 @@ const theme = createTheme({
   },
 });
 
+function getModeAccueil(pathname: string): 'entreprise' | 'etudiant' | undefined {
+  if (["/", "/demande", "/suivi", "/suivi/:trackingNumber"].some(p => pathname.startsWith(p))) {
+    return 'entreprise';
+  }
+  if (["/espace-etudiant", "/profil-etudiant", "/etudiants"].some(p => pathname.startsWith(p))) {
+    return 'etudiant';
+  }
+  return undefined;
+}
+
+const AppContent: React.FC = () => {
+  const location = useLocation();
+  const [selectedRole, setSelectedRole] = React.useState<'etudiant' | 'entreprise'>('entreprise');
+  const modeAccueil = location.pathname === '/' ? selectedRole : getModeAccueil(location.pathname);
+  return (
+    <>
+      <Navbar modeAccueil={modeAccueil} />
+      <main style={{ flex: 1, paddingBottom: '20px' }}>
+        <Routes>
+          <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} setSelectedRole={setSelectedRole} />} />
+          <Route path="/home-etudiant" element={<HomeEtudiant />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/demande" element={<DemandeForm />} />
+          <Route path="/suivi" element={<SuiviDemande />} />
+          <Route path="/suivi/:trackingNumber" element={<SuiviDemande />} />
+          <Route path="/etudiants" element={<Etudiants />} />
+          <Route path="/espace-etudiant" element={<ProtectedRoute requiredRoles={['student']}><EspaceEtudiant /></ProtectedRoute>} />
+          {/* Routes Dashboard Admin */}
+          <Route path="/dashboard" element={<ProtectedRoute requiredRoles={['admin']}><DashboardMenu /></ProtectedRoute>} />
+          <Route path="/dashboard/pre-registrations" element={<ProtectedRoute requiredRoles={['admin']}><DashboardPreRegistrations /></ProtectedRoute>} />
+          <Route path="/dashboard/match" element={<ProtectedRoute requiredRoles={['admin']}><DashboardMatch /></ProtectedRoute>} />
+          <Route path="/dashboard/users" element={<ProtectedRoute requiredRoles={['admin']}><DashboardUsers /></ProtectedRoute>} />
+          <Route path="/dashboard/stats" element={<ProtectedRoute requiredRoles={['admin']}><DashboardStats /></ProtectedRoute>} />
+          <Route path="/dashboard/notifications" element={<ProtectedRoute requiredRoles={['admin']}><DashboardNotifications /></ProtectedRoute>} />
+          <Route path="/dashboard/settings" element={<ProtectedRoute requiredRoles={['admin']}><DashboardSettings /></ProtectedRoute>} />
+          {/* Route 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
+      <CookieConsent />
+    </>
+  );
+};
+
 const App: React.FC = () => {
   const { isMaintenance, isLoading: isMaintenanceLoading, error: maintenanceError } = useMaintenance();
   const { session, userRole, isChecking: isAuthChecking } = useAuth();
@@ -179,116 +231,28 @@ const App: React.FC = () => {
                 <Route path="*" element={<MaintenanceMode />} />
               </Routes>
             ) : (
-              <>
-                <Navbar />
-                <main style={{ flex: 1, paddingBottom: '20px' }}>
-                  <Routes>
-                    {/* Routes publiques */}
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/privacy" element={<Privacy />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/unauthorized" element={<Unauthorized />} />
-
-                    {/* Routes protégées */}
-
-                    <Route 
-                      path="/demande" 
-                      element={<DemandeForm />}
-                    />
-                    <Route 
-                      path="/suivi" 
-                      element={<SuiviDemande />}
-                    />
-                    <Route 
-                      path="/suivi/:trackingNumber" 
-                      element={<SuiviDemande />}
-                    />
-                    <Route 
-                      path="/etudiants" 
-                      element={<Etudiants />}
-                    />
-
-                    {/* Routes Dashboard */}
-                    <Route 
-                      path="/dashboard" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardMenu />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/pre-registrations" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardPreRegistrations />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/match" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardMatch />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/users" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardUsers />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/stats" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardStats />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/notifications" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardNotifications />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/dashboard/settings" 
-                      element={
-                        <ProtectedRoute requiredRoles={['admin']}>
-                          <DashboardSettings />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/espace-etudiant" 
-                      element={
-                        <ProtectedRoute requiredRoles={['student']}>
-                          <EspaceEtudiant />
-                        </ProtectedRoute>
-                      }
-                    />
-
-                    {/* Route 404 */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <Footer />
-                <CookieConsent />
-              </>
+              <AppContent />
             )}
           </div>
         </Router>
       </ThemeProvider>
     </HelmetProvider>
+  );
+};
+
+// HomeSwitcher reçoit maintenant selectedRole et setSelectedRole en props
+interface HomeSwitcherProps {
+  selectedRole: 'etudiant' | 'entreprise';
+  setSelectedRole: (role: 'etudiant' | 'entreprise') => void;
+}
+const HomeSwitcher: React.FC<HomeSwitcherProps> = ({ selectedRole, setSelectedRole }) => {
+  return (
+    <>
+      <RoleSwitchBar selectedRole={selectedRole} onChange={setSelectedRole} />
+      <main style={{ flex: 1, paddingBottom: '20px' }}>
+        {selectedRole === 'etudiant' ? <HomeEtudiant /> : <Home />}
+      </main>
+    </>
   );
 };
 

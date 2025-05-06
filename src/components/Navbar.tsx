@@ -26,7 +26,11 @@ import LoginIcon from '@mui/icons-material/Login';
 import { authService } from '../services/authService';
 import { UserRole } from '../types';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  modeAccueil?: 'etudiant' | 'entreprise';
+}
+
+const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -222,7 +226,7 @@ const Navbar: React.FC = () => {
               </Typography>
 
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
+                {modeAccueil === 'entreprise' && (
                   <>
                     <Button
                       component={RouterLink}
@@ -234,7 +238,6 @@ const Navbar: React.FC = () => {
                     >
                       Introduire une demande
                     </Button>
-
                     <Button
                       component={RouterLink}
                       to="/suivi"
@@ -247,17 +250,56 @@ const Navbar: React.FC = () => {
                     </Button>
                   </>
                 )}
-
-                <Button
-                  component={RouterLink}
-                  to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
-                  disableRipple
-                  disableElevation
-                  variant="text"
-                  sx={buttonStyle}
-                >
-                  {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'}
-                </Button>
+                {modeAccueil === 'etudiant' && (
+                  <Button
+                    component={RouterLink}
+                    to="/etudiants"
+                    disableRipple
+                    disableElevation
+                    variant="text"
+                    sx={buttonStyle}
+                  >
+                    Rejoindre notre espace étudiant
+                  </Button>
+                )}
+                {!modeAccueil && (
+                  <>
+                    {(!isAuthenticated || (isAuthenticated && userRole !== 'student')) && (
+                      <>
+                        <Button
+                          component={RouterLink}
+                          to="/demande"
+                          disableRipple
+                          disableElevation
+                          variant="text"
+                          sx={buttonStyle}
+                        >
+                          Introduire une demande
+                        </Button>
+                        <Button
+                          component={RouterLink}
+                          to="/suivi"
+                          disableRipple
+                          disableElevation
+                          variant="text"
+                          sx={buttonStyle}
+                        >
+                          Suivre une demande
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      component={RouterLink}
+                      to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
+                      disableRipple
+                      disableElevation
+                      variant="text"
+                      sx={buttonStyle}
+                    >
+                      {isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'}
+                    </Button>
+                  </>
+                )}
               </Box>
             </Box>
 

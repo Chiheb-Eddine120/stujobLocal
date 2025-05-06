@@ -28,8 +28,8 @@ import {
   Assignment as AssignmentIcon,
   HandshakeOutlined as HandshakeIcon,
 } from '@mui/icons-material';
-import { statisticsService } from '../services/statisticsService';
-import DashboardBackButton from '../components/DashboardBackButton';
+import { statisticsService } from '../../services/statisticsService';
+import DashboardBackButton from '../../components/DashboardBackButton';
 
 interface StatCardProps {
   title: string;

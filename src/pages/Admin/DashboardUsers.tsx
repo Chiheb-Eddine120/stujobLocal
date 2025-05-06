@@ -27,9 +27,9 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
-import { authService } from '../services/authService';
-import { UserRole } from '../types';
-import DashboardBackButton from '../components/DashboardBackButton';
+import { authService } from '../../services/authService';
+import { UserRole } from '../../types';
+import DashboardBackButton from '../../components/DashboardBackButton';
 
 interface User {
   id: string;

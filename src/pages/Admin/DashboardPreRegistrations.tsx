@@ -15,7 +15,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { supabase } from '../services/supabase';
+import { supabase } from '../../services/supabase';
 import EmailIcon from '@mui/icons-material/Email';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { format } from 'date-fns';

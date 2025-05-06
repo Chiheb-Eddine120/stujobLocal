@@ -23,8 +23,8 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import DashboardBackButton from '../components/DashboardBackButton';
-import { notificationService } from '../services/notificationService';
+import DashboardBackButton from '../../components/DashboardBackButton';
+import { notificationService } from '../../services/notificationService';
 
 interface Notification {
   id: string;

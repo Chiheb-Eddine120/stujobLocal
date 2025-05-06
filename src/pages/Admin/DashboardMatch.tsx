@@ -33,11 +33,11 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
 } from '@mui/icons-material';
-import { demandeService } from '../services/demandeService';
-import { matchService } from '../services/matchService';
-import { Demande, Etudiant, Match } from '../types';
-import DashboardBackButton from '../components/DashboardBackButton';
-import { etudiantService } from '../services/etudiantService';
+import { demandeService } from '../../services/demandeService';
+import { matchService } from '../../services/matchService';
+import { Demande, Etudiant, Match } from '../../types';
+import DashboardBackButton from '../../components/DashboardBackButton';
+import { etudiantService } from '../../services/etudiantService';
 
 /*interface FilterState {
   competences: string[];
