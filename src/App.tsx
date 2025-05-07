@@ -138,8 +138,8 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      <Navbar modeAccueil={modeAccueil} />
-      {showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
+      {location.pathname !== '/login' && location.pathname !== '/register' && <Navbar modeAccueil={modeAccueil} />}
+      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/demande' && !location.pathname.startsWith('/suivi') && showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
       <main style={{ flex: 1, paddingBottom: '20px' }}>
         <Routes>
           <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} />} />
@@ -167,7 +167,7 @@ const AppContent: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {location.pathname !== '/login' && location.pathname !== '/register' && <Footer />}
       <CookieConsent />
     </>
   );

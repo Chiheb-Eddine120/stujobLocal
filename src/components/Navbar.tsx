@@ -195,20 +195,35 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                 <MenuIcon sx={{ fontSize: 32 }} />
               </IconButton>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mr: 6 }}>
-                <Typography
-                  variant="h6"
-                  component={RouterLink}
-                  to="/"
-                  sx={{
-                    textDecoration: 'none',
-                    color: 'white',
-                    fontWeight: 700,
-                    fontSize: '1.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    '&:hover': { opacity: 0.9 },
-                    '&::after': {
+              <Box
+                component={RouterLink}
+                to="/"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  mr: 6,
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      textDecoration: 'none',
+                      color: 'white',
+                      fontWeight: 700,
+                      fontSize: '1.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      '&:hover': { opacity: 0.9 },
+                    }}
+                  >
+                    StuJob
+                  </Typography>
+                  <Box
+                    sx={{
                       content: '""',
                       display: 'inline-block',
                       width: '12px',
@@ -216,12 +231,10 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                       backgroundColor: 'white',
                       transform: 'rotate(45deg)',
                       marginLeft: '2px',
-                      marginBottom: '8px'
-                    }
-                  }}
-                >
-                  StuJob
-                </Typography>
+                      marginBottom: '8px',
+                    }}
+                  />
+                </Box>
                 <span
                   style={{
                     fontFamily: "'Pacifico', cursive",
@@ -260,18 +273,6 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                       Suivre une demande
                     </Button>
                   </>
-                )}
-                {modeAccueil === 'etudiant' && (
-                  <Button
-                    component={RouterLink}
-                    to="/etudiants"
-                    disableRipple
-                    disableElevation
-                    variant="text"
-                    sx={buttonStyle}
-                  >
-                    Rejoindre notre espace étudiant
-                  </Button>
                 )}
               </Box>
             </Box>
@@ -345,20 +346,22 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                       </Menu>
                     </>
                   ) : (
-                    <Button
-                      component={RouterLink}
-                      to="/login"
-                      startIcon={<LoginIcon />}
-                      sx={{
-                        ...buttonStyle,
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        '&:hover': {
-                          background: 'rgba(255, 255, 255, 0.2)',
-                        }
-                      }}
-                    >
-                      Connexion
-                    </Button>
+                    modeAccueil === 'etudiant' && (
+                      <Button
+                        component={RouterLink}
+                        to="/register"
+                        startIcon={<LoginIcon />}
+                        sx={{
+                          ...buttonStyle,
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.2)',
+                          }
+                        }}
+                      >
+                        Rejoindre notre réseau étudiant
+                      </Button>
+                    )
                   )}
                 </>
               )}
