@@ -13,8 +13,8 @@ import {
 import { authService } from '../services/authService';
 import { profileService } from '../services/profileService';
 import { etudiantService } from '../services/etudiantService';
-import StudentProfileForm from '../components/StudentProfileForm';
-import StudentProfileView from '../components/StudentProfileView';
+import StudentProfileForm from '../components/Students/StudentProfileForm';
+import StudentProfileView from '../components/Students/StudentProfileView';
 import { Profile } from '../types';
 import { Etudiant } from '../types/etudiant';
 

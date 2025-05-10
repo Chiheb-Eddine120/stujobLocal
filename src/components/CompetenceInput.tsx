@@ -81,7 +81,7 @@ const CompetenceInput: React.FC<CompetenceInputProps> = ({
           <Box key={index} sx={{ mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Chip
-                label={`${competence.nom} - ${competence.niveau}`}
+                label={`${competence.nom || 'Compétence'} - ${competence.niveau || ''}`}
                 onDelete={() => handleRemoveCompetence(index)}
                 onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
                 sx={{ 

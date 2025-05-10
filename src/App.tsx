@@ -36,6 +36,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import HomeEtudiant from './pages/HomeEtudiant';
 import RoleSwitchBar from './components/RoleSwitchBar';
 import LoadingSpinner from './components/loading/LoadingSpinner';
+import StudentDashboardPage from './pages/StudentDashboardPage';
 
 const theme = createTheme({
   palette: {
@@ -163,6 +164,7 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/stats" element={<ProtectedRoute requiredRoles={['admin']}><DashboardStats /></ProtectedRoute>} />
           <Route path="/dashboard/notifications" element={<ProtectedRoute requiredRoles={['admin']}><DashboardNotifications /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requiredRoles={['admin']}><DashboardSettings /></ProtectedRoute>} />
+          <Route path="/dashboard-etudiant" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

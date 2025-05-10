@@ -71,26 +71,6 @@ const HomeEtudiant: React.FC = () => {
           >
             Rejoindre le réseau étudiant
           </Button>
-          <Button
-            component={RouterLink}
-            to="/offres"
-            variant="outlined"
-            sx={{
-              borderColor: '#9333EA',
-              color: '#9333EA',
-              borderRadius: '25px',
-              px: 6,
-              py: 2,
-              fontSize: '1.1rem',
-              '&:hover': {
-                borderColor: '#7928CA',
-                color: '#7928CA',
-                bgcolor: 'rgba(147, 51, 234, 0.04)'
-              }
-            }}
-          >
-            Découvrir les offres
-          </Button>
         </Box>
       </Container>
 

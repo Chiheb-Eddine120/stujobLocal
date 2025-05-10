@@ -18,8 +18,8 @@ import {
   Phone as PhoneIcon,
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
-import { Profile } from '../types';
-import { Etudiant } from '../types/etudiant';
+import { Profile } from '../../types';
+import { Etudiant } from '../../types/etudiant';
 
 interface StudentProfileViewProps {
   profile: Profile;
@@ -256,7 +256,7 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ profile, etudia
                 {etudiant.competences.map((comp, index) => (
                   <Chip
                     key={index}
-                    label={`${comp.nom}${comp.niveau ? ` - ${comp.niveau}` : ''}`}
+                    label={`${comp.label}${comp.niveau ? ` - ${comp.niveau}` : ''}`}
                     sx={{ 
                       bgcolor: '#F3E8FF',
                       color: '#9333EA',

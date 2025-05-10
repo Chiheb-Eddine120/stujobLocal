@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -37,6 +37,8 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const isDashboardEtudiant = location.pathname.startsWith('/dashboard-etudiant');
   //const theme = useTheme();
 
   useEffect(() => {
@@ -127,6 +129,15 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
             sx={{ py: 2 }}
           >
             <ListItemText primary="Dashboard" />
+          </ListItem>
+        )}
+        {isAuthenticated && userRole === 'student' && isDashboardEtudiant && (
+          <ListItem 
+            button 
+            onClick={handleLogout}
+            sx={{ py: 2, mt: 2 }}
+          >
+            <ListItemText primary={<span style={{ color: '#e53935', fontWeight: 600 }}>Déconnexion</span>} />
           </ListItem>
         )}
       </List>
@@ -313,19 +324,71 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                           Dashboard
                         </Button>
                       )}
-                      <IconButton
-                        onClick={handleMenu}
-                        sx={{
-                          color: 'white',
-                          '&:hover': {
-                            background: 'rgba(255, 255, 255, 0.1)',
-                          }
-                        }}
-                      >
-                        <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
-                          {userRole?.[0].toUpperCase()}
-                        </Avatar>
-                      </IconButton>
+                      {userRole === 'student' && isDashboardEtudiant ? (
+                        <>
+                          <IconButton
+                            onClick={handleMenu}
+                            sx={{
+                              color: 'white',
+                              ml: 1,
+                              '&:hover': {
+                                background: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            }}
+                          >
+                            <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
+                              {userRole?.[0].toUpperCase()}
+                            </Avatar>
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          {userRole === 'student' && !isDashboardEtudiant && (
+                            <Button
+                              component={RouterLink}
+                              to="/dashboard-etudiant"
+                              startIcon={
+                                <DashboardIcon 
+                                  sx={{
+                                    transition: 'transform 0.3s ease',
+                                    transform: 'rotate(0deg)',
+                                    '.MuiButton-root:hover &': {
+                                      transform: 'rotate(90deg)',
+                                    },
+                                  }}
+                                />
+                              }
+                              sx={{
+                                ...buttonStyle,
+                                background: 'rgba(255, 255, 255, 0.1)',
+                                ml: 2,
+                                '&:hover': {
+                                  background: 'white',
+                                  color: '#9333EA',
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 4px 8px rgba(147, 51, 234, 0.2)',
+                                }
+                              }}
+                            >
+                              Mon espace étudiant
+                            </Button>
+                          )}
+                          <IconButton
+                            onClick={handleMenu}
+                            sx={{
+                              color: 'white',
+                              ml: 1,
+                              '&:hover': {
+                                background: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            }}
+                          >
+                            <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
+                              {userRole?.[0].toUpperCase()}
+                            </Avatar>
+                          </IconButton>
+                        </>
+                      )}
                       <Menu
                         anchorEl={anchorEl}
                         open={Boolean(anchorEl)}

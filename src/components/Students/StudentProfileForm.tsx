@@ -27,12 +27,12 @@ import {
   Save as SaveIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { Profile, Etudiant, Experience, DocumentFile, Competence, Langue, Disponibilite } from '../types/etudiant';
-import FileUpload from './FileUpload';
-import CompetenceInput from './CompetenceInput';
-import LangueInput from './LangueInput';
-import DisponibiliteDialog from './DisponibiliteDialog';
-import { supabase } from '../services/supabaseClient';
+import { Profile, Etudiant, Experience, DocumentFile, Competence, Langue, Disponibilite } from '../../types/etudiant';
+import FileUpload from '../FileUpload';
+import CompetenceInput from '../CompetenceInput';
+import LangueInput from '../LangueInput';
+import DisponibiliteDialog from '../DisponibiliteDialog';
+import { supabase } from '../../services/supabaseClient';
 
 interface StudentProfileFormProps {
   profile: Profile;

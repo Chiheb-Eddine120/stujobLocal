@@ -58,7 +58,7 @@ const Footer: React.FC = () => {
                 StuJob
               </Typography>
               <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-                Trouvez un étudiant fiable, sans perdre de temps.
+              Parce que la fiabilité, c’est aussi une question de lien.              
               </Typography>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <IconButton 
