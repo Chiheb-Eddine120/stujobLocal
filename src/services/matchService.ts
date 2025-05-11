@@ -2,11 +2,6 @@ import { supabase } from './supabaseClient';
 import { Match, Demande, Etudiant, Profile, Competence } from '../types';
 //import { etudiantService } from './etudiantService';
 
-interface EtudiantWithProfile extends Etudiant {
-  profile: Profile;
-  competences: Competence[];
-}
-
 export const matchService = {
   async createMatch(match: Omit<Match, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase
