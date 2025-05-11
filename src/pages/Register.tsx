@@ -11,7 +11,6 @@ import {
   Grid,
 } from '@mui/material';
 import { authService } from '../services/authService';
-import SimpleHeader from '../components/SimpleHeader';
 import PersonIcon from '@mui/icons-material/Person';
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';

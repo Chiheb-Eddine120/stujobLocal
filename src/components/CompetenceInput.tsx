@@ -10,9 +10,7 @@ import {
   MenuItem,
   Collapse,
   Button,
-  //Tooltip,
 } from '@mui/material';
-//import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Competence } from '../types';

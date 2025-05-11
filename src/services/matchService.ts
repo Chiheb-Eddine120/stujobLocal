@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import { Match, Demande, Etudiant, Profile, Competence } from '../types';
+import { Match, Demande, Etudiant, Competence } from '../types';
 //import { etudiantService } from './etudiantService';
 
 export const matchService = {
@@ -181,6 +181,7 @@ export const matchService = {
 
   async searchEtudiants(competencesRequises: Array<{ competence: string; priorite: 'Obligatoire' | 'Flexible' | 'Optionnel' }>) {
     try {
+      // Filtrer les étudiants en fonction des compétences requises
       const { data: etudiants, error } = await supabase
         .from('etudiants')
         .select('*, profile:profiles(*)')
@@ -188,7 +189,20 @@ export const matchService = {
 
       if (error) throw error;
 
-      return etudiants || [];
+      // Filtrer les étudiants qui ont au moins une des compétences requises
+      const filteredEtudiants = etudiants?.filter(etudiant => {
+        if (!etudiant.competences || !etudiant.competences.length) return false;
+        
+        return competencesRequises.some(requise => 
+          etudiant.competences.some((comp: string | Competence) => {
+            if (!comp) return false;
+            const compName = typeof comp === 'string' ? comp : (comp.label || comp.nom);
+            return compName?.toLowerCase() === requise.competence.toLowerCase();
+          })
+        );
+      });
+
+      return filteredEtudiants || [];
     } catch (error) {
       console.error('Erreur lors de la recherche des étudiants:', error);
       return [];

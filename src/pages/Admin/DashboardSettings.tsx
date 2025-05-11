@@ -33,7 +33,6 @@ import {
 } from '@mui/icons-material';
 import { getSettings, updateSettings, setMaintenanceMode } from '../../services/settings';
 import DashboardBackButton from '../../components/DashboardBackButton';
-//import MaintenanceToggle from '../components/MaintenanceToggle';
 import { useMaintenance } from '../../hooks/useMaintenance';
 import { supabase } from '../../services/supabase';
 

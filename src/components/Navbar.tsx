@@ -15,8 +15,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  //useMediaQuery,
-  //useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -39,7 +37,6 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isDashboardEtudiant = location.pathname.startsWith('/dashboard-etudiant');
-  //const theme = useTheme();
 
   useEffect(() => {
     const checkAuth = async () => {
