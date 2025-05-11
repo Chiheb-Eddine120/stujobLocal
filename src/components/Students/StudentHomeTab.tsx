@@ -45,7 +45,7 @@ const StudentHomeTab: React.FC<StudentHomeTabProps> = ({ profile, etudiant }) =>
         <Grid container spacing={2}>
           {/* Colonne latérale gauche */}
           <Grid item xs={12} md={4}>
-            <UserProfileCard profile={profile} etudiant={etudiant} />
+            <UserProfileCard profile={profile} />
             <ActivityFeed />
             <DocumentSection cv={etudiant.cv_file?.cv} />
             <AvailabilitySection disponibilites={etudiant.disponibilite?.disponibilites} />
