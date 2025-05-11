@@ -3,13 +3,14 @@ import { Box, Typography, Paper } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import MailIcon from '@mui/icons-material/Mail';
 import PhoneIcon from '@mui/icons-material/Phone';
-import { Profile } from '../../types';
+import { Profile, Etudiant } from '../../types';
 
 interface UserProfileCardProps {
   profile: Profile;
+  etudiant: Etudiant;
 }
 
-const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => (
+const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile, etudiant }) => (
   <Paper
     elevation={0}
     sx={{
