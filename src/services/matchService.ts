@@ -89,25 +89,42 @@ export const matchService = {
 
   async calculateMatchScore(demande: Demande, etudiant: Etudiant): Promise<number> {
     let score = 0;
-    // On prend les suggestions_competences comme référence
-    const requises = demande.suggestions_competences || [];
+    let totalWeight = 0;
+    
+    // On prend les suggestions_competences et competences_personnalisees comme référence
+    const requises = [...(demande.suggestions_competences || []), ...(demande.competences_personnalisees || [])];
     if (!etudiant.competences || etudiant.competences.length === 0 || requises.length === 0) {
       return 0;
     }
+
+    // Définir les poids selon la priorité
+    const poidsPriorite = {
+      'Obligatoire': 3,
+      'Flexible': 2,
+      'Optionnel': 1
+    };
+
     for (const requise of requises) {
       const match = etudiant.competences.some(comp => {
         if (!comp) return false;
         if (typeof comp === 'string') {
-          return (comp as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+          return (comp as string).trim().toLowerCase() === requise.competence.trim().toLowerCase();
         }
-        if (typeof comp === 'object' && comp.label) {
-          return (comp.label as string).trim().toLowerCase() === (requise as string).trim().toLowerCase();
+        if (typeof comp === 'object' && (comp.label || comp.nom)) {
+          // On vérifie label ou nom
+          const nomComp = comp.label || comp.nom;
+          return (nomComp as string).trim().toLowerCase() === requise.competence.trim().toLowerCase();
         }
         return false;
       });
-      if (match) score += 1;
+
+      if (match) {
+        score += poidsPriorite[requise.priorite];
+      }
+      totalWeight += poidsPriorite[requise.priorite];
     }
-    return Math.round((score / requises.length) * 100);
+
+    return Math.round((score / totalWeight) * 100);
   },
 
   async generateMatchesForDemande(demande: Demande, minScore: number = 60) {
@@ -124,14 +141,8 @@ export const matchService = {
       if (existingMatches && existingMatches.length > 0) {
         return existingMatches;
       }
-      
-      const competencesRequises = demande.suggestions_competences.map(nom => ({ nom }));
-      
-      if (!competencesRequises.length) {
-        return [];
-      }
 
-      const etudiants = await this.searchEtudiants(competencesRequises);
+      const etudiants = await this.searchEtudiants(demande.suggestions_competences);
 
       if (!etudiants.length) {
         return [];
@@ -151,57 +162,38 @@ export const matchService = {
         return [];
       }
 
-      const createdMatches = await Promise.all(
-        potentialMatches.map(async ({ etudiant, score }) => {
-          try {
-            if (!etudiant.id) {
-              throw new Error('ID d\'étudiant manquant');
-            }
-            const match = await this.createMatch({
-              demande_id: demande.id,
-              etudiant_id: etudiant.id,
-              statut: 'proposé',
-              notes_admin: `Score de compatibilité: ${score}%`
-            });
-            return match;
-          } catch (error) {
-            console.error('Erreur lors de la création du match pour l\'étudiant:', etudiant.id, error);
-            return null;
-          }
-        })
-      );
+      // Créer les matches dans la base de données
+      const matchesToCreate = potentialMatches.map(match => ({
+        demande_id: demande.id,
+        etudiant_id: match.etudiant.id,
+        statut: 'proposé',
+        score: match.score
+      }));
 
-      const successfulMatches = createdMatches.filter(match => match !== null);
+      const { data: createdMatches, error } = await supabase
+        .from('matches')
+        .insert(matchesToCreate)
+        .select();
 
-      return successfulMatches;
+      if (error) throw error;
+
+      return createdMatches || [];
     } catch (error) {
       console.error('Erreur lors de la génération des matches:', error);
       throw error;
     }
   },
 
-  async searchEtudiants(competencesRequises: { nom: string }[]): Promise<EtudiantWithProfile[]> {
+  async searchEtudiants(competencesRequises: Array<{ competence: string; priorite: 'Obligatoire' | 'Flexible' | 'Optionnel' }>) {
     try {
-      const competenceNoms = competencesRequises.map(comp => comp.nom);
-
       const { data: etudiants, error } = await supabase
         .from('etudiants')
-        .select(`
-          *,
-          profile:profiles(*)
-        `);
+        .select('*, profile:profiles(*)')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Filtrer les étudiants qui ont les compétences requises
-      const etudiantsFiltres = etudiants?.filter(etudiant => {
-        const competencesEtudiant = etudiant.competences || [];
-        return competenceNoms.some(nom => 
-          competencesEtudiant.some((comp: Competence) => comp.nom === nom)
-        );
-      }) || [];
-
-      return etudiantsFiltres as EtudiantWithProfile[];
+      return etudiants || [];
     } catch (error) {
       console.error('Erreur lors de la recherche des étudiants:', error);
       return [];

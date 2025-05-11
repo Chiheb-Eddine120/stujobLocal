@@ -57,13 +57,13 @@ const Contact: React.FC = () => {
     },
     {
       icon: <PhoneIcon />,
-      title: 'Téléphone',
-      content: '+33 6 XX XX XX XX',
+      title: 'Téléphone', 
+      content: '+32 460 97 89 72',
     },
     {
       icon: <LocationOnIcon />,
       title: 'Adresse',
-      content: 'Paris, France',
+      content: 'Av. du Ciseau 15, 1348 Ottignies-Louvain-la-Neuve (Belgique)',
     },
   ];
 

@@ -1,15 +1,26 @@
 import React from 'react';
 import { Container, Typography, Button, Box, Grid, Paper, Card, CardContent, CardMedia } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 //import SchoolIcon from '@mui/icons-material/School';
 import WorkIcon from '@mui/icons-material/Work';
 //import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import PersonIcon from '@mui/icons-material/Person';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { supabase } from '../services/supabase';
 
 const HomeEtudiant: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
+  const navigate = useNavigate();
+
+  const handleJoinClick = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      navigate('/dashboard-etudiant');
+    } else {
+      navigate('/register');
+    }
+  };
 
   const handleToggle = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -55,8 +66,7 @@ const HomeEtudiant: React.FC = () => {
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
-            component={RouterLink}
-            to="/etudiants"
+            onClick={handleJoinClick}
             variant="contained"
             sx={{
               bgcolor: '#9333EA',

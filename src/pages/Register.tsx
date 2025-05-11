@@ -16,6 +16,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Logo from '../components/Logo';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -154,8 +155,7 @@ const Register: React.FC = () => {
               p: { xs: 5, md: 8 },
               boxSizing: 'border-box',
             }}>
-              <SimpleHeader />
-              <Box sx={{ height: 24 }} />
+              <Logo variant="students" fontSize={32} />
               <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 32, md: 38 }, mb: 1, lineHeight: 1.1 }}>
                 Inscription Étudiant
               </Typography>

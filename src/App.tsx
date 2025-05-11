@@ -37,6 +37,8 @@ import HomeEtudiant from './pages/HomeEtudiant';
 import RoleSwitchBar from './components/RoleSwitchBar';
 import LoadingSpinner from './components/loading/LoadingSpinner';
 import StudentDashboardPage from './pages/StudentDashboardPage';
+import ResetPassword from './pages/ResetPassword';
+import AdminSupport from './pages/Admin/AdminSupport';
 
 const theme = createTheme({
   palette: {
@@ -139,8 +141,8 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {location.pathname !== '/login' && location.pathname !== '/register' && <Navbar modeAccueil={modeAccueil} />}
-      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/demande' && !location.pathname.startsWith('/suivi') && showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
+      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/reset-password' && <Navbar modeAccueil={modeAccueil} />}
+      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/demande' && !location.pathname.startsWith('/suivi') && location.pathname !== '/reset-password' && showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
       <main style={{ flex: 1, paddingBottom: '20px' }}>
         <Routes>
           <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} />} />
@@ -165,11 +167,13 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/notifications" element={<ProtectedRoute requiredRoles={['admin']}><DashboardNotifications /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requiredRoles={['admin']}><DashboardSettings /></ProtectedRoute>} />
           <Route path="/dashboard-etudiant" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/dashboard/AdminSupport" element={<ProtectedRoute requiredRoles={['admin']}><AdminSupport /></ProtectedRoute>} />
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {location.pathname !== '/login' && location.pathname !== '/register' && <Footer />}
+      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/reset-password' && <Footer />}
       <CookieConsent />
     </>
   );

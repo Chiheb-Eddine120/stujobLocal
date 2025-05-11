@@ -57,7 +57,7 @@ const DashboardMenu: React.FC = () => {
       title: 'Support',
       description: 'Gérer les tickets de support',
       icon: <SupportIcon sx={{ fontSize: 40 }} />,
-      link: '/dashboard/support',
+      link: '/dashboard/AdminSupport',
       color: '#E355A3',
     },
     {

@@ -7,14 +7,19 @@ import {
   Button,
   Box,
   Typography,
-  IconButton,
-  TextField,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { Disponibilite } from '../types/etudiant';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+const PERIODES = [
+  { id: 'matin', label: 'Matin' },
+  { id: 'apres_midi', label: 'Après-midi' },
+  { id: 'soir', label: 'Soir' },
+  { id: 'journee', label: 'Journée complète' }
+];
 
 interface DisponibiliteDialogProps {
   open: boolean;
@@ -26,24 +31,34 @@ interface DisponibiliteDialogProps {
 const DisponibiliteDialog: React.FC<DisponibiliteDialogProps> = ({ open, disponibilites, onClose, onSave }) => {
   const [localDispos, setLocalDispos] = useState<Disponibilite[]>(disponibilites);
 
-  const handleAddCreneau = (jour: string) => {
-    setLocalDispos(prev => ([
-      ...prev,
-      { jour, debut: '', fin: '' }
-    ]));
+  const handlePeriodChange = (jour: string, periode: string, checked: boolean) => {
+    setLocalDispos(prev => {
+      // Si on coche "Journée complète", on décoche les autres périodes
+      if (periode === 'journee' && checked) {
+        return prev.filter(d => d.jour !== jour || d.debut === 'journee');
+      }
+      
+      // Si on coche une autre période alors que "Journée complète" est cochée, on la décoche
+      if (periode !== 'journee' && checked) {
+        const filtered = prev.filter(d => d.jour !== jour || d.debut !== 'journee');
+        return [...filtered, { jour, debut: periode, fin: periode }];
+      }
+
+      // Si on décoche une période
+      if (!checked) {
+        return prev.filter(d => !(d.jour === jour && d.debut === periode));
+      }
+
+      return prev;
+    });
   };
 
-  const handleChangeCreneau = (index: number, field: 'debut' | 'fin', value: string) => {
-    setLocalDispos(prev => prev.map((d, i) => i === index ? { ...d, [field]: value } : d));
-  };
-
-  const handleRemoveCreneau = (index: number) => {
-    setLocalDispos(prev => prev.filter((_, i) => i !== index));
+  const isPeriodChecked = (jour: string, periode: string) => {
+    return localDispos.some(d => d.jour === jour && d.debut === periode);
   };
 
   const handleSave = () => {
-    // Filtrer les créneaux vides
-    onSave(localDispos.filter(d => d.jour && d.debut && d.fin));
+    onSave(localDispos);
     onClose();
   };
 
@@ -52,41 +67,25 @@ const DisponibiliteDialog: React.FC<DisponibiliteDialogProps> = ({ open, disponi
       <DialogTitle>Mes disponibilités</DialogTitle>
       <DialogContent>
         <Typography variant="body2" sx={{ mb: 2 }}>
-          Sélectionnez vos créneaux de disponibilité pour chaque jour de la semaine.
+          Sélectionnez vos périodes de disponibilité pour chaque jour de la semaine.
         </Typography>
         {JOURS.map(jour => (
-          <Box key={jour} sx={{ mb: 2, borderBottom: '1px solid #eee', pb: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="subtitle1" sx={{ flex: 1 }}>{jour}</Typography>
-              <IconButton size="small" onClick={() => handleAddCreneau(jour)}>
-                <AddIcon fontSize="small" />
-              </IconButton>
-            </Box>
-            {localDispos.map((d, idx) => d.jour === jour && (
-              <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <TextField
-                  type="time"
-                  label="Début"
-                  value={d.debut}
-                  onChange={e => handleChangeCreneau(idx, 'debut', e.target.value)}
-                  size="small"
-                  sx={{ width: 120 }}
-                  InputLabelProps={{ shrink: true }}
+          <Box key={jour} sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>{jour}</Typography>
+            <FormGroup>
+              {PERIODES.map(periode => (
+                <FormControlLabel
+                  key={periode.id}
+                  control={
+                    <Checkbox
+                      checked={isPeriodChecked(jour, periode.id)}
+                      onChange={(e) => handlePeriodChange(jour, periode.id, e.target.checked)}
+                    />
+                  }
+                  label={periode.label}
                 />
-                <TextField
-                  type="time"
-                  label="Fin"
-                  value={d.fin}
-                  onChange={e => handleChangeCreneau(idx, 'fin', e.target.value)}
-                  size="small"
-                  sx={{ width: 120 }}
-                  InputLabelProps={{ shrink: true }}
-                />
-                <IconButton size="small" onClick={() => handleRemoveCreneau(idx)}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ))}
+              ))}
+            </FormGroup>
           </Box>
         ))}
       </DialogContent>

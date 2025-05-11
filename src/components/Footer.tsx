@@ -152,11 +152,11 @@ const Footer: React.FC = () => {
               Contact
             </Typography>
             <Stack spacing={2}>
-              <Typography sx={{ color: 'white', opacity: 0.9, fontSize: '1rem' }}>
+              <Link href="mailto:contact@stujob.be" sx={{ color: 'white', opacity: 0.9, fontSize: '1rem', textDecoration: 'none', '&:hover': { opacity: 1 } }}>
                 contact@stujob.be
-              </Typography>
+              </Link>
               <Typography sx={{ color: 'white', opacity: 0.9, fontSize: '1rem' }}>
-                +33 6 XX XX XX XX
+                +32 460 97 89 72
               </Typography>
               <Typography sx={{ color: 'white', opacity: 0.9, fontSize: '1rem' }}>
                 Av. du Ciseau 15, 1348

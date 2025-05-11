@@ -268,7 +268,7 @@ const SuiviDemande: React.FC = () => {
                 <IconButton
                   aria-label="Copier le numéro de suivi"
                   onClick={() => {
-                    navigator.clipboard.writeText(demande.id);
+                    navigator.clipboard.writeText(demande.code_demande);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 1200);
                   }}
@@ -292,7 +292,7 @@ const SuiviDemande: React.FC = () => {
               wordBreak: 'break-all',
               justifyContent: 'space-between',
             }}>
-              {demande.id}
+              {demande.code_demande}
             </Box>
 
             <Divider sx={{ my: 3 }} />

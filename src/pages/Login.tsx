@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { authService } from '../services/authService';
-import SimpleHeader from '../components/SimpleHeader';
+import Logo from '../components/Logo';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
           p: { xs: 5, md: 8 },
           boxSizing: 'border-box',
         }}>
-          <SimpleHeader />
+          <Logo variant="students" fontSize={32} />
           <Box sx={{ height: 24 }} />
           <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 32, md: 38 }, mb: 1, lineHeight: 1.1 }}>
             Connexion
@@ -101,10 +101,19 @@ const Login: React.FC = () => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               disabled={loading}
-              sx={{ mb: 4 }}
+              sx={{ mb: 2 }}
               InputProps={{ style: { fontSize: 18 } }}
               InputLabelProps={{ style: { fontSize: 18 } }}
             />
+            <Button
+              variant="text"
+              fullWidth
+              onClick={() => navigate('/reset-password')}
+              disabled={loading}
+              sx={{ mb: 2, fontSize: 16, color: '#9333EA', textTransform: 'none', fontWeight: 500 }}
+            >
+              Mot de passe oublié ?
+            </Button>
             <Button
               type="submit"
               variant="contained"

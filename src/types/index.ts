@@ -97,15 +97,20 @@ export interface Demande {
   adresse: string;
   secteur: Secteur;
   email: string;
-  priorite: 'Obligatoire' | 'Flexible' | 'Optionnel';
   delai_recrutement: string;
   duree_mission: string;
-  profil: string;
   nombre_personnes: number;
   remarques: string;
   status: 'en_attente' | 'en_traitement' | 'etudiant_trouve' | 'termine';
   description_demande: string;
-  suggestions_competences: string[];
+  suggestions_competences: Array<{
+    competence: string;
+    priorite: 'Obligatoire' | 'Flexible' | 'Optionnel';
+  }>;
+  competences_personnalisees: Array<{
+    competence: string;
+    priorite: 'Obligatoire' | 'Flexible' | 'Optionnel';
+  }>;
   created_at: string;
   telephone?: string;
   ville: string;

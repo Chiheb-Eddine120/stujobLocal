@@ -25,6 +25,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import { authService } from '../services/authService';
 import { UserRole } from '../types';
+import Logo from './Logo';
 
 interface NavbarProps {
   modeAccueil?: 'etudiant' | 'entreprise';
@@ -218,46 +219,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                   cursor: 'pointer',
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      textDecoration: 'none',
-                      color: 'white',
-                      fontWeight: 700,
-                      fontSize: '1.5rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      '&:hover': { opacity: 0.9 },
-                    }}
-                  >
-                    StuJob
-                  </Typography>
-                  <Box
-                    sx={{
-                      content: '""',
-                      display: 'inline-block',
-                      width: '12px',
-                      height: '12px',
-                      backgroundColor: 'white',
-                      transform: 'rotate(45deg)',
-                      marginLeft: '2px',
-                      marginBottom: '8px',
-                    }}
-                  />
-                </Box>
-                <span
-                  style={{
-                    fontFamily: "'Pacifico', cursive",
-                    fontSize: 18,
-                    color: 'white',
-                    marginLeft: 2,
-                    marginTop: -4,
-                    letterSpacing: 1,
-                  }}
-                >
-                  {modeAccueil === 'entreprise' ? 'For Partners' : 'For Students'}
-                </span>
+                <Logo variant={modeAccueil === 'entreprise' ? 'partners' : 'students'} fontSize={28} color="white" />
               </Box>
 
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

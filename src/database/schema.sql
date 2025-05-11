@@ -68,10 +68,62 @@ create policy "Les étudiants peuvent modifier leur propre profil"
 alter table demandes 
   add column if not exists description_projet text,
   add column if not exists suggestions_competences jsonb default '[]'::jsonb,
-  add column if not exists niveau_priorite text,
+  add column if not exists competences_personnalisees jsonb default '[]'::jsonb,
+  drop column if exists priorite,
   add column if not exists duree_mission text,
   add column if not exists date_debut_souhaitee date,
   add column if not exists budget text;
+
+-- Mise à jour des données existantes pour le nouveau format
+UPDATE demandes 
+SET suggestions_competences = (
+  SELECT jsonb_agg(
+    jsonb_build_object(
+      'competence', competence,
+      'priorite', 'Flexible'
+    )
+  )
+  FROM jsonb_array_elements_text(suggestions_competences) AS competence
+)
+WHERE suggestions_competences IS NOT NULL;
+
+-- Ajout d'une contrainte pour s'assurer que le format est correct
+ALTER TABLE demandes 
+  ADD CONSTRAINT check_suggestions_competences_format 
+  CHECK (
+    suggestions_competences IS NULL OR 
+    (
+      jsonb_typeof(suggestions_competences) = 'array' AND
+      NOT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(suggestions_competences) AS comp
+        WHERE NOT (
+          jsonb_typeof(comp->'competence') = 'string' AND
+          jsonb_typeof(comp->'priorite') = 'string' AND
+          (comp->>'priorite')::text IN ('Obligatoire', 'Flexible', 'Optionnel')
+        )
+      )
+    )
+  );
+
+-- Ajout d'une contrainte pour s'assurer que le format des compétences personnalisées est correct
+ALTER TABLE demandes 
+  ADD CONSTRAINT check_competences_personnalisees_format 
+  CHECK (
+    competences_personnalisees IS NULL OR 
+    (
+      jsonb_typeof(competences_personnalisees) = 'array' AND
+      NOT EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(competences_personnalisees) AS comp
+        WHERE NOT (
+          jsonb_typeof(comp->'competence') = 'string' AND
+          jsonb_typeof(comp->'priorite') = 'string' AND
+          (comp->>'priorite')::text IN ('Obligatoire', 'Flexible', 'Optionnel')
+        )
+      )
+    )
+  );
 
 create trigger update_demandes_updated_at
     before update on demandes
@@ -196,4 +248,35 @@ create policy "Les admins peuvent gérer toutes les demandes d'entreprises"
             where profiles.id = auth.uid()
             and profiles.role = 'admin'
         )
-    ); 
+    );
+
+-- Table tickets pour le support
+create table tickets (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references profiles(id) on delete set null,
+  email text not null,
+  message text not null,
+  statut text default 'ouvert' check (statut in ('ouvert', 'en_cours', 'resolu')),
+  priorite text default 'normale' check (priorite in ('basse', 'normale', 'haute', 'critique')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create trigger update_tickets_updated_at
+    before update on tickets
+    for each row
+    execute function update_updated_at_column();
+
+alter table tickets enable row level security;
+
+create policy "Les admins peuvent voir tous les tickets"
+  on tickets for select
+  using (auth.role() = 'authenticated');
+
+create policy "Un utilisateur peut créer un ticket"
+  on tickets for insert
+  with check (true);
+
+create policy "Un admin peut modifier le statut d'un ticket"
+  on tickets for update
+  using (auth.role() = 'authenticated'); 

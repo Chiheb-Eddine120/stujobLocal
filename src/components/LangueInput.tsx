@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Autocomplete, TextField, Box, MenuItem, Chip, Typography, Paper } from '@mui/material';
+import { Autocomplete, TextField, Box, MenuItem, Chip, Typography, Paper, IconButton } from '@mui/material';
 import { Langue } from '../types/etudiant';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 
 const LANGUES_SUGGESTIONS = [
   'Français',
@@ -27,16 +29,16 @@ interface LangueInputProps {
 const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, error }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
-  const [selectedNiveau, setSelectedNiveau] = useState<(typeof NIVEAUX)[number]>('A1');
+  const [selectedNiveau, setSelectedNiveau] = useState<number>(0);
 
   const handleAddLangue = () => {
     if (selectedLangue && !langues.some(l => l.nom === selectedLangue)) {
       onLanguesChange([
         ...langues,
-        { nom: selectedLangue, niveau: selectedNiveau as Langue['niveau'] }
+        { nom: selectedLangue, niveau: selectedNiveau }
       ]);
       setSelectedLangue('');
-      setSelectedNiveau('A1');
+      setSelectedNiveau(0);
       setInputValue('');
     }
   };
@@ -45,6 +47,10 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
     const newLangues = [...langues];
     newLangues.splice(index, 1);
     onLanguesChange(newLangues);
+  };
+
+  const handleStarClick = (star: number) => {
+    setSelectedNiveau(star);
   };
 
   return (
@@ -56,7 +62,7 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
         {langues.map((langue, idx) => (
           <Chip
             key={langue.nom}
-            label={`${langue.nom} - ${langue.niveau}`}
+            label={`${langue.nom} - ${langue.niveau} étoile${langue.niveau > 1 ? 's' : ''}`}
             onDelete={() => handleRemoveLangue(idx)}
             sx={{ m: 0.5 }}
           />
@@ -81,17 +87,18 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
           )}
           sx={{ flex: 1 }}
         />
-        <TextField
-          select
-          label="Niveau"
-          value={selectedNiveau}
-          onChange={e => setSelectedNiveau(e.target.value as Langue['niveau'])}
-          sx={{ width: 120 }}
-        >
-          {NIVEAUX.map(niveau => (
-            <MenuItem key={niveau} value={niveau}>{niveau}</MenuItem>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {[1,2,3,4,5].map((star) => (
+            <IconButton
+              key={star}
+              onClick={() => handleStarClick(star)}
+              color={star <= selectedNiveau ? 'warning' : 'default'}
+              size="small"
+            >
+              {star <= selectedNiveau ? <StarIcon /> : <StarBorderIcon />}
+            </IconButton>
           ))}
-        </TextField>
+        </Box>
         <button
           type="button"
           onClick={handleAddLangue}

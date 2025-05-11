@@ -41,8 +41,6 @@ const sectors: Secteur[] = [
   'Autre',
 ];
 
-const niveauxPriorite = ['Obligatoire', 'Flexible', 'Optionnel'] as const;
-
 const DemandeForm: React.FC = () => {
   const [formData, setFormData] = useState<Omit<Demande, 'id' | 'created_at'>>({
     entreprise: '',
@@ -50,15 +48,14 @@ const DemandeForm: React.FC = () => {
     adresse: '',
     secteur: 'Autre' as Secteur,
     email: '',
-    priorite: 'Flexible',
     delai_recrutement: '',
     duree_mission: '',
-    profil: '',
     nombre_personnes: 1,
     remarques: '',
     status: 'en_attente',
     description_demande: '',
     suggestions_competences: [],
+    competences_personnalisees: [],
     telephone: '',
     ville: '',
     code_demande: '',
@@ -71,6 +68,11 @@ const DemandeForm: React.FC = () => {
   const [showLegalDialog, setShowLegalDialog] = useState<boolean>(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
+  const [newCustomCompetence, setNewCustomCompetence] = useState({
+    competence: '',
+    priorite: 'Flexible' as 'Obligatoire' | 'Flexible' | 'Optionnel'
+  });
+
   const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -79,11 +81,12 @@ const DemandeForm: React.FC = () => {
     }));
   };
 
-  const handlePrioriteChange = (e: SelectChangeEvent) => {
-    const value = e.target.value as 'Obligatoire' | 'Flexible' | 'Optionnel';
+  const handlePrioriteChange = (index: number, priorite: 'Obligatoire' | 'Flexible' | 'Optionnel') => {
     setFormData((prev) => ({
       ...prev,
-      priorite: value,
+      suggestions_competences: prev.suggestions_competences.map((comp, i) => 
+        i === index ? { ...comp, priorite } : comp
+      ),
     }));
   };
 
@@ -95,10 +98,13 @@ const DemandeForm: React.FC = () => {
   };
 
   const handleSelectPredefinedCompetence = (competence: string) => {
-    if (!formData.suggestions_competences.includes(competence)) {
+    if (!formData.suggestions_competences.some(comp => comp.competence === competence)) {
       setFormData((prev) => ({
         ...prev,
-        suggestions_competences: [...prev.suggestions_competences, competence],
+        suggestions_competences: [...prev.suggestions_competences, {
+          competence,
+          priorite: 'Flexible'
+        }],
       }));
     }
   };
@@ -107,6 +113,26 @@ const DemandeForm: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       suggestions_competences: prev.suggestions_competences.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddCustomCompetence = () => {
+    if (newCustomCompetence.competence.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        competences_personnalisees: [...prev.competences_personnalisees, newCustomCompetence]
+      }));
+      setNewCustomCompetence({
+        competence: '',
+        priorite: 'Flexible'
+      });
+    }
+  };
+
+  const handleRemoveCustomCompetence = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      competences_personnalisees: prev.competences_personnalisees.filter((_, i) => i !== index)
     }));
   };
 
@@ -345,24 +371,6 @@ const DemandeForm: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <InputLabel>Priorité</InputLabel>
-              <Select
-                value={formData.priorite}
-                onChange={handlePrioriteChange}
-                label="Priorité"
-                sx={selectStyles}
-              >
-                {niveauxPriorite.map((niveau) => (
-                  <MenuItem key={niveau} value={niveau}>
-                    {niveau}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
             <TextField
               required
               fullWidth
@@ -441,27 +449,144 @@ const DemandeForm: React.FC = () => {
               </Box>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 {formData.suggestions_competences.map((comp, index) => {
-                  const competenceInfo = competencesData.competences.find(c => c.label === comp);
+                  const competenceInfo = competencesData.competences.find(c => c.label === comp.competence);
                   return (
-                    <Tooltip 
-                      key={index} 
-                      title={competenceInfo?.description}
-                      arrow
-                      placement="top"
-                    >
-                      <Chip
-                        label={comp}
-                        onDelete={() => handleRemoveCompetence(index)}
-                        sx={{
-                          borderRadius: '20px',
-                          bgcolor: '#FDF8FF',
-                          color: '#9333EA',
-                          border: '1px solid #9333EA',
-                        }}
-                      />
-                    </Tooltip>
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Tooltip 
+                        title={competenceInfo?.description}
+                        arrow
+                        placement="top"
+                      >
+                        <Chip
+                          label={comp.competence}
+                          onDelete={() => handleRemoveCompetence(index)}
+                          sx={{
+                            borderRadius: '20px',
+                            bgcolor: '#FDF8FF',
+                            color: '#9333EA',
+                            border: '1px solid #9333EA',
+                          }}
+                        />
+                      </Tooltip>
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <Select
+                          value={comp.priorite}
+                          onChange={(e) => handlePrioriteChange(index, e.target.value as 'Obligatoire' | 'Flexible' | 'Optionnel')}
+                          sx={{
+                            borderRadius: '12px',
+                            bgcolor: 'white',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#9333EA',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#9333EA',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#9333EA',
+                            },
+                          }}
+                        >
+                          <MenuItem value="Obligatoire">Obligatoire</MenuItem>
+                          <MenuItem value="Flexible">Flexible</MenuItem>
+                          <MenuItem value="Optionnel">Optionnel</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
                   );
                 })}
+              </Box>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#1F1F1F', fontWeight: 600 }}>
+              Vous n'avez pas trouvé la compétence que vous cherchez ?
+            </Typography>
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Nouvelle compétence personnalisée"
+                  value={newCustomCompetence.competence}
+                  onChange={(e) => setNewCustomCompetence(prev => ({ ...prev, competence: e.target.value }))}
+                  sx={inputStyles}
+                />
+                <FormControl sx={{ minWidth: 150 }}>
+                  <InputLabel>Priorité</InputLabel>
+                  <Select
+                    value={newCustomCompetence.priorite}
+                    onChange={(e) => setNewCustomCompetence(prev => ({ 
+                      ...prev, 
+                      priorite: e.target.value as 'Obligatoire' | 'Flexible' | 'Optionnel' 
+                    }))}
+                    label="Priorité"
+                    sx={selectStyles}
+                  >
+                    <MenuItem value="Obligatoire">Obligatoire</MenuItem>
+                    <MenuItem value="Flexible">Flexible</MenuItem>
+                    <MenuItem value="Optionnel">Optionnel</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button
+                  variant="contained"
+                  onClick={handleAddCustomCompetence}
+                  disabled={!newCustomCompetence.competence.trim()}
+                  sx={{
+                    background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
+                    borderRadius: '12px',
+                    '&:hover': {
+                      background: 'linear-gradient(90deg, #7928CA 0%, #E6447E 100%)',
+                    }
+                  }}
+                >
+                  Ajouter
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {formData.competences_personnalisees.map((comp, index) => (
+                  <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Chip
+                      label={comp.competence}
+                      onDelete={() => handleRemoveCustomCompetence(index)}
+                      sx={{
+                        borderRadius: '20px',
+                        bgcolor: '#FDF8FF',
+                        color: '#9333EA',
+                        border: '1px solid #9333EA',
+                      }}
+                    />
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <Select
+                        value={comp.priorite}
+                        onChange={(e) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            competences_personnalisees: prev.competences_personnalisees.map((c, i) => 
+                              i === index ? { ...c, priorite: e.target.value as 'Obligatoire' | 'Flexible' | 'Optionnel' } : c
+                            )
+                          }));
+                        }}
+                        sx={{
+                          borderRadius: '12px',
+                          bgcolor: 'white',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#9333EA',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#9333EA',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#9333EA',
+                          },
+                        }}
+                      >
+                        <MenuItem value="Obligatoire">Obligatoire</MenuItem>
+                        <MenuItem value="Flexible">Flexible</MenuItem>
+                        <MenuItem value="Optionnel">Optionnel</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                ))}
               </Box>
             </Box>
           </Grid>
