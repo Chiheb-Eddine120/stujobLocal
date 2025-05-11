@@ -288,7 +288,7 @@ const Home: React.FC = () => {
             <Card elevation={0} sx={{ height: '100%', bgcolor: 'white', borderRadius: 4 }}>
               <CardContent>
                 <Typography variant="h5" sx={{ mb: 3, color: '#9333EA' }}>
-                  Notre différence
+                  Nos différences
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   • Expertise dans le recrutement étudiant

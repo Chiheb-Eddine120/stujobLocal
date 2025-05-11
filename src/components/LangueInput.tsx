@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Autocomplete, TextField, Box, MenuItem, Chip, Typography, Paper, IconButton } from '@mui/material';
+import { Autocomplete, TextField, Box, Chip, Typography, Paper, IconButton } from '@mui/material';
 import { Langue } from '../types/etudiant';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -18,7 +18,7 @@ const LANGUES_SUGGESTIONS = [
   'Russe',
 ];
 
-const NIVEAUX = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const NIVEAUX: Langue['niveau'][] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
 interface LangueInputProps {
   langues: Langue[];
@@ -29,16 +29,17 @@ interface LangueInputProps {
 const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, error }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
-  const [selectedNiveau, setSelectedNiveau] = useState<number>(0);
+  const [selectedNiveau, setSelectedNiveau] = useState<Langue['niveau']>('A1');
 
   const handleAddLangue = () => {
     if (selectedLangue && !langues.some(l => l.nom === selectedLangue)) {
-      onLanguesChange([
-        ...langues,
-        { nom: selectedLangue, niveau: selectedNiveau }
-      ]);
+      const nouvelleLangue: Langue = {
+        nom: selectedLangue,
+        niveau: selectedNiveau
+      };
+      onLanguesChange([...langues, nouvelleLangue]);
       setSelectedLangue('');
-      setSelectedNiveau(0);
+      setSelectedNiveau('A1');
       setInputValue('');
     }
   };
@@ -50,7 +51,7 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
   };
 
   const handleStarClick = (star: number) => {
-    setSelectedNiveau(star);
+    setSelectedNiveau(NIVEAUX[star - 1]);
   };
 
   return (
@@ -62,7 +63,7 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
         {langues.map((langue, idx) => (
           <Chip
             key={langue.nom}
-            label={`${langue.nom} - ${langue.niveau} étoile${langue.niveau > 1 ? 's' : ''}`}
+            label={`${langue.nom} - ${langue.niveau}`}
             onDelete={() => handleRemoveLangue(idx)}
             sx={{ m: 0.5 }}
           />
@@ -88,14 +89,14 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
           sx={{ flex: 1 }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {[1,2,3,4,5].map((star) => (
+          {[1,2,3,4,5,6].map((star) => (
             <IconButton
               key={star}
               onClick={() => handleStarClick(star)}
-              color={star <= selectedNiveau ? 'warning' : 'default'}
+              color={NIVEAUX.indexOf(selectedNiveau) + 1 >= star ? 'warning' : 'default'}
               size="small"
             >
-              {star <= selectedNiveau ? <StarIcon /> : <StarBorderIcon />}
+              {NIVEAUX.indexOf(selectedNiveau) + 1 >= star ? <StarIcon /> : <StarBorderIcon />}
             </IconButton>
           ))}
         </Box>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -182,6 +182,17 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   const { isMaintenance, isLoading: isMaintenanceLoading, error: maintenanceError } = useMaintenance();
   const { session, userRole, isChecking: isAuthChecking } = useAuth();
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('tributeShown')) {
+      console.log(
+        '%cÀ mon père, Fadhel-Eddine Mosbah. Ce site lui est dédié.',
+        'color: #888; font-style: italic; font-size: 14px;'
+      );
+      console.log('LinkedIn : https://www.linkedin.com/in/fadhel-eddine-mosbah-2018/');
+      sessionStorage.setItem('tributeShown', 'true');
+    }
+  }, []);
 
   if (isMaintenanceLoading || isAuthChecking) {
     return <LoadingSpinner text="Chargement de StuJob..." />;
