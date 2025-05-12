@@ -34,6 +34,10 @@ create policy "Les utilisateurs peuvent modifier leur propre profil"
   on profiles for update
   using (auth.uid() = id);
 
+create policy "Les utilisateurs peuvent créer leur propre profil"
+  on profiles for insert
+  with check (auth.uid() = id);
+
 -- Table etudiants
 create table etudiants (
   id uuid default uuid_generate_v4() primary key,

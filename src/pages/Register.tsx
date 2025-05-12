@@ -41,7 +41,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      await authService.signUp(
+      const result = await authService.signUp(
         formData.email,
         formData.password,
         {
@@ -49,7 +49,11 @@ const Register: React.FC = () => {
           prenom: formData.prenom,
         }
       );
-      navigate('/login', { state: { message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.' } });
+      navigate('/login', { 
+        state: { 
+          message: result.message || 'Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.' 
+        } 
+      });
     } catch (err) {
       setError('Erreur lors de l\'inscription. Veuillez réessayer.');
       console.error('Erreur d\'inscription:', err);

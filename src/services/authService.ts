@@ -112,22 +112,46 @@ export const authService = {
     return this.hasRole('student');
   },
 
-  async signUp(email: string, password: string, profileData: Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'role' | 'email'>): Promise<User> {
+  async signUp(email: string, password: string, profileData: Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'role' | 'email'>): Promise<{ message: string }> {
     try {
       // 1. Créer l'utilisateur dans Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          data: {
+            role: 'student',
+            ...profileData // Stocker temporairement les données du profil dans les métadonnées
+          }
+        }
       });
 
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error('Erreur lors de la création du compte');
+      if (signUpError) {
+        console.error('Erreur lors de la création du compte:', signUpError);
+        throw new Error(`Erreur lors de la création du compte: ${signUpError.message}`);
+      }
+      
+      if (!authData.user) {
+        throw new Error('Erreur lors de la création du compte: utilisateur non créé');
+      }
 
-      // 2. Créer le profil dans la table profiles avec le client service
+      // Retourner un message indiquant que l'utilisateur doit vérifier son email
+      return {
+        message: 'Un email de vérification a été envoyé. Veuillez vérifier votre boîte mail pour activer votre compte.'
+      };
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription:', error);
+      throw error;
+    }
+  },
+
+  // Nouvelle fonction pour créer le profil après vérification de l'email
+  async createProfileAfterVerification(userId: string, email: string, profileData: Omit<Profile, 'id' | 'created_at' | 'updated_at' | 'role' | 'email'>): Promise<User> {
+    try {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: authData.user.id,
+          id: userId,
           role: 'student' as UserRole,
           email,
           ...profileData
@@ -136,7 +160,7 @@ export const authService = {
         .single();
 
       if (profileError) {
-        console.error('Erreur détaillée lors de la création du profil:', profileError);
+        console.error('Erreur lors de la création du profil:', profileError);
         throw new Error(`Erreur lors de la création du profil: ${profileError.message}`);
       }
 
@@ -145,16 +169,16 @@ export const authService = {
       }
 
       return {
-        id: authData.user.id,
-        email: authData.user.email!,
+        id: userId,
+        email,
         role: 'student',
-        nom: '',
-        prenom: '',
-        telephone: '',
-        created_at: authData.user.created_at,
+        nom: profileData.nom || '',
+        prenom: profileData.prenom || '',
+        telephone: profileData.telephone || '',
+        created_at: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
+      console.error('Erreur lors de la création du profil:', error);
       throw error;
     }
   },
