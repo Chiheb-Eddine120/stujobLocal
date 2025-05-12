@@ -69,7 +69,7 @@ const ProfileCompletionSnackbar: React.FC = () => {
             size="small"
             variant="contained"
             sx={{ bgcolor: '#9333EA', ml: 2, '&:hover': { bgcolor: '#7928CA' }, color: '#fff' }}
-            onClick={() => navigate('/espace-etudiant')}
+            onClick={() => navigate('/dashboard-etudiant')}
           >
             Compléter mon profil
           </Button>
