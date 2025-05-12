@@ -11,7 +11,7 @@ const EducationSection: React.FC<EducationSectionProps> = ({ niveau_etudes, ecol
   return (
     <Paper elevation={0} sx={{ p: 2, borderRadius: 4, background: '#FDF8FF', border: '1px solid #F3E8FF', mb: 2 }}>
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        Formation/Diplôme
+        Formation
       </Typography>
       <Box sx={{ pl: 2 }}>
         {niveau_etudes && (
