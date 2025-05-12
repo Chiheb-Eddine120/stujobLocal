@@ -289,7 +289,7 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Informations personnelles (depuis votre profil)
+          Informations personnelles
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -327,6 +327,17 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
               value={formData.telephone ?? profile.telephone ?? ''}
               onChange={handleInputChange}
               sx={{ bgcolor: 'rgba(0, 0, 0, 0.02)' }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Date de naissance"
+              name="date_naissance"
+              type="date"
+              value={formData.date_naissance || ''}
+              onChange={handleInputChange}
+              InputLabelProps={{ shrink: true }}
             />
           </Grid>
         </Grid>

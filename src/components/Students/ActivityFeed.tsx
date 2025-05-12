@@ -30,18 +30,12 @@ const ActivityFeed: React.FC = () => {
         Activité récente
       </Typography>
       <List>
-        {activities.map((activity, index) => (
-          <React.Fragment key={index}>
-            <ListItem>
-              <ListItemIcon>{activity.icon}</ListItemIcon>
-              <ListItemText primary={activity.title} secondary={activity.subtitle} />
-              {activity.chip && (
-                <Chip label={activity.chip} size="small" sx={{ backgroundColor: '#9333EA', color: 'white' }} />
-              )}
-            </ListItem>
-            {index < activities.length - 1 && <Divider />}
-          </React.Fragment>
-        ))}
+        <ListItem>
+          <ListItemText
+            primary="Aucune activité récentes"
+            sx={{ textAlign: 'center', color: 'text.secondary' }}
+          />
+        </ListItem>
       </List>
     </Paper>
   );

@@ -2,19 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Tabs,
-  Tab,
   Avatar,
   IconButton,
   Drawer,
-  useTheme,
-  useMediaQuery,
+  //useTheme,
+  //useMediaQuery,
 } from '@mui/material';
 import {
-  Home as HomeIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
   Menu as MenuIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
@@ -26,6 +20,10 @@ import StudentAlertsTab from './StudentAlertsTab';
 import { supabase } from '../../services/supabase';
 import { useNavigate } from 'react-router-dom';
 import ConfirmLogoutDialog from './ConfirmLogoutDialog';
+import StudentSubNav from './StudentSubNav';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import PhoneIcon from '@mui/icons-material/Phone';
+import CakeIcon from '@mui/icons-material/Cake';
 
 interface StudentDashboardProps {
   profile: Profile;
@@ -63,8 +61,8 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, onUpdate }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  //const theme = useTheme();
+  //const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
 
   const [settings, setSettings] = useState({
@@ -103,12 +101,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
     fetchNotifications();
   }, []);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
-    if (isMobile) {
-      setMobileOpen(false);
-    }
-  };
 
   const handleSettingChange = (setting: string, value: any) => {
     setSettings(prev => ({
@@ -144,83 +136,50 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
 
   const drawer = (
     <Box sx={{ width: 250, pt: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
         <Avatar
           sx={{
             width: 100,
             height: 100,
             mb: 2,
             border: '4px solid #9333EA',
+            fontSize: 36,
+            bgcolor: '#F3F4F6',
+            color: '#9333EA',
           }}
         >
           {profile.prenom[0]}{profile.nom[0]}
         </Avatar>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, textTransform: 'capitalize', mb: 0.5 }}>
           {profile.prenom} {profile.nom}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {profile.email}
-        </Typography>
+        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <MailOutlineIcon fontSize="small" sx={{ color: '#9333EA' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Email :</Typography>
+          <Typography variant="body2" color="text.secondary">{profile.email}</Typography>
+        </Box>
+        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <PhoneIcon fontSize="small" sx={{ color: '#9333EA' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Téléphone :</Typography>
+          <Typography variant="body2" color={profile.telephone ? 'text.primary' : 'text.secondary'}>
+            {profile.telephone || 'Non renseigné'}
+          </Typography>
+        </Box>
+        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CakeIcon fontSize="small" sx={{ color: '#9333EA' }} />
+          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Date de naissance :</Typography>
+          <Typography variant="body2" color={etudiant.date_naissance ? 'text.primary' : 'text.secondary'}>
+            {etudiant.date_naissance
+              ? new Date(etudiant.date_naissance).toLocaleDateString('fr-FR')
+              : 'Non renseignée'}
+          </Typography>
+        </Box>
+        {(!profile.telephone || !etudiant.date_naissance) && (
+          <Typography variant="caption" color="error" sx={{ mt: 1, textAlign: 'center' }}>
+            Complétez votre profil pour renseigner toutes vos informations personnelles.
+          </Typography>
+        )}
       </Box>
-      <Tabs
-        orientation="vertical"
-        value={selectedTab}
-        onChange={handleTabChange}
-        sx={{
-          '& .MuiTabs-indicator': {
-            backgroundColor: '#9333EA',
-          },
-        }}
-      >
-        <Tab
-          icon={<HomeIcon />}
-          label="Accueil"
-          iconPosition="start"
-          sx={{
-            justifyContent: 'flex-start',
-            color: 'text.primary',
-            '&.Mui-selected': {
-              color: '#9333EA',
-            },
-          }}
-        />
-        <Tab
-          icon={<PersonIcon />}
-          label="Profil"
-          iconPosition="start"
-          sx={{
-            justifyContent: 'flex-start',
-            color: 'text.primary',
-            '&.Mui-selected': {
-              color: '#9333EA',
-            },
-          }}
-        />
-        <Tab
-          icon={<SettingsIcon />}
-          label="Paramètres"
-          iconPosition="start"
-          sx={{
-            justifyContent: 'flex-start',
-            color: 'text.primary',
-            '&.Mui-selected': {
-              color: '#9333EA',
-            },
-          }}
-        />
-        <Tab
-          icon={<NotificationsIcon />}
-          label="Alertes"
-          iconPosition="start"
-          sx={{
-            justifyContent: 'flex-start',
-            color: 'text.primary',
-            '&.Mui-selected': {
-              color: '#9333EA',
-            },
-          }}
-        />
-      </Tabs>
       {/* Bouton Déconnexion */}
       <Box sx={{ mt: 4, px: 2 }}>
         <Box
@@ -259,96 +218,93 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Drawer pour mobile */}
-      <Drawer
-        variant="temporary"
-        anchor="left"
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: 250,
-          },
-        }}
-      >
-        {drawer}
-      </Drawer>
-
-      {/* Drawer permanent pour desktop */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: 251,
-            borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-            position: 'absolute',
-            height: '80vh',
-            top: '60%',
-            transform: 'translateY(-50%)',
-            overflow: 'auto',
-            zIndex: 1000,
-            backgroundColor: '#fff',
-            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-          },
-        }}
-        open
-      >
-        {drawer}
-      </Drawer>
-
-      {/* Contenu principal */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { md: `calc(100% - 250px)` },
-          ml: { md: '251px' },
-          mt: { md: 0 },
-          position: 'relative',
-        }}
-      >
-        {/* Bouton menu pour mobile */}
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={() => setMobileOpen(true)}
-          sx={{ display: { md: 'none' }, mb: 2 }}
+    <>
+      <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        {/* Drawer pour mobile */}
+        <Drawer
+          variant="temporary"
+          anchor="left"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: 250,
+            },
+          }}
         >
-          <MenuIcon />
-        </IconButton>
-
-        {/* Contenu des onglets */}
-        <TabPanel value={selectedTab} index={0}>
-          <StudentHomeTab profile={profile} etudiant={etudiant} />
-        </TabPanel>
-
-        <TabPanel value={selectedTab} index={1}>
-          <StudentProfileTab profile={profile} etudiant={etudiant} onUpdate={onUpdate} />
-        </TabPanel>
-
-        <TabPanel value={selectedTab} index={2}>
-          <StudentSettingsTab settings={settings} onSettingChange={handleSettingChange} />
-        </TabPanel>
-
-        <TabPanel value={selectedTab} index={3}>
-          <StudentAlertsTab
-            notifications={notifications}
-            onNotificationRead={handleNotificationRead}
-            onNotificationDelete={handleNotificationDelete}
-          />
-        </TabPanel>
+          {drawer}
+        </Drawer>
+        {/* Drawer permanent pour desktop */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: 300,
+              borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+              position: 'absolute',
+              height: '80vh',
+              top: '70%',
+              transform: 'translateY(-50%)',
+              overflow: 'auto',
+              zIndex: 1000,
+              backgroundColor: '#fff',
+              boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+            },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+        {/* Contenu principal */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            width: { md: `calc(100% - 250px)` },
+            ml: { md: '251px' },
+            mt: { md: 0 },
+            position: 'relative',
+          }}
+        >
+          {/* Bouton menu pour mobile */}
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={() => setMobileOpen(true)}
+            sx={{ display: { md: 'none' }, mb: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          {/* Contenu des onglets */}
+          <TabPanel value={selectedTab} index={0}>
+            <StudentHomeTab profile={profile} etudiant={etudiant} />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={1}>
+            <StudentProfileTab profile={profile} etudiant={etudiant} onUpdate={onUpdate} />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={2}>
+            <StudentAlertsTab
+              notifications={notifications}
+              onNotificationRead={handleNotificationRead}
+              onNotificationDelete={handleNotificationDelete}
+            />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={3}>
+            <StudentSettingsTab settings={settings} onSettingChange={handleSettingChange} />
+          </TabPanel>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

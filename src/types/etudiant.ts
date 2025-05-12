@@ -62,4 +62,5 @@ export interface Etudiant {
   ecole?: string;
   created_at?: string;
   updated_at?: string;
+  date_naissance?: string;
 } 

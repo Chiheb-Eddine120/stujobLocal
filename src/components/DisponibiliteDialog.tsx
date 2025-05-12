@@ -33,22 +33,20 @@ const DisponibiliteDialog: React.FC<DisponibiliteDialogProps> = ({ open, disponi
 
   const handlePeriodChange = (jour: string, periode: string, checked: boolean) => {
     setLocalDispos(prev => {
-      // Si on coche "Journée complète", on décoche les autres périodes
+      // Si on coche "Journée complète", on décoche les autres périodes et on coche celle-ci
       if (periode === 'journee' && checked) {
-        return prev.filter(d => d.jour !== jour || d.debut === 'journee');
+        return prev.filter(d => d.jour !== jour)
+          .concat({ jour, debut: 'journee', fin: 'journee' });
       }
-      
       // Si on coche une autre période alors que "Journée complète" est cochée, on la décoche
       if (periode !== 'journee' && checked) {
         const filtered = prev.filter(d => d.jour !== jour || d.debut !== 'journee');
         return [...filtered, { jour, debut: periode, fin: periode }];
       }
-
       // Si on décoche une période
       if (!checked) {
         return prev.filter(d => !(d.jour === jour && d.debut === periode));
       }
-
       return prev;
     });
   };

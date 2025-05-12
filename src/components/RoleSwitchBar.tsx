@@ -20,20 +20,20 @@ const RoleSwitchBar: React.FC<RoleSwitchBarProps> = ({ selectedRole, onChange })
     >
       <Button
         className="role-btn"
-        variant={selectedRole === 'etudiant' ? 'contained' : 'outlined'}
+        variant={selectedRole === 'etudiant' ? 'outlined' : 'contained'}
         onClick={() => onChange('etudiant')}
         sx={{
           px: 4,
           py: 1.2,
           borderRadius: 2,
           fontWeight: 'bold',
-          backgroundColor: selectedRole === 'etudiant' ? '#9333EA' : '#f0f0f0',
-          color: selectedRole === 'etudiant' ? 'white' : '#9333EA',
-          border: selectedRole === 'etudiant' ? 'none' : '1px solid #9333EA',
+          backgroundColor: selectedRole === 'etudiant' ? '#fff' : '#9333EA',
+          color: selectedRole === 'etudiant' ? '#9333EA' : '#fff',
+          border: '1.5px solid #9333EA',
           boxShadow: selectedRole === 'etudiant' ? '0 2px 8px rgba(147,51,234,0.08)' : 'none',
           transition: 'background-color 0.3s, color 0.3s',
           '&:hover': {
-            backgroundColor: selectedRole === 'etudiant' ? '#7928CA' : '#e0e0e0',
+            backgroundColor: selectedRole === 'etudiant' ? '#f3e8ff' : '#7928CA',
           },
         }}
       >
@@ -41,20 +41,20 @@ const RoleSwitchBar: React.FC<RoleSwitchBarProps> = ({ selectedRole, onChange })
       </Button>
       <Button
         className="role-btn"
-        variant={selectedRole === 'entreprise' ? 'contained' : 'outlined'}
+        variant={selectedRole === 'entreprise' ? 'outlined' : 'contained'}
         onClick={() => onChange('entreprise')}
         sx={{
           px: 4,
           py: 1.2,
           borderRadius: 2,
           fontWeight: 'bold',
-          backgroundColor: selectedRole === 'entreprise' ? '#9333EA' : '#f0f0f0',
-          color: selectedRole === 'entreprise' ? 'white' : '#9333EA',
-          border: selectedRole === 'entreprise' ? 'none' : '1px solid #9333EA',
+          backgroundColor: selectedRole === 'entreprise' ? '#fff' : '#9333EA',
+          color: selectedRole === 'entreprise' ? '#9333EA' : '#fff',
+          border: '1.5px solid #9333EA',
           boxShadow: selectedRole === 'entreprise' ? '0 2px 8px rgba(147,51,234,0.08)' : 'none',
           transition: 'background-color 0.3s, color 0.3s',
           '&:hover': {
-            backgroundColor: selectedRole === 'entreprise' ? '#7928CA' : '#e0e0e0',
+            backgroundColor: selectedRole === 'entreprise' ? '#f3e8ff' : '#7928CA',
           },
         }}
       >

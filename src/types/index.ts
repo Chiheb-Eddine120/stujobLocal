@@ -87,6 +87,7 @@ export interface Etudiant {
   created_at?: string;
   updated_at?: string;
   profile?: Profile;
+  date_naissance?: string;
 }
 
 export interface Demande {

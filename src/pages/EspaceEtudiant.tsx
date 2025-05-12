@@ -17,6 +17,7 @@ import StudentProfileForm from '../components/Students/StudentProfileForm';
 import StudentProfileView from '../components/Students/StudentProfileView';
 import { Profile } from '../types';
 import { Etudiant } from '../types/etudiant';
+import StudentSubNav from '../components/Students/StudentSubNav';
 
 const EspaceEtudiant: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -90,66 +91,75 @@ const EspaceEtudiant: React.FC = () => {
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <>
+        <StudentSubNav />
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error">{error}</Alert>
+        </Container>
+      </>
     );
   }
 
   if (!profile) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">Profil non trouvé</Alert>
-      </Container>
+      <>
+        <StudentSubNav />
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error">Profil non trouvé</Alert>
+        </Container>
+      </>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-            Mon Espace Étudiant
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Gérez votre profil et suivez vos opportunités
-          </Typography>
+    <>
+      <StudentSubNav />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+              Mon Espace Étudiant
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Gérez votre profil et suivez vos opportunités
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<EditIcon />}
+            onClick={() => setIsEditing(true)}
+            sx={{
+              bgcolor: '#9333EA',
+              '&:hover': { bgcolor: '#7928CA' }
+            }}
+          >
+            {etudiant ? 'Modifier mon profil' : 'Compléter mon profil'}
+          </Button>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<EditIcon />}
-          onClick={() => setIsEditing(true)}
-          sx={{
-            bgcolor: '#9333EA',
-            '&:hover': { bgcolor: '#7928CA' }
-          }}
-        >
-          {etudiant ? 'Modifier mon profil' : 'Compléter mon profil'}
-        </Button>
-      </Box>
 
-      {saveError && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {saveError}
-        </Alert>
-      )}
+        {saveError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {saveError}
+          </Alert>
+        )}
 
-      {!etudiant && !isEditing && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Veuillez compléter votre profil pour accéder à toutes les fonctionnalités.
-        </Alert>
-      )}
+        {!etudiant && !isEditing && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Veuillez compléter votre profil pour accéder à toutes les fonctionnalités.
+          </Alert>
+        )}
 
-      {isEditing ? (
-        <StudentProfileForm
-          profile={profile}
-          etudiant={etudiant || undefined}
-          onSubmit={handleSave}
-        />
-      ) : (
-        <StudentProfileView profile={profile} etudiant={etudiant} />
-      )}
-    </Container>
+        {isEditing ? (
+          <StudentProfileForm
+            profile={profile}
+            etudiant={etudiant || undefined}
+            onSubmit={handleSave}
+          />
+        ) : (
+          <StudentProfileView profile={profile} etudiant={etudiant} />
+        )}
+      </Container>
+    </>
   );
 };
 

@@ -16,12 +16,14 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Security as SecurityIcon,
   Language as LanguageIcon,
   Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
+  //Visibility as VisibilityIcon,
   Email as EmailIcon,
   Work as WorkIcon,
   People as PeopleIcon,
@@ -69,7 +71,7 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
         </Typography>
 
         <List>
-          <ListItem>
+          {/* <ListItem>
             <ListItemIcon>
               <VisibilityIcon sx={{ color: '#9333EA' }} />
             </ListItemIcon>
@@ -94,38 +96,11 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
               }
               label=""
             />
-          </ListItem>
+          </ListItem> */}
 
-          <Divider />
 
-          <ListItem>
-            <ListItemIcon>
-              <EmailIcon sx={{ color: '#9333EA' }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Notifications par email"
-              secondary="Recevoir des notifications par email"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.emailNotifications}
-                  onChange={(e) => onSettingChange('emailNotifications', e.target.checked)}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#9333EA',
-                      '& + .MuiSwitch-track': {
-                        backgroundColor: '#9333EA',
-                      },
-                    },
-                  }}
-                />
-              }
-              label=""
-            />
-          </ListItem>
 
-          <Divider />
+          {/*<Divider />*/}
 
           <ListItem>
             <ListItemIcon>
@@ -135,23 +110,26 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
               primary="Langue"
               secondary="Choisir la langue de l'interface"
             />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.language === 'fr'}
-                  onChange={(e) => onSettingChange('language', e.target.checked ? 'fr' : 'en')}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#9333EA',
-                      '& + .MuiSwitch-track': {
-                        backgroundColor: '#9333EA',
-                      },
-                    },
-                  }}
-                />
-              }
-              label={settings.language === 'fr' ? 'Français' : 'English'}
-            />
+            <Select
+              value={settings.language}
+              onChange={(e) => onSettingChange('language', e.target.value)}
+              size="small"
+              sx={{
+                minWidth: 120,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#9333EA',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#7928CA',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#9333EA',
+                },
+              }}
+            >
+              <MenuItem value="fr">Français</MenuItem>
+              <MenuItem value="en">English</MenuItem>
+            </Select>
           </ListItem>
         </List>
       </Paper>

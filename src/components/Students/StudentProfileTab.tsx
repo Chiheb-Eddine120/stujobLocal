@@ -2,15 +2,11 @@ import React from 'react';
 import {
   Box,
   Paper,
-  Typography,
   Grid,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
 } from '@mui/material';
 import { Profile, Etudiant } from '../../types';
 import StudentProfileForm from './StudentProfileForm';
+import ProfileCompletionProgressBar from './ProfileCompletionProgressBar';
 
 interface StudentProfileTabProps {
   profile: Profile;
@@ -18,29 +14,23 @@ interface StudentProfileTabProps {
   onUpdate: (data: Partial<Etudiant>) => Promise<void>;
 }
 
-const steps = [
-  'Informations personnelles',
-  'Études',
-  'Expériences',
-  'Langues',
-  'Documents',
-  'Réseaux',
-  'Disponibilité',
-  'Compétences',
-  'Recherche',
-  'Bio',
-];
+
+
+const getProfileCompletion = (etudiant: Etudiant): number => {
+  const fields = [
+    etudiant.niveau_etudes,
+    etudiant.ecole,
+    etudiant.competences?.length,
+    etudiant.langues?.length,
+    etudiant.cv_file?.cv,
+  ];
+  const completed = fields.filter(Boolean).length;
+  return (completed / fields.length) * 100;
+};
 
 const StudentProfileTab: React.FC<StudentProfileTabProps> = ({ profile, etudiant, onUpdate }) => {
-  const [activeStep, setActiveStep] = React.useState(0);
 
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-  };
 
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
 
   return (
     <Box>
@@ -54,16 +44,8 @@ const StudentProfileTab: React.FC<StudentProfileTabProps> = ({ profile, etudiant
           border: '1px solid #F3E8FF',
         }}
       >
-        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-          Complétez votre profil
-        </Typography>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+
+        <ProfileCompletionProgressBar value={getProfileCompletion(etudiant)} />
       </Paper>
 
       <Grid container spacing={4}>
@@ -75,34 +57,6 @@ const StudentProfileTab: React.FC<StudentProfileTabProps> = ({ profile, etudiant
           />
         </Grid>
       </Grid>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-        <Button
-          disabled={activeStep === 0}
-          onClick={handleBack}
-          sx={{
-            color: '#9333EA',
-            '&:hover': {
-              backgroundColor: 'rgba(147, 51, 234, 0.04)',
-            },
-          }}
-        >
-          Retour
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleNext}
-          disabled={activeStep === steps.length - 1}
-          sx={{
-            backgroundColor: '#9333EA',
-            '&:hover': {
-              backgroundColor: '#7928CA',
-            },
-          }}
-        >
-          {activeStep === steps.length - 1 ? 'Terminer' : 'Suivant'}
-        </Button>
-      </Box>
     </Box>
   );
 };

@@ -140,10 +140,15 @@ const AppContent: React.FC = () => {
     localStorage.setItem('selectedRole', role);
   };
 
+  const { session, userRole } = useAuth();
+  const isAuthenticated = !!session;
+
   return (
     <>
       {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/reset-password' && <Navbar modeAccueil={modeAccueil} />}
-      {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/demande' && !location.pathname.startsWith('/suivi') && location.pathname !== '/reset-password' && showRoleSwitch && <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />}
+      {showRoleSwitch && !(isAuthenticated && userRole === 'student') && (
+        <RoleSwitchBar selectedRole={selectedRole} onChange={handleRoleChange} />
+      )}
       <main style={{ flex: 1, paddingBottom: '20px' }}>
         <Routes>
           <Route path="/" element={<HomeSwitcher selectedRole={selectedRole} />} />
