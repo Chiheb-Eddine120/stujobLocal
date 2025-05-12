@@ -39,6 +39,7 @@ import LoadingSpinner from './components/loading/LoadingSpinner';
 import StudentDashboardPage from './pages/StudentDashboardPage';
 import ResetPassword from './pages/ResetPassword';
 import AdminSupport from './pages/Admin/AdminSupport';
+import ProfileCompletionSnackbar from './components/ProfileCompletionSnackbar';
 
 const theme = createTheme({
   palette: {
@@ -175,6 +176,7 @@ const AppContent: React.FC = () => {
       </main>
       {location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/reset-password' && <Footer />}
       <CookieConsent />
+      <ProfileCompletionSnackbar />
     </>
   );
 };

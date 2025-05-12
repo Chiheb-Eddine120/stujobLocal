@@ -33,6 +33,7 @@ import CompetenceInput from '../CompetenceInput';
 import LangueInput from '../LangueInput';
 import DisponibiliteDialog from '../DisponibiliteDialog';
 import { supabase } from '../../services/supabaseClient';
+import { keyframes } from '@emotion/react';
 
 interface StudentProfileFormProps {
   profile: Profile;
@@ -45,14 +46,8 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
   etudiant,
   onSubmit,
 }) => {
-  const [formData, setFormData] = useState<Partial<Etudiant>>({
-    profile_id: profile.id,
-    cv_file: { cv: undefined, lettre_motivation: undefined },
-    competences: [],
-    experiences: [],
-    disponibilite: { disponibilites: [] },
-    langues: [],
-    biographie: '',
+  const [formData, setFormData] = useState<Partial<Etudiant> & { telephone?: string }>({
+    profile_id: profile.id
   });
   const [editingExperienceIndex, setEditingExperienceIndex] = useState<number | null>(null);
   const [editExperience, setEditExperience] = useState<Partial<Experience> | null>(null);
@@ -63,6 +58,7 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
   const [isCurrentJob, setIsCurrentJob] = useState(false);
   const [editIsCurrentJob, setEditIsCurrentJob] = useState(false);
   const [biographieError, setBiographieError] = useState(false);
+  const [shakeBtn, setShakeBtn] = useState(false);
 
   const MONTHS = [
     { value: '01', label: 'Janvier' },
@@ -271,6 +267,24 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
     }
   }, [editExperience]);
 
+  // Déclenche l'animation à chaque modification du formulaire
+  useEffect(() => {
+    if (!etudiant) return; // Ne pas shaker à l'initialisation
+    setShakeBtn(true);
+    const timeout = setTimeout(() => setShakeBtn(false), 600);
+    return () => clearTimeout(timeout);
+  }, [formData]);
+
+  // Animation shake
+  const shake = keyframes`
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+    100% { transform: translateX(0); }
+  `;
+
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Paper sx={{ p: 3, mb: 3 }}>
@@ -309,8 +323,9 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
             <TextField
               fullWidth
               label="Téléphone"
-              value={profile.telephone}
-              disabled
+              name="telephone"
+              value={formData.telephone ?? profile.telephone ?? ''}
+              onChange={handleInputChange}
               sx={{ bgcolor: 'rgba(0, 0, 0, 0.02)' }}
             />
           </Grid>
@@ -631,14 +646,30 @@ const StudentProfileForm: React.FC<StudentProfileFormProps> = ({
         error={langueError}
       />
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Box
+        sx={{
+          position: 'sticky',
+          bottom: 32,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          zIndex: 100,
+          background: 'transparent',
+          pointerEvents: 'auto',
+        }}
+      >
         <Button
           type="submit"
           variant="contained"
           size="large"
           sx={{
             bgcolor: '#9333EA',
-            '&:hover': { bgcolor: '#7928CA' }
+            '&:hover': { bgcolor: '#7928CA' },
+            borderRadius: '24px',
+            boxShadow: 3,
+            px: 4,
+            py: 1.5,
+            animation: shakeBtn ? `${shake} 0.6s` : 'none',
           }}
         >
           Enregistrer

@@ -36,6 +36,51 @@ export const authService = {
         .eq('id', user.id)
         .single();
 
+      // Si le profil n'existe pas, le créer avec les données de l'utilisateur
+      if (profileError && profileError.code === 'PGRST116') {
+        // 1. Créer le profil
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            role: 'student' as UserRole,
+            email: user.email!,
+            nom: user.user_metadata.nom || '',
+            prenom: user.user_metadata.prenom || '',
+            telephone: user.user_metadata.telephone || '',
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Erreur lors de la création du profil:', createError);
+          throw new Error('Erreur lors de la création du profil');
+        }
+
+        // 2. Créer l'entrée dans la table etudiants
+        const { error: etudiantError } = await supabase
+          .from('etudiants')
+          .insert({
+            profile_id: user.id
+          });
+
+        if (etudiantError) {
+          console.error('Erreur lors de la création du profil étudiant:', etudiantError);
+          // Ne pas échouer si la création du profil étudiant échoue
+          // car le profil principal a été créé avec succès
+        }
+
+        return {
+          id: user.id,
+          email: user.email!,
+          role: 'student',
+          nom: user.user_metadata.nom || '',
+          prenom: user.user_metadata.prenom || '',
+          telephone: user.user_metadata.telephone || '',
+          created_at: user.created_at,
+        };
+      }
+
       if (profileError) {
         throw new Error('Erreur lors de la récupération du profil');
       }
@@ -44,9 +89,9 @@ export const authService = {
         id: user.id,
         email: user.email!,
         role: profile.role as UserRole,
-        nom: '',
-        prenom: '',
-        telephone: '',
+        nom: user.user_metadata.nom || '',
+        prenom: user.user_metadata.prenom || '',
+        telephone: user.user_metadata.telephone || '',
         created_at: user.created_at,
       };
     } catch (error) {

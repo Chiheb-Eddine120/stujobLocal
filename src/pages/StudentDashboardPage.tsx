@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Snackbar, Alert, Button } from '@mui/material';
 import StudentDashboard from '../components/Students/StudentDashboard';
 import { Profile, Etudiant } from '../types';
 import { supabase } from '../services/supabase';
@@ -9,6 +9,7 @@ const StudentDashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [etudiant, setEtudiant] = useState<Etudiant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showProfileAlert, setShowProfileAlert] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,8 +39,23 @@ const StudentDashboardPage: React.FC = () => {
           .eq('profile_id', session.user.id)
           .single();
 
-        if (etudiantError) throw etudiantError;
-        setEtudiant(etudiantData);
+        // Si l'étudiant n'existe pas, le créer
+        if (etudiantError && etudiantError.code === 'PGRST116') {
+          const { data: newEtudiant, error: createError } = await supabase
+            .from('etudiants')
+            .insert({
+              profile_id: session.user.id
+            })
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          setEtudiant(newEtudiant);
+        } else if (etudiantError) {
+          throw etudiantError;
+        } else {
+          setEtudiant(etudiantData);
+        }
 
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
@@ -71,6 +87,28 @@ const StudentDashboardPage: React.FC = () => {
     }
   };
 
+  // Calcul du taux de complétion du profil
+  function getProfileCompletion(etudiant: Etudiant): number {
+    const fields = [
+      etudiant.niveau_etudes,
+      etudiant.ecole,
+      etudiant.competences?.length,
+      etudiant.langues?.length,
+      etudiant.cv_file?.cv,
+    ];
+    const completed = fields.filter(Boolean).length;
+    return (completed / fields.length) * 100;
+  }
+
+  useEffect(() => {
+    if (etudiant) {
+      const completion = getProfileCompletion(etudiant);
+      if (completion < 30) {
+        setShowProfileAlert(true);
+      }
+    }
+  }, [etudiant]);
+
   if (loading) {
     return (
       <Box
@@ -91,11 +129,40 @@ const StudentDashboardPage: React.FC = () => {
   }
 
   return (
-    <StudentDashboard
-      profile={profile}
-      etudiant={etudiant}
-      onUpdate={handleUpdate}
-    />
+    <>
+      <StudentDashboard
+        profile={profile}
+        etudiant={etudiant}
+        onUpdate={handleUpdate}
+      />
+      <Snackbar
+        open={showProfileAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        onClose={(_, reason) => {
+          if (reason === 'clickaway') return;
+          setShowProfileAlert(false);
+        }}
+        autoHideDuration={10000}
+      >
+        <Alert
+          severity="info"
+          sx={{ bgcolor: '#F3E8FF', color: '#9333EA', border: '1px solid #9333EA', boxShadow: 3 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              variant="contained"
+              sx={{ bgcolor: '#9333EA', ml: 2, '&:hover': { bgcolor: '#7928CA' }, color: '#fff' }}
+              onClick={() => navigate('/espace-etudiant')}
+            >
+              Compléter mon profil
+            </Button>
+          }
+        >
+          Votre profil est incomplet. Cliquez ici pour le compléter et accéder à toutes les fonctionnalités !
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

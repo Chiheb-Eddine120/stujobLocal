@@ -24,8 +24,21 @@ export const etudiantService = {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // Aucun étudiant trouvé pour ce profil
-        return null;
+        // Créer un nouveau profil étudiant
+        const { data: newEtudiant, error: createError } = await supabase
+          .from('etudiants')
+          .insert({
+            profile_id: profileId
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Erreur lors de la création du profil étudiant:', createError);
+          throw new Error('Impossible de créer le profil étudiant');
+        }
+
+        return newEtudiant as Etudiant;
       }
       console.error('Erreur lors de la récupération de l\'étudiant:', error);
       throw new Error('Impossible de récupérer les informations de l\'étudiant');
