@@ -39,7 +39,7 @@ export const authService = {
       // Si le profil n'existe pas, le créer avec les données de l'utilisateur
       if (profileError && profileError.code === 'PGRST116') {
         // 1. Créer le profil
-        const { data: newProfile, error: createError } = await supabase
+        const { error: createError } = await supabase
           .from('profiles')
           .insert({
             id: user.id,
