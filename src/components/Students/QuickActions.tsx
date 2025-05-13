@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Snackbar } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import WarningIcon from '@mui/icons-material/Warning';
 import ReportProblemDialog from '../ReportProblemDialog';
 import { authService } from '../../services/authService';
@@ -33,19 +33,41 @@ const QuickActions: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
       <Button
         variant="contained"
-        startIcon={<TrendingUpIcon />}
-        sx={{ background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)', color: 'white', fontWeight: 600 }}
+        startIcon={<DescriptionIcon />}
+        sx={{
+          minHeight: 40,
+          padding: '8px 16px',
+          borderRadius: '8px',
+          backgroundColor: '#673ab7',
+          color: 'white',
+          fontWeight: 600,
+          '&:hover': {
+            backgroundColor: '#5e35b1',
+          },
+        }}
         onClick={() => handleClick('Fonctionnalité à venir : mise à jour du CV')}
       >
         Mettre à jour mon CV
       </Button>
       <Button
         variant="outlined"
-        startIcon={<CheckCircleIcon />}
-        sx={{ color: '#9333EA', borderColor: '#9333EA', fontWeight: 600 }}
+        startIcon={<AssignmentIcon />}
+        sx={{
+          minHeight: 40,
+          padding: '8px 16px',
+          borderRadius: '8px',
+          borderColor: '#f0f0f0',
+          backgroundColor: '#f0f0f0',
+          color: '#333',
+          fontWeight: 600,
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+            borderColor: '#e0e0e0',
+          },
+        }}
         onClick={() => handleClick('Fonctionnalité à venir : voir mes candidatures')}
       >
         Voir mes candidatures
@@ -53,7 +75,19 @@ const QuickActions: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<WarningIcon />}
-        sx={{ color: '#9333EA', borderColor: '#9333EA', fontWeight: 600 }}
+        sx={{
+          minHeight: 40,
+          padding: '8px 16px',
+          borderRadius: '8px',
+          borderColor: '#f0f0f0',
+          backgroundColor: '#f0f0f0',
+          color: '#333',
+          fontWeight: 600,
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
+            borderColor: '#e0e0e0',
+          },
+        }}
         onClick={handleReportClick}
       >
         Signaler un problème

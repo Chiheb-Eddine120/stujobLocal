@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box, Grid, Paper, Card, CardContent, CardMedia } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkIcon from '@mui/icons-material/Work';
 import HandshakeIcon from '@mui/icons-material/Handshake';
@@ -10,20 +10,24 @@ import { authService } from '../services/authService';
 
 const Home: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkUserRole = async () => {
       try {
         const isAuthenticated = await authService.isAuthenticated();
         if (isAuthenticated) {
-          await authService.getCurrentUser();
+          const user = await authService.getCurrentUser();
+          if (user?.role === 'student') {
+            navigate('/home-etudiant');
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la vérification du rôle:', error);
       }
     };
     checkUserRole();
-  }, []);
+  }, [navigate]);
 
   const faqItems = [
     {

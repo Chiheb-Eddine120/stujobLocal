@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
-  Avatar,
+  //Typography,
+  //Avatar,
   IconButton,
-  Drawer,
+  //Drawer,
   //useTheme,
   //useMediaQuery,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  Logout as LogoutIcon,
+  //Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { Profile, Etudiant } from '../../types';
 import StudentHomeTab from './StudentHomeTab';
@@ -19,11 +19,13 @@ import StudentSettingsTab from './StudentSettingsTab';
 import StudentAlertsTab from './StudentAlertsTab';
 import { supabase } from '../../services/supabase';
 import { useNavigate } from 'react-router-dom';
-import ConfirmLogoutDialog from './ConfirmLogoutDialog';
+//import ConfirmLogoutDialog from './ConfirmLogoutDialog';
 import StudentSubNav from './StudentSubNav';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import PhoneIcon from '@mui/icons-material/Phone';
-import CakeIcon from '@mui/icons-material/Cake';
+//import MailOutlineIcon from '@mui/icons-material/MailOutline';
+//import PhoneIcon from '@mui/icons-material/Phone';
+//import CakeIcon from '@mui/icons-material/Cake';
+import ScrollToTopButton from './ScrollToTopButton';
+import StudentDrawer from './StudentDrawer';
 
 interface StudentDashboardProps {
   profile: Profile;
@@ -74,7 +76,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
   });
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  //const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+
+  const [currentProfile, setCurrentProfile] = useState<Profile>(profile);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -134,135 +138,33 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
     navigate('/login');
   };
 
-  const drawer = (
-    <Box sx={{ width: 250, pt: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-        <Avatar
-          sx={{
-            width: 100,
-            height: 100,
-            mb: 2,
-            border: '4px solid #9333EA',
-            fontSize: 36,
-            bgcolor: '#F3F4F6',
-            color: '#9333EA',
-          }}
-        >
-          {profile.prenom[0]}{profile.nom[0]}
-        </Avatar>
-        <Typography variant="h6" sx={{ fontWeight: 700, textTransform: 'capitalize', mb: 0.5 }}>
-          {profile.prenom} {profile.nom}
-        </Typography>
-        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <MailOutlineIcon fontSize="small" sx={{ color: '#9333EA' }} />
-          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Email :</Typography>
-          <Typography variant="body2" color="text.secondary">{profile.email}</Typography>
-        </Box>
-        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <PhoneIcon fontSize="small" sx={{ color: '#9333EA' }} />
-          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Téléphone :</Typography>
-          <Typography variant="body2" color={profile.telephone ? 'text.primary' : 'text.secondary'}>
-            {profile.telephone || 'Non renseigné'}
-          </Typography>
-        </Box>
-        <Box sx={{ width: '100%', px: 2, py: 1, borderRadius: 2, background: '#F9FAFB', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CakeIcon fontSize="small" sx={{ color: '#9333EA' }} />
-          <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 90 }}>Date de naissance :</Typography>
-          <Typography variant="body2" color={etudiant.date_naissance ? 'text.primary' : 'text.secondary'}>
-            {etudiant.date_naissance
-              ? new Date(etudiant.date_naissance).toLocaleDateString('fr-FR')
-              : 'Non renseignée'}
-          </Typography>
-        </Box>
-        {(!profile.telephone || !etudiant.date_naissance) && (
-          <Typography variant="caption" color="error" sx={{ mt: 1, textAlign: 'center' }}>
-            Complétez votre profil pour renseigner toutes vos informations personnelles.
-          </Typography>
-        )}
-      </Box>
-      {/* Bouton Déconnexion */}
-      <Box sx={{ mt: 4, px: 2 }}>
-        <Box
-          component="button"
-          onClick={() => setLogoutDialogOpen(true)}
-          sx={{
-            width: '100%',
-            background: 'none',
-            border: 'none',
-            color: '#e53935',
-            fontWeight: 600,
-            fontSize: '1rem',
-            textAlign: 'left',
-            cursor: 'pointer',
-            py: 1.5,
-            px: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            transition: 'color 0.2s',
-            '&:hover': {
-              color: '#b71c1c',
-            },
-          }}
-        >
-          <LogoutIcon sx={{ mr: 1, color: 'inherit' }} />
-          Déconnexion
-        </Box>
-        <ConfirmLogoutDialog
-          open={logoutDialogOpen}
-          onClose={() => setLogoutDialogOpen(false)}
-          onConfirm={handleLogout}
-        />
-      </Box>
-    </Box>
-  );
+  const handleProfileUpdate = (updatedProfile: Profile) => {
+    setCurrentProfile(updatedProfile);
+  };
 
   return (
     <>
       <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {/* Drawer pour mobile */}
-        <Drawer
+        <StudentDrawer
+          profile={currentProfile}
+          etudiant={etudiant}
+          onLogout={handleLogout}
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
           variant="temporary"
-          anchor="left"
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: 250,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
+          onProfileUpdate={handleProfileUpdate}
+        />
         {/* Drawer permanent pour desktop */}
-        <Drawer
+        <StudentDrawer
+          profile={currentProfile}
+          etudiant={etudiant}
+          onLogout={handleLogout}
           variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: 300,
-              borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-              position: 'absolute',
-              height: '80vh',
-              top: '70%',
-              transform: 'translateY(-50%)',
-              overflow: 'auto',
-              zIndex: 1000,
-              backgroundColor: '#fff',
-              boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+          onProfileUpdate={handleProfileUpdate}
+        />
+
         {/* Contenu principal */}
         <Box
           component="main"
@@ -304,6 +206,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
           </TabPanel>
         </Box>
       </Box>
+      <ScrollToTopButton />
     </>
   );
 };

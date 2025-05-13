@@ -131,8 +131,11 @@ const AppContent: React.FC = () => {
   // Le modeAccueil est maintenant toujours basé sur le selectedRole
   const modeAccueil = selectedRole;
 
-  // Le RoleSwitchBar sera affiché sur toutes les pages sauf le dashboard
-  const showRoleSwitch = !location.pathname.startsWith('/dashboard');
+  const showRoleSwitch = !location.pathname.startsWith('/dashboard') && 
+    location.pathname !== '/login' && 
+    location.pathname !== '/register' && 
+    location.pathname !== '/reset-password';
+
 
   // Nouvelle fonction pour changer le rôle et le stocker
   const handleRoleChange = (role: 'etudiant' | 'entreprise') => {

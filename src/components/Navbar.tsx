@@ -86,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const drawer = (
     <Box sx={{ width: 250, pt: 2, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
       <List>
-        {modeAccueil === 'entreprise' && (
+        {!isAuthenticated && modeAccueil === 'entreprise' && (
           <>
             <ListItem 
               button 
@@ -108,15 +108,17 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
             </ListItem>
           </>
         )}
-        <ListItem 
-          button 
-          component={RouterLink} 
-          to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
-          onClick={handleDrawerToggle}
-          sx={{ py: 2 }}
-        >
-          <ListItemText primary={isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'} />
-        </ListItem>
+        {!isAuthenticated && (
+          <ListItem 
+            button 
+            component={RouterLink} 
+            to={isAuthenticated && userRole === 'student' ? '/espace-etudiant' : '/etudiants'}
+            onClick={handleDrawerToggle}
+            sx={{ py: 2 }}
+          >
+            <ListItemText primary={isAuthenticated && userRole === 'student' ? 'Mon Espace' : 'Vous êtes étudiant ?'} />
+          </ListItem>
+        )}
         {isAuthenticated && userRole === 'admin' && (
           <ListItem 
             button 
@@ -128,7 +130,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
             <ListItemText primary="Dashboard" />
           </ListItem>
         )}
-        {isAuthenticated && userRole === 'student' && isDashboardEtudiant && (
+        {isAuthenticated && (
           <ListItem 
             button 
             onClick={handleLogout}
@@ -215,11 +217,11 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                   cursor: 'pointer',
                 }}
               >
-                <Logo variant={modeAccueil === 'entreprise' ? 'partners' : 'students'} fontSize={28} color="white" />
+                <Logo variant={isAuthenticated && userRole === 'student' ? 'students' : (modeAccueil === 'entreprise' ? 'partners' : 'students')} fontSize={28} color="white" />
               </Box>
 
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                {modeAccueil === 'entreprise' && (
+                {!isAuthenticated && modeAccueil === 'entreprise' && (
                   <>
                     <Button
                       component={RouterLink}
@@ -397,7 +399,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', md: 'none' },

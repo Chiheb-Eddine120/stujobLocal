@@ -66,7 +66,7 @@ const Register: React.FC = () => {
     <>
       <Box sx={{
         minHeight: '100vh',
-        width: '100vw',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -98,18 +98,18 @@ const Register: React.FC = () => {
               color: '#222',
               borderRadius: 6,
               boxShadow: '0 8px 32px rgba(80, 36, 122, 0.10)',
-              minWidth: 520,
-              maxWidth: 650,
-              width: { xs: '100%', md: 600 },
-              minHeight: 650,
+              minWidth: 400,
+              maxWidth: 500,
+              width: { xs: '100%', md: 450 },
+              minHeight: 340,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              p: { xs: 5, md: 8 },
+              p: { xs: 2, md: 3.5 },
               wordBreak: 'break-word',
               overflowWrap: 'break-word',
             }}>
-              <Typography variant="h2" component="h2" gutterBottom sx={{ color: '#222', fontWeight: 900, fontSize: { xs: 32, md: 38 }, mb: 4, lineHeight: 1.1 }}>
+              <Typography variant="h2" component="h2" gutterBottom sx={{ color: '#222', fontWeight: 900, fontSize: { xs: 20, md: 26 }, mb: 2, lineHeight: 1.1 }}>
                 Comment ça marche ?
               </Typography>
               <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -145,24 +145,24 @@ const Register: React.FC = () => {
             </Paper>
             {/* Formulaire d'inscription */}
             <Box sx={{
-              minWidth: 520,
-              maxWidth: 650,
-              width: { xs: '100%', md: 600 },
-              minHeight: 650,
+              minWidth: 400,
+              maxWidth: 500,
+              width: { xs: '100%', md: 450 },
+              minHeight: 340,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
               wordBreak: 'break-word',
               overflowWrap: 'break-word',
-              p: { xs: 5, md: 8 },
+              p: { xs: 2, md: 3.5 },
               boxSizing: 'border-box',
             }}>
-              <Logo variant="students" fontSize={32} />
-              <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 32, md: 38 }, mb: 1, lineHeight: 1.1 }}>
+              <Logo variant="students" />
+              <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 20, md: 26 }, mb: 1, lineHeight: 1.1 }}>
                 Inscription Étudiant
               </Typography>
-              <Typography variant="subtitle1" align="center" sx={{ color: '#666', mb: 4, fontSize: 19, lineHeight: 1.4 }}>
+              <Typography variant="subtitle1" align="center" sx={{ color: '#666', mb: 2, fontSize: 13, lineHeight: 1.4 }}>
                 Créez votre compte en une étape.
               </Typography>
               {error && (

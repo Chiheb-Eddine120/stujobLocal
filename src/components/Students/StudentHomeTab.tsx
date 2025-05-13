@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid } from '@mui/material';
+import { Box, Container, Grid, Typography } from '@mui/material';
 import { Profile, Etudiant } from '../../types';
 import ProfileCompletionProgressBar from './ProfileCompletionProgressBar';
 import QuickActions from './QuickActions';
@@ -34,36 +34,61 @@ const StudentHomeTab: React.FC<StudentHomeTabProps> = ({ profile, etudiant }) =>
   const profileCompletion = getProfileCompletion(etudiant);
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: '#fafafa' }}>
       <Container maxWidth="lg" sx={{ flex: 1, px: 1 }}>
-        {/* Header */}
-        <Box sx={{ pt: 2, pb: 1 }}>
-          <ProfileCompletionProgressBar value={profileCompletion} />
+        {/* Header avec barre de progression améliorée */}
+        <Box sx={{ pt: 2, pb: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" sx={{ color: '#666', minWidth: '100px' }}>
+            {profileCompletion}% complété
+          </Typography>
+          <Box sx={{ flex: 1 }}>
+            <ProfileCompletionProgressBar value={profileCompletion} />
+          </Box>
+        </Box>
+
+        {/* Actions rapides avec nouveaux styles */}
+        <Box sx={{ mb: 3 }}>
           <QuickActions />
         </Box>
+
         {/* Content Area */}
-        <Grid container spacing={2}>
-          {/* Colonne latérale gauche */}
+        <Grid container spacing={3}>
+          {/* Colonne latérale gauche améliorée */}
           <Grid item xs={12} md={4}>
-            <UserProfileCard profile={profile} />
-            <ActivityFeed />
-            <DocumentSection cv={etudiant.cv_file?.cv} />
-            <AvailabilitySection disponibilites={etudiant.disponibilite?.disponibilites} />
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 2,
+              '& > *': { mb: 2 }
+            }}>
+              <UserProfileCard profile={profile} />
+              <ActivityFeed />
+              <DocumentSection cv={etudiant.cv_file?.cv} />
+              <AvailabilitySection disponibilites={etudiant.disponibilite?.disponibilites} />
+            </Box>
           </Grid>
-          {/* Colonne principale */}
+
+          {/* Colonne principale améliorée */}
           <Grid item xs={12} md={8}>
-            <Biography biographie={etudiant.biographie} />
-            <SkillsTags
-              competences={etudiant.competences
-                ?.filter((c) => !!c.label)
-                .map((c) => ({
-                  label: c.label || '',
-                  niveau: c.niveau,
-                }))}
-            />
-            <ExperienceSection experiences={etudiant.experiences} />
-            <EducationSection niveau_etudes={etudiant.niveau_etudes} ecole={etudiant.ecole} />
-            <LanguesSection langues={etudiant.langues} />
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 3,
+              '& > *': { mb: 3 }
+            }}>
+              <Biography biographie={etudiant.biographie} />
+              <SkillsTags
+                competences={etudiant.competences
+                  ?.filter((c) => !!c.label)
+                  .map((c) => ({
+                    label: c.label || '',
+                    niveau: c.niveau,
+                  }))}
+              />
+              <ExperienceSection experiences={etudiant.experiences} />
+              <EducationSection niveau_etudes={etudiant.niveau_etudes} ecole={etudiant.ecole} />
+              <LanguesSection langues={etudiant.langues} />
+            </Box>
           </Grid>
         </Grid>
       </Container>

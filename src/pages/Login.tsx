@@ -43,7 +43,7 @@ const Login: React.FC = () => {
     <>
       <Box sx={{
         minHeight: '100vh',
-        width: '100vw',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -52,22 +52,22 @@ const Login: React.FC = () => {
         py: 0,
       }}>
         <Box sx={{
-          minWidth: 520,
-          maxWidth: 650,
-          width: { xs: '100%', md: 600 },
-          minHeight: 650,
+          minWidth: 400,
+          maxWidth: 500,
+          width: { xs: '100%', md: 450 },
+          minHeight: 340,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           wordBreak: 'break-word',
           overflowWrap: 'break-word',
-          p: { xs: 5, md: 8 },
+          p: { xs: 2, md: 3.5 },
           boxSizing: 'border-box',
         }}>
-          <Logo variant="students" fontSize={32} />
-          <Box sx={{ height: 24 }} />
-          <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 32, md: 38 }, mb: 1, lineHeight: 1.1 }}>
+          <Logo variant="students" />
+          <Box sx={{ height: 6 }} />
+          <Typography variant="h2" component="h1" gutterBottom align="center" sx={{ fontWeight: 900, fontSize: { xs: 20, md: 26 }, mb: 1, lineHeight: 1.1 }}>
             Connexion
           </Typography>
           {message && (

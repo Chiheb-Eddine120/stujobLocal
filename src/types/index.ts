@@ -47,6 +47,7 @@ export interface Profile {
   nom: string;
   prenom: string;
   telephone?: string;
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }
