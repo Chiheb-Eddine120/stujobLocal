@@ -1,5 +1,29 @@
 # Stujob - Plateforme de Recrutement d'Étudiants
 
+## Migration du Projet
+
+Ce projet a été migré depuis un dépôt GitHub d'organisation vers un dépôt personnel pour des raisons de coûts d'hébergement.
+
+### Raison de la Migration
+
+Netlify, notre plateforme d'hébergement, facture l'utilisation de leur service lorsqu'on utilise un dépôt GitHub associé à une organisation. Pour maintenir la gratuité du service et continuer à offrir la même qualité de service aux utilisateurs, nous avons décidé de migrer le code vers un dépôt personnel.
+
+### Impact de la Migration
+
+- ✅ Aucun impact sur les fonctionnalités
+- ✅ Même qualité de service
+- ✅ Même structure de code
+- ✅ Même expérience utilisateur
+- ✅ Économies sur les coûts d'hébergement
+
+### Statut Actuel
+
+Le projet est maintenant hébergé sur ce dépôt personnel tout en conservant :
+- Toutes les fonctionnalités
+- La même architecture
+- Les mêmes dépendances
+- La même configuration
+
 ## Présentation
 
 Stujob est une plateforme web qui met en relation les entreprises cherchant à recruter des étudiants avec des étudiants à la recherche de missions flexibles. La plateforme simplifie le processus de recrutement en offrant un service d'intermédiation personnalisé.
@@ -76,6 +100,7 @@ Stujob est une plateforme web qui met en relation les entreprises cherchant à r
 - **Authentification** : Supabase Auth
 - **Validation de Formulaire** : Validation native HTML5
 - **Responsive Design** : Grid et Flexbox de Material-UI
+- **Hébergement** : Netlify
 
 ## Points Forts
 
@@ -103,13 +128,18 @@ Stujob est une plateforme web qui met en relation les entreprises cherchant à r
 
 1. Clonez le dépôt :
 ```bash
-git clone https://github.com/votre-username/stujob-vitrine.git
-cd stujob-vitrine
+git clone https://github.com/Chiheb-Eddine120/stujobLocal.git
+cd stujobLocal
 ```
 
 2. Installez les dépendances :
 ```bash
 npm install
+```
+
+3. Lancez le projet en développement :
+```bash
+npm run dev
 ```
 
 ## Démarrage en développement
