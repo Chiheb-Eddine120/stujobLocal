@@ -30,14 +30,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-        {/*
-        {profile.avatar ? (
+        {profile.avatar_url ? (
           <Avatar
-            src={profile.avatar}
+            src={profile.avatar_url}
             sx={{ width: 64, height: 64, mb: 2 }}
           />
         ) : (
-        */}
           <Avatar
             sx={{
               width: 64,
@@ -50,7 +48,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ profile }) => {
           >
             {getInitials(`${profile.prenom} ${profile.nom}`)}
           </Avatar>
-        {/* )} */}
+        )}
         <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
           {profile.prenom} {profile.nom}
         </Typography>

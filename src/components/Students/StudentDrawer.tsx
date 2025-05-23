@@ -51,8 +51,8 @@ const StudentDrawer: React.FC<StudentDrawerProps> = ({
     try {
       // Upload l'image vers Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.id}-${Math.random()}.${fileExt}`;
-      const { data, error } = await supabase.storage
+      const fileName = `${profile.id}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
         .from('avatars')
         .upload(fileName, file);
 

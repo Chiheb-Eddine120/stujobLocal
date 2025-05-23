@@ -1,8 +1,5 @@
 import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WorkIcon from '@mui/icons-material/Work';
-import BarChartIcon from '@mui/icons-material/BarChart';
 
 interface BiographyProps {
   biographie?: string;

@@ -2,9 +2,8 @@ import React from 'react';
 import { Box, Button } from '@mui/material';
 import {
   Home as HomeIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-  Notifications as NotificationsIcon
+  Notifications as NotificationsIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 
 interface StudentSubNavProps {
@@ -13,8 +12,7 @@ interface StudentSubNavProps {
 }
 
 const navItems = [
-  { label: 'Accueil', icon: <HomeIcon /> },
-  { label: 'Profil', icon: <PersonIcon /> },
+  { label: 'Profil', icon: <HomeIcon /> },
   { label: 'Alertes', icon: <NotificationsIcon /> },
   { label: 'Paramètres', icon: <SettingsIcon /> }
 ];

@@ -18,6 +18,7 @@ import {
   TextField,
   Select,
   MenuItem,
+  Snackbar,
 } from '@mui/material';
 import {
   Security as SecurityIcon,
@@ -27,7 +28,10 @@ import {
   Email as EmailIcon,
   Work as WorkIcon,
   People as PeopleIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
+import ReportProblemDialog from '../ReportProblemDialog';
+import { authService } from '../../services/authService';
 
 interface StudentSettingsTabProps {
   settings: {
@@ -46,12 +50,32 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
 }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState('');
+  const [snackbar, setSnackbar] = React.useState<string | null>(null);
+  const [reportOpen, setReportOpen] = React.useState(false);
+  const [userEmail, setUserEmail] = React.useState<string>('');
+  const [userId, setUserId] = React.useState<string | undefined>(undefined);
 
   const handleDeleteAccount = () => {
     if (deleteConfirmation === 'SUPPRIMER') {
       // Logique de suppression du compte
       setOpenDeleteDialog(false);
     }
+  };
+
+  const handleReportClick = async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      setUserEmail(user?.email || '');
+      setUserId(user?.id);
+    } catch {
+      setUserEmail('');
+      setUserId(undefined);
+    }
+    setReportOpen(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(null);
   };
 
   return (
@@ -297,6 +321,33 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
               Supprimer
             </Button>
           </ListItem>
+
+          <Divider />
+
+          <ListItem>
+            <ListItemIcon>
+              <WarningIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Signaler un problème"
+              secondary="Signaler un problème concernant votre compte"
+            />
+            <Button
+              variant="outlined"
+              startIcon={<WarningIcon />}
+              onClick={handleReportClick}
+              sx={{
+                color: '#FF9800',
+                borderColor: '#FF9800',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 152, 0, 0.04)',
+                  borderColor: '#FF9800',
+                },
+              }}
+            >
+              Signaler un problème
+            </Button>
+          </ListItem>
         </List>
       </Paper>
 
@@ -337,6 +388,7 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
           >
             Annuler
           </Button>
+          
           <Button
             onClick={handleDeleteAccount}
             disabled={deleteConfirmation !== 'SUPPRIMER'}
@@ -351,6 +403,20 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={!!snackbar}
+        autoHideDuration={2500}
+        onClose={handleCloseSnackbar}
+        message={snackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
+      <ReportProblemDialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        userEmail={userEmail}
+        userId={userId}
+      />
     </Box>
   );
 };

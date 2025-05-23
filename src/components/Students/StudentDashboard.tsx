@@ -62,6 +62,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, onUpdate }) => {
   const [selectedTab, setSelectedTab] = useState(0);
+  const [showProfileForm, setShowProfileForm] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   //const theme = useTheme();
   //const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -144,7 +145,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
 
   return (
     <>
-      <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
+      <StudentSubNav selectedTab={selectedTab} onTabChange={(idx) => { setSelectedTab(idx); setShowProfileForm(false); }} />
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         {/* Drawer pour mobile */}
         <StudentDrawer
@@ -189,19 +190,20 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ profile, etudiant, 
           </IconButton>
           {/* Contenu des onglets */}
           <TabPanel value={selectedTab} index={0}>
-            <StudentHomeTab profile={profile} etudiant={etudiant} />
+            {showProfileForm ? (
+              <StudentProfileTab profile={profile} etudiant={etudiant} onUpdate={onUpdate} />
+            ) : (
+              <StudentHomeTab profile={profile} etudiant={etudiant} onGoToProfil={() => setShowProfileForm(true)} />
+            )}
           </TabPanel>
           <TabPanel value={selectedTab} index={1}>
-            <StudentProfileTab profile={profile} etudiant={etudiant} onUpdate={onUpdate} />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={2}>
             <StudentAlertsTab
               notifications={notifications}
               onNotificationRead={handleNotificationRead}
               onNotificationDelete={handleNotificationDelete}
             />
           </TabPanel>
-          <TabPanel value={selectedTab} index={3}>
+          <TabPanel value={selectedTab} index={2}>
             <StudentSettingsTab settings={settings} onSettingChange={handleSettingChange} />
           </TabPanel>
         </Box>

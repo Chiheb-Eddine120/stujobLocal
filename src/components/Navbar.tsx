@@ -23,6 +23,8 @@ import LoginIcon from '@mui/icons-material/Login';
 import { authService } from '../services/authService';
 import { UserRole } from '../types';
 import Logo from './Logo';
+import { supabase } from '../services/supabase';
+import { Profile } from '../types';
 
 interface NavbarProps {
   modeAccueil?: 'etudiant' | 'entreprise';
@@ -33,10 +35,16 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isDashboardEtudiant = location.pathname.startsWith('/dashboard-etudiant');
+
+  const getInitials = (profile: Profile | null) => {
+    if (!profile?.prenom || !profile?.nom) return userRole?.[0].toUpperCase() || '?';
+    return `${profile.prenom[0]}${profile.nom[0]}`.toUpperCase();
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,6 +55,17 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
         if (authenticated) {
           const role = await authService.getCurrentUser();
           setUserRole(role?.role as UserRole);
+          
+          // Récupérer le profil
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', role?.id)
+            .single();
+
+          if (!profileError && profileData) {
+            setProfile(profileData);
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la vérification de l\'authentification:', error);
@@ -296,9 +315,26 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                               }
                             }}
                           >
-                            <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
-                              {userRole?.[0].toUpperCase()}
-                            </Avatar>
+                            {profile?.avatar_url ? (
+                              <Avatar 
+                                src={profile.avatar_url}
+                                sx={{ 
+                                  bgcolor: 'white', 
+                                  color: '#9333EA',
+                                  width: 40,
+                                  height: 40
+                                }}
+                              />
+                            ) : (
+                              <Avatar sx={{ 
+                                bgcolor: 'white', 
+                                color: '#9333EA',
+                                width: 40,
+                                height: 40
+                              }}>
+                                {getInitials(profile)}
+                              </Avatar>
+                            )}
                           </IconButton>
                         </>
                       ) : (
@@ -343,9 +379,26 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
                               }
                             }}
                           >
-                            <Avatar sx={{ bgcolor: 'white', color: '#9333EA' }}>
-                              {userRole?.[0].toUpperCase()}
-                            </Avatar>
+                            {profile?.avatar_url ? (
+                              <Avatar 
+                                src={profile.avatar_url}
+                                sx={{ 
+                                  bgcolor: 'white', 
+                                  color: '#9333EA',
+                                  width: 40,
+                                  height: 40
+                                }}
+                              />
+                            ) : (
+                              <Avatar sx={{ 
+                                bgcolor: 'white', 
+                                color: '#9333EA',
+                                width: 40,
+                                height: 40
+                              }}>
+                                {getInitials(profile)}
+                              </Avatar>
+                            )}
                           </IconButton>
                         </>
                       )}

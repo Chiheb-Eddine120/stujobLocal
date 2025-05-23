@@ -3,6 +3,7 @@ import {
   Box,
   Paper,
   Grid,
+  Typography,
 } from '@mui/material';
 import { Profile, Etudiant } from '../../types';
 import StudentProfileForm from './StudentProfileForm';
@@ -14,23 +15,29 @@ interface StudentProfileTabProps {
   onUpdate: (data: Partial<Etudiant>) => Promise<void>;
 }
 
-
-
-const getProfileCompletion = (etudiant: Etudiant): number => {
-  const fields = [
-    etudiant.niveau_etudes,
-    etudiant.ecole,
-    etudiant.competences?.length,
-    etudiant.langues?.length,
-    etudiant.cv_file?.cv,
+const getProfileCompletion = (profile: Profile, etudiant: Etudiant): number => {
+  const checks = [
+    !!profile.prenom,
+    !!profile.nom,
+    !!profile.email,
+    !!profile.telephone,
+    !!etudiant.date_naissance,
+    !!etudiant.niveau_etudes,
+    !!etudiant.ecole,
+    !!etudiant.biographie && etudiant.biographie.length > 30,
+    Array.isArray(etudiant.competences) && etudiant.competences.length > 0,
+    (etudiant.competence_description && Object.keys(etudiant.competence_description).length > 0) || (Array.isArray(etudiant.experiences) && etudiant.experiences.some(exp => exp.description && exp.description.length > 0)),
+    Array.isArray(etudiant.experiences) && etudiant.experiences.length > 0,
+    (etudiant.cv_file && (etudiant.cv_file.cv || etudiant.cv_file.lettre_motivation)),
+    etudiant.disponibilite && Array.isArray(etudiant.disponibilite.disponibilites) && etudiant.disponibilite.disponibilites.length > 0,
+    Array.isArray(etudiant.langues) && etudiant.langues.length > 0,
   ];
-  const completed = fields.filter(Boolean).length;
-  return (completed / fields.length) * 100;
+  const completed = checks.filter(Boolean).length;
+  return Math.round((completed / checks.length) * 100);
 };
 
 const StudentProfileTab: React.FC<StudentProfileTabProps> = ({ profile, etudiant, onUpdate }) => {
-
-
+  const profileCompletion = getProfileCompletion(profile, etudiant);
 
   return (
     <Box>
@@ -44,8 +51,14 @@ const StudentProfileTab: React.FC<StudentProfileTabProps> = ({ profile, etudiant
           border: '1px solid #F3E8FF',
         }}
       >
-
-        <ProfileCompletionProgressBar value={getProfileCompletion(etudiant)} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="body2" sx={{ color: '#666', minWidth: '100px' }}>
+            {profileCompletion}% complété
+          </Typography>
+          <Box sx={{ flex: 1 }}>
+            <ProfileCompletionProgressBar profile={profile} etudiant={etudiant} />
+          </Box>
+        </Box>
       </Paper>
 
       <Grid container spacing={4}>

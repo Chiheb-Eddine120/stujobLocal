@@ -42,7 +42,6 @@ const Logo: React.FC<LogoProps> = ({ variant = 'students', fontSize = 32, color 
     <Typography
       variant="subtitle1"
       sx={{
-        fontFamily: 'Pacifico, cursive',
         color,
         fontSize: fontSize === 32 ? 22 : (typeof fontSize === 'number' ? fontSize / 1.5 : 22),
         fontWeight: 400,

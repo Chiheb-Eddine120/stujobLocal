@@ -26,6 +26,7 @@ const EspaceEtudiant: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -92,7 +93,7 @@ const EspaceEtudiant: React.FC = () => {
   if (error) {
     return (
       <>
-        <StudentSubNav />
+        <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">{error}</Alert>
         </Container>
@@ -103,7 +104,7 @@ const EspaceEtudiant: React.FC = () => {
   if (!profile) {
     return (
       <>
-        <StudentSubNav />
+        <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">Profil non trouvé</Alert>
         </Container>
@@ -113,7 +114,7 @@ const EspaceEtudiant: React.FC = () => {
 
   return (
     <>
-      <StudentSubNav />
+      <StudentSubNav selectedTab={selectedTab} onTabChange={setSelectedTab} />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>

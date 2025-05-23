@@ -1,39 +1,15 @@
-import React, { useState } from 'react';
-import { Box, Button, Snackbar } from '@mui/material';
+import React from 'react';
+import { Box, Button } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import WarningIcon from '@mui/icons-material/Warning';
-import ReportProblemDialog from '../ReportProblemDialog';
-import { authService } from '../../services/authService';
+//import ReportProblemButton from './ReportProblemButton';
 
-const QuickActions: React.FC = () => {
-  const [snackbar, setSnackbar] = useState<string | null>(null);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [userId, setUserId] = useState<string | undefined>(undefined);
+interface QuickActionsProps {
+  onGoToProfil?: () => void;
+}
 
-  const handleClick = (message: string) => {
-    setSnackbar(message);
-  };
-
-  const handleReportClick = async () => {
-    try {
-      const user = await authService.getCurrentUser();
-      setUserEmail(user?.email || '');
-      setUserId(user?.id);
-    } catch {
-      setUserEmail('');
-      setUserId(undefined);
-    }
-    setReportOpen(true);
-  };
-
-  const handleClose = () => {
-    setSnackbar(null);
-  };
-
+const QuickActions: React.FC<QuickActionsProps> = ({ onGoToProfil }) => {
   return (
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
       <Button
         variant="contained"
         startIcon={<DescriptionIcon />}
@@ -41,70 +17,17 @@ const QuickActions: React.FC = () => {
           minHeight: 40,
           padding: '8px 16px',
           borderRadius: '8px',
-          backgroundColor: '#673ab7',
+          background: 'linear-gradient(90deg, #ff5e62 0%, #ff9966 100%)',
           color: 'white',
           fontWeight: 600,
           '&:hover': {
-            backgroundColor: '#5e35b1',
+            background: 'linear-gradient(90deg, #ff9966 0%, #ff5e62 100%)',
           },
         }}
-        onClick={() => handleClick('Fonctionnalité à venir : mise à jour du CV')}
+        onClick={onGoToProfil}
       >
-        Mettre à jour mon CV
+        Mettre à jour mon profil
       </Button>
-      <Button
-        variant="outlined"
-        startIcon={<AssignmentIcon />}
-        sx={{
-          minHeight: 40,
-          padding: '8px 16px',
-          borderRadius: '8px',
-          borderColor: '#f0f0f0',
-          backgroundColor: '#f0f0f0',
-          color: '#333',
-          fontWeight: 600,
-          '&:hover': {
-            backgroundColor: '#e0e0e0',
-            borderColor: '#e0e0e0',
-          },
-        }}
-        onClick={() => handleClick('Fonctionnalité à venir : voir mes candidatures')}
-      >
-        Voir mes candidatures
-      </Button>
-      <Button
-        variant="outlined"
-        startIcon={<WarningIcon />}
-        sx={{
-          minHeight: 40,
-          padding: '8px 16px',
-          borderRadius: '8px',
-          borderColor: '#f0f0f0',
-          backgroundColor: '#f0f0f0',
-          color: '#333',
-          fontWeight: 600,
-          '&:hover': {
-            backgroundColor: '#e0e0e0',
-            borderColor: '#e0e0e0',
-          },
-        }}
-        onClick={handleReportClick}
-      >
-        Signaler un problème
-      </Button>
-      <Snackbar
-        open={!!snackbar}
-        autoHideDuration={2500}
-        onClose={handleClose}
-        message={snackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      />
-      <ReportProblemDialog
-        open={reportOpen}
-        onClose={() => setReportOpen(false)}
-        userEmail={userEmail}
-        userId={userId}
-      />
     </Box>
   );
 };
