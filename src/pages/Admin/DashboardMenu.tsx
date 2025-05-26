@@ -15,6 +15,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SupportIcon from '@mui/icons-material/Support';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const DashboardMenu: React.FC = () => {
   const menuItems = [
@@ -24,6 +25,13 @@ const DashboardMenu: React.FC = () => {
       icon: <HowToRegIcon sx={{ fontSize: 40 }} />,
       link: '/dashboard/pre-registrations',
       color: '#E355A3',
+    },
+    {
+      title: 'Enregistrement Étudiant',
+      description: 'Enregistrer manuellement un nouvel étudiant',
+      icon: <PersonAddIcon sx={{ fontSize: 40 }} />,
+      link: '/dashboard/student-registration',
+      color: '#9333EA',
     },
     {
       title: 'Matching',

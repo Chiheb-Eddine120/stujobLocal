@@ -40,6 +40,7 @@ import StudentDashboardPage from './pages/StudentDashboardPage';
 import ResetPassword from './pages/ResetPassword';
 import AdminSupport from './pages/Admin/AdminSupport';
 import ProfileCompletionSnackbar from './components/ProfileCompletionSnackbar';
+import DashboardStudentRegistration from './pages/Admin/DashboardStudentRegistration';
 
 const theme = createTheme({
   palette: {
@@ -175,6 +176,7 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/stats" element={<ProtectedRoute requiredRoles={['admin']}><DashboardStats /></ProtectedRoute>} />
           <Route path="/dashboard/notifications" element={<ProtectedRoute requiredRoles={['admin']}><DashboardNotifications /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requiredRoles={['admin']}><DashboardSettings /></ProtectedRoute>} />
+          <Route path="/dashboard/student-registration" element={<ProtectedRoute requiredRoles={['admin']}><DashboardStudentRegistration /></ProtectedRoute>} />
           <Route path="/dashboard-etudiant" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard/AdminSupport" element={<ProtectedRoute requiredRoles={['admin']}><AdminSupport /></ProtectedRoute>} />

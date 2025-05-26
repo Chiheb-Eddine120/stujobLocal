@@ -1,0 +1,147 @@
+Table des matières
+4.0 Méthodologie de travail	2
+4.1 Outil de Matching – Logique et Fonctionnement	2
+4.2 Étapes du Développement	3
+4.2.1 Phase Alpha	3
+4.2.2 Phase Bêta	4
+4.3 Feedbacks Techniques, Améliorations et Problèmes Rencontrés	5
+4.4 Sécurité, Hébergement et Architecture	6
+4.4.1 Glossaire Technique Vulgarisé (format "vocabulaire")	6
+4.4.2 Sécurité, Hébergement et Architecture	10
+
+ 
+4.0 Méthodologie de travail
+Nous avons combiné l'usage de Jira et de Discord pour organiser et suivre nos projets : Jira sert à planifier les tâches, suivre leur avancement et gérer les sprints, tandis que Discord centralise les échanges techniques et les mises à jour quotidiennes de développement. À terme, nous migrerons vers Notion pour bénéficier d'une plateforme unifiée, plus flexible et efficace, qui sera également intégrée à GitHub afin de faciliter la collaboration des développeurs et le suivi du code.
+4.1 Outil de Matching - Logique et Fonctionnement
+1. Matching par compétences et besoins
+Notre solution de matching combine collecte de données, algorithme de pondération et évaluation humaine pour garantir une adéquation optimale entre les compétences des étudiants et les besoins spécifiques des entreprises. Lorsqu'une entreprise soumet une offre, les compétences recherchées sont d'abord renseignées soit manuellement via un formulaire détaillant chaque exigence technique et optionnelle, soit extraites automatiquement à partir du profil étudiant à l'aide d'un parseur de CV capable de reconnaître les mots-clés (langages de programmation, frameworks, certifications) et de les enrichir avec des métadonnées (niveau d'expérience, date d'obtention), ou encore saisies par un administrateur lorsqu'un CV est transmis par email. Un filtre initial balaye ensuite l'ensemble de la base de données et élimine immédiatement tous les candidats n'ayant aucune des compétences essentielles listées.
+Chaque compétence retenue se voit attribuer un poids reflétant son degré de priorité : trois points pour une compétence jugée absolument indispensable (par exemple : maîtrise de Java pour un développement backend), deux points pour une compétence "flexible" tolérant un certain niveau d'adaptation (une expérience antérieure en C# est acceptable à la place de .NET), et un point pour les compétences "optionnelles" qui constituent un plus (connaissance de Docker, notions de DevOps). L'algorithme cumule ces pondérations pour produire un score brut, puis calcule un score de compatibilité global en pourcentage, tenant compte à la fois du nombre de compétences couvertes et de leur priorité.
+Ce pourcentage est ensuite interprété selon trois zones de couleur : vert pour "très compatible" (score ≥ 70 %), jaune pour "compatible" (entre 50 % et 69 %) et rouge pour "peu compatible" (< 50 %). Afin de focaliser les ressources de recrutement sur les meilleurs profils, seuls ceux dépassant un seuil de 80 % de compatibilité déclenchent automatiquement une proposition de match. Ces candidats sont alors contactés pour un entretien physique, au cours duquel un de nos chargés de recrutement évalue non seulement la maîtrise technique, mais aussi la personnalité, la motivation et l'adéquation aux valeurs de l'entreprise (culture d'équipe, modes de travail, projet professionnel). Cette étape permet de confirmer l'algorithme et d'assurer une intégration réussie au sein de la structure.
+
+1.	Administration, base de données & suivi statistique
+L'interface d'administration offre une vue centralisée sur toutes les demandes et leurs correspondances : il est possible de consulter chaque offre et les profils suggérés, de visualiser instantanément les scores de compatibilité grâce à un code couleur intuitif (vert pour "très compatible" ≥ 70 %, jaune pour "compatible" 50–69 % et rouge pour "peu compatible" < 50 %), et de suivre l'évolution du processus en modifiant les statuts (proposé, accepté, refusé). Des actions rapides permettent de créer manuellement un nouveau match, d'envoyer un email personnalisé au candidat ou à l'entreprise, et de valider ou rejeter une proposition en un clic. Pour affiner la sélection, un outil de comparaison donne la possibilité d'évaluer un profil donné face à l'ensemble des candidatures disponibles, afin d'identifier en un seul coup d'œil la meilleure adéquation possible.
+Le tableau de bord synthétise les indicateurs clés : le nombre total de candidats compatibles pour chaque offre, ainsi que le détail des compétences requises (obligatoires, flexibles ou optionnelles) et leur taux de couverture par les étudiants. Des filtres et graphiques dynamiques facilitent l'exploration des données par période, domaine technique ou niveau d'expérience.
+Toutes les données de matching sont conservées dans une base de données sécurisée, structurée pour garantir un accès rapide et fiable : chaque demande, chaque profil et chaque interaction y sont horodatés. Le contrôle d'accès s'effectue par rôles : seuls les administrateurs disposent de droits complets, tandis que les autres utilisateurs authentifiés n'ont qu'un accès en lecture seule à leurs propres informations.
+Enfin, le module de suivi statistique met à disposition des indicateurs de performance, tels que le nombre total de matches réalisés, le taux de succès (part des propositions acceptées) et la répartition mensuelle des mises en relation. Une analyse détaillée des scores de compatibilité alimente un reporting régulier, utilisé pour ajuster les pondérations de l'algorithme et améliorer en continu la qualité des correspondances.
+
+4.2 Étapes du Développement
+Le développement s'est déroulé en deux grandes phases, Alpha et Bêta.
+4.2.1 Phase Alpha
+La phase Alpha avait consisté à déployer un MVP d'authentification avec Supabase, intégrant l'inscription et la connexion via JWT, la gestion des refresh tokens, la validation des e-mails, la protection CSRF, le rate limiting et la validation des entrées. Elle avait également mis en place une recherche basique d'offres d'emploi, avec des filtres par localisation, type de contrat et secteur, la possibilité de sauvegarder les annonces par catégories, d'ajouter des notes personnelles et de programmer des rappels de candidature. L'interface principale avait été conçue autour d'un tableau de bord étudiant, qui permettait de suivre l'état des candidatures et de consulter le calendrier des entretiens. Par ailleurs, une intégration LTI 1.3 pour Moodle avait été réalisée, assurant la synchronisation des contextes et des données pédagogiques.
+Pour garantir la qualité et'efficacité du développement, un environnement Docker avait été mis en place, complété par ESLint, des tests unitaires et un pipeline CI/CD assurant l'automatisation des builds et des déploiements. Le stack technologique avait été défini de manière modulaire : Next.js et TypeScript pour le frontend web, React Native avec Expo pour le mobile, Node.js avec TypeScript pour le backend, et PostgreSQL via Supabase pour la base de données. La gestion des utilisateurs avait bénéficié de profils personnalisés, de préférences et de rôles spécifiques. Le module de recherche et de sauvegarde des offres avait été optimisé avec des notifications et une interface responsive, tandis que le suivi des candidatures était enrichi par la gestion des statuts, un historique complet et des rappels automatisés. Enfin, les aspects de sécurité et de performance — chiffrement des données, conformité RGPD, mise en cache, lazy loading et optimisation des requêtes — avaient été implémentés pour garantir robustesse et rapidité.
+
+4.2.2 Phase Bêta
+La phase Bêta marque une évolution majeure de la plateforme avec une refonte complète de l'interface utilisateur basée sur Material-UI v5. Le design system personnalisé intègre un thème cohérent avec des dégradés de couleurs spécifiques (violet #A236EC, rose #FF28C6, corail #FF7970), des composants arrondis et des animations fluides. L'interface est entièrement responsive et propose une navigation intuitive avec une barre de rôle permettant de basculer entre les vues étudiant et entreprise, offrant ainsi une expérience utilisateur adaptée à chaque type d'utilisateur.
+
+Le système d'authentification a été considérablement renforcé avec une gestion avancée des rôles (étudiant, entreprise, administrateur), des routes protégées selon les permissions, un système de réinitialisation de mot de passe, une gestion des sessions sécurisée et un mode maintenance pour les mises à jour. Cette architecture de sécurité permet une séparation claire des accès et des fonctionnalités selon le profil de l'utilisateur.
+
+Les tableaux de bord ont été développés de manière exhaustive pour répondre aux besoins spécifiques de chaque type d'utilisateur. Les étudiants bénéficient d'une interface dédiée avec suivi des candidatures, suggestions personnalisées et calendrier d'entretiens. Les administrateurs disposent d'un ensemble complet d'outils de gestion incluant la gestion des pré-inscriptions, un tableau de bord de matching, une gestion des utilisateurs, des statistiques détaillées, une gestion des notifications, des paramètres système et un support administrateur. Chaque tableau de bord est optimisé pour son usage spécifique, avec des interfaces intuitives et des fonctionnalités adaptées aux besoins des utilisateurs.
+
+La plateforme intègre plusieurs couches de sécurité et de conformité, notamment un système de consentement aux cookies (CookieConsent), une page de politique de confidentialité détaillée, une gestion robuste des erreurs et des états de chargement, un système de notifications toast pour le feedback utilisateur, et une protection contre les accès non autorisés. Ces mécanismes assurent non seulement la sécurité des données mais aussi la conformité aux normes en vigueur.
+
+L'architecture technique a été optimisée avec l'utilisation de technologies modernes et performantes : React Router v6 pour la gestion des routes, React Helmet Async pour le SEO, React Toastify pour les notifications, un système de thème personnalisé avec Material-UI, des composants réutilisables et modulaires, une gestion d'état centralisée et des hooks personnalisés pour la logique métier. Cette architecture modulaire permet une maintenance facilitée et une évolution constante de la plateforme.
+
+La performance et l'accessibilité ont été considérablement améliorées grâce à un chargement optimisé des composants, des transitions fluides entre les pages, une gestion des erreurs utilisateur, des indicateurs de chargement, une structure HTML sémantique, des messages d'erreur explicites et une navigation au clavier. Ces optimisations garantissent une expérience utilisateur fluide et accessible à tous les utilisateurs, quel que soit leur équipement ou leurs besoins spécifiques.
+
+Cette phase a également introduit des fonctionnalités de support et de maintenance essentielles pour la pérennité de la plateforme : un mode maintenance pour les mises à jour, un système de gestion des erreurs, des logs de débogage, un support administrateur, des sauvegardes automatiques et un monitoring des performances. Ces outils permettent une maintenance proactive et une résolution rapide des problèmes éventuels.
+
+4.3 Feedbacks Techniques, Améliorations et Problèmes Rencontrés
+
+Au cours du développement, nous relevons d'abord le défi de l'affinement des suggestions en mettant en œuvre un système de scoring pondéré. Concrètement, chaque compétence se voit attribuer un poids selon son importance pour l'entreprise, puis un service dédié calcule un score global pour chaque profil. Cette approche permet d'isoler les critères clés et d'ajuster dynamiquement leur influence au gré des retours terrain, garantissant que les candidats les plus pertinents remontent systématiquement en tête. Pour gérer l'explosion des volumes de données, nous recourons à des traitements asynchrones en batch : plutôt que d'interroger la base à chaque requête, des tâches planifiées s'exécutent en arrière-plan ce qui libère les API pour répondre immédiatement à l'utilisateur. Les résultats sont stockés temporairement dans Redis, un cache en mémoire rapide, afin de servir instantanément les recherches récurrentes et d'éviter la surcharge de la base de données principale.
+Parallèlement, la maintenabilité du code est assurée par une architecture modulaire : chaque composant (authentification, recherche, notification…) dispose de sa propre interface et de ses tests unitaires, de sorte que les équipes peuvent travailler en parallèle sans générer de conflits. Nous intégrons également des tests automatisés — unitaires pour les fonctions isolées et d'intégration pour les scénarios de bout en bout — afin de détecter immédiatement toute régression lors de l'ajout de nouvelles fonctionnalités. Côté scalabilité, l'application est déployée en cluster derrière un load-balancer, ce qui lui permet de répartir uniformément la charge et de s'adapter en temps réel à la montée en charge. Enfin, nous optimisons l'accès à la base de données au moyen d'index créés sur les colonnes les plus sollicitées (similaires aux sommaires d'un livre), de pagination pour limiter la quantité de données transférées à chaque appel, et de vues matérialisées des tables précalculées rafraîchies périodiquement qui fournissent des résultats de requêtes complexes en quelques millisecondes. Ces techniques combinées garantissent une réactivité inférieure à 200 ms, même lors des pics d'activité.
+
+4.4 Sécurité, Hébergement et Architecture
+4.4.1 Glossaire Technique 
+1. Interface et design
+•	Interface : partie visible de l'application (pages, boutons, menus).
+•	Design : organisation et style visuel destinés à rendre l'interface claire et agréable.
+•	Material-UI (MUI) : bibliothèque de composants graphiques préfabriqués (boutons, cartes, formulaires…).
+•	React : bibliothèque JavaScript pour construire des interfaces web réactives, basées sur des composants.
+•	JavaScript : langage de programmation qui rend les pages web dynamiques.
+•	TypeScript : sur-ensemble de JavaScript avec typage statique, conçu pour prévenir certaines erreurs à la compilation.
+•	Vite : outil de développement et de bundling ultra-rapide.
+•	Responsive Design : approche qui adapte automatiquement l'affichage à tous types d'écrans (mobile, tablette, ordinateur).
+
+2. Architecture
+•	Frontend : couche visible par l'utilisateur (tout ce qu'il voit et clique).
+•	Backend : couche serveur qui gère la logique métier et les données.
+•	API : interface de communication entre le frontend et le backend (comme un service postal échangeant des messages).
+•	Architecture modulaire : code découpé en blocs indépendants (composants), favorisant la réutilisation et la maintenabilité.
+
+3. Base de données
+•	Base de données : système de stockage organisé des informations (profils, offres…).
+•	Supabase : plateforme cloud fournissant base PostgreSQL, authentification et stockage de fichiers.
+•	PostgreSQL : système de gestion de bases de données relationnelles, reconnu pour sa robustesse.
+•	RLS (Row Level Security) : mécanisme de contrôle d'accès au niveau de chaque ligne de la table.
+•	Migrations : scripts permettant d'évoluer la structure de la base sans perte de données.
+•	Backup : copies automatiques des données, pour restauration en cas de besoin.
+
+4. Sécurité
+•	JWT (JSON Web Token) : jeton chiffré attestant de l'authenticité et des droits d'un utilisateur.
+•	HTTPS : protocole sécurisé garantissant le chiffrement des échanges client-serveur.
+•	RGPD : règlement européen protégeant les données personnelles des utilisateurs.
+•	MFA (Authentification multi facteur) : double vérification (mot de passe + code SMS ou application) pour renforcer la sécurité.
+•	Rate limiting : limitation du nombre de requêtes qu'un utilisateur peut envoyer sur une période donnée, afin de prévenir les abus.
+
+5. Communication
+•	Requête/Réponse : échange standard entre le client (frontend) et le serveur (backend).
+•	SMTP : protocole pour l'envoi d'e-mails depuis l'application.
+•	Notifications : alertes en temps réel (push, e-mail) pour informer l'utilisateur d'un événement.
+•	Webhooks : messages automatiques envoyés à des services externes lors d'événements spécifiques.
+
+6. Outils de développement
+•	Éditeur de code : logiciel pour écrire et organiser le code (ex. VS Code).
+•	Git : système de gestion de versions, permettant de suivre et collaborer sur le code.
+•	npm : gestionnaire de paquets JavaScript, pour installer et mettre à jour les dépendances.
+•	ESLint : outil d'analyse statique du code, vérifiant la conformité aux règles de style et détectant les erreurs.
+
+7. Hébergement et infrastructure
+•	Hébergement : mise à disposition d'un serveur pour rendre l'application accessible en ligne.
+•	Netlify : plateforme cloud automatisant la construction, le déploiement et la distribution du frontend via CDN.
+•	CI/CD : processus automatisé de tests, de build et de déploiement à chaque modification du code.
+•	CDN (Content Delivery Network) : réseau mondial de serveurs diffusant le contenu depuis le point le plus proche de l'utilisateur.
+•	SSL/TLS : certificats assurant le chiffrement de bout en bout des communications.
+•	Variables d'environnement : paramètres sensibles (clés API, URL…) stockés hors du code source.
+
+8. Sécurité des données
+•	Chiffrement en transit : protection des données pendant leur circulation (via HTTPS).
+•	Chiffrement au repos : encodage des données stockées sur le serveur.
+•	Contrôle d'accès : mécanismes qui restreignent la lecture et la modification aux seuls utilisateurs autorisés.
+
+9. Sauvegarde et reprise d'activité
+•	Backup automatique : sauvegardes journalières des données, avec possibilité de restauration.
+•	Rétention : durée de conservation des sauvegardes avant archivage ou suppression.
+•	PRA (Plan de reprise d'activité) : procédures documentées pour rétablir le service en cas de panne majeure.
+
+10. Monitoring et observabilité
+•	Monitoring : surveillance en continu des performances (temps de réponse, taux d'erreur).
+•	Alertes : notifications automatiques déclenchées lorsque des seuils critiques sont dépassés.
+•	Logging : enregistrement détaillé des actions et des erreurs pour faciliter le diagnostic.
+•	Tableaux de bord : visualisation graphique des indicateurs clés (charge serveur, trafic).
+
+11. Architecture technique
+•	Composants React : blocs d'interface autonomes, échangeant des données via des props et des états.
+•	Serveur applicatif : machine exécutant la logique du backend et répondant aux requêtes API.
+•	Base de données : stockage centralisé interrogé par le serveur pour récupérer ou modifier les données.
+
+12. Optimisations et performance (plus d'explications)
+•	Cache : stockage temporaire des données fréquemment demandées pour un accès plus rapide.
+•	CDN & caching : combinaison de réseau de diffusion et de mise en cache pour accélérer le rendu des pages.
+•	Auto-scaling : ajustement automatique des ressources serveurs en fonction du trafic.
+•	Load balancing : répartition du trafic sur plusieurs serveurs pour éviter la surcharge.
+•	Requêtes optimisées : indexation, pagination et vues matérialisées pour accélérer les opérations en base.
+
+4.4.2 Sécurité, Hébergement et Architecture 
+
+L'architecture technique du projet repose sur une application React moderne construite avec Vite, offrant des performances optimales grâce à son système de build rapide et son hot module replacement (HMR). Cette approche permet un développement agile avec rechargement instantané des modifications et une optimisation automatique des assets. Le frontend est déployé sur Netlify avec une configuration précise : le processus de build est automatisé via la commande `npm install && npm run build`, le contenu est publié depuis le dossier `dist`, et l'environnement est configuré avec Node.js v18 et NPM v10. Une redirection SPA (Single Page Application) est mise en place pour gérer le routage côté client, tandis que le CDN global de Netlify assure une distribution rapide des assets statiques depuis les points de présence les plus proches des utilisateurs.
+
+La sécurité et l'authentification sont gérées par Supabase, qui fournit une infrastructure robuste et sécurisée. L'authentification s'appuie sur des JWT (JSON Web Tokens) pour des sessions sans état, tandis que la base de données PostgreSQL est protégée par Row Level Security (RLS), permettant un contrôle granulaire des accès aux données. Le stockage des fichiers est sécurisé avec un chiffrement de bout en bout, et les fonctions serverless permettent d'exécuter la logique métier de manière isolée et sécurisée. Toutes les communications sont chiffrées en HTTPS, et les variables d'environnement sensibles sont gérées via dotenv pour éviter toute exposition accidentelle.
+
+L'interface utilisateur est construite avec Material-UI (MUI) v5, offrant un design system cohérent et personnalisable. Les composants sont optimisés pour la performance et intègrent nativement la gestion des thèmes (clair/sombre). Le développement est structuré avec TypeScript pour un typage statique robuste, ESLint pour la qualité du code, et React Router v6 pour la gestion des routes. React Helmet Async gère le SEO, React Toastify fournit des notifications utilisateur élégantes, et Recharts permet une visualisation de données interactive et performante.
+
+La gestion des données et la sécurité incluent plusieurs couches de protection : le chiffrement HTTPS pour toutes les communications, une protection CSRF intégrée, un rate limiting côté API pour prévenir les abus, et une validation stricte des entrées utilisateur. Les variables d'environnement sont sécurisées via dotenv, et les clés API sont gérées de manière centralisée.
+
+Le déploiement et la maintenance sont entièrement automatisés. L'intégration continue via Netlify assure que chaque modification est testée avant déploiement, tandis que le monitoring des performances permet de détecter et résoudre rapidement les problèmes. Les sauvegardes automatiques de la base de données sont effectuées quotidiennement, et la gestion des versions via Git permet un suivi précis des modifications.
+
+Cette architecture moderne et évolutive garantit des temps de chargement optimaux (inférieurs à 2 secondes), une scalabilité horizontale pour gérer les pics de trafic, une maintenance simplifiée grâce à l'automatisation, une sécurité renforcée à tous les niveaux, et une expérience utilisateur fluide et responsive sur tous les appareils. La combinaison de Vite, React, Material-UI et Supabase crée un écosystème performant et maintenable, parfaitement adapté aux besoins d'une application web moderne.
+
