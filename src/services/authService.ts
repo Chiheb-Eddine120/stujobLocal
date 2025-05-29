@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Profile } from '../types';
+import { createClient } from '@supabase/supabase-js';
 
 export type UserRole = 'admin' | 'student' | 'entreprise' ;
 
@@ -242,6 +243,44 @@ export const authService = {
     return data as User[];
   },
 
+  async getAdminCreatedStudents(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('all_students')
+      .select('*')
+      .eq('created_by_role', 'admin')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Erreur lors de la récupération des étudiants créés par admin:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  async getAuthenticatedUsersWithoutProfile(): Promise<any[]> {
+    try {
+      // Créer un client Supabase avec la clé de service
+      const supabaseAdmin = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw new Error('Erreur lors de la récupération des utilisateurs');
+      }
+
+      console.log('Utilisateurs récupérés:', data);
+      return data.users || [];
+    } catch (error) {
+      console.error('Erreur complète:', error);
+      throw error;
+    }
+  },
+
   async updateUser(userId: string, userData: Partial<User>, adminPassword?: string): Promise<void> {
     try {
       // Vérifier si on essaie de promouvoir en admin
@@ -279,29 +318,21 @@ export const authService = {
   },
 
   async deleteUser(userId: string): Promise<void> {
-    // Vérifier d'abord si l'utilisateur est admin
-    const { data: user, error: checkError } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single();
+    try {
+      // Créer un client Supabase avec la clé de service
+      const supabaseAdmin = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+      );
 
-    if (checkError) {
-      console.error('Erreur lors de la vérification du rôle:', checkError);
-      throw checkError;
-    }
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
-    if (user.role === 'admin') {
-      throw new Error('Impossible de supprimer un compte administrateur');
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-
-    if (error) {
-      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+      if (error) {
+        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+        throw error;
+      }
+    } catch (error) {
+      console.error('Erreur complète:', error);
       throw error;
     }
   },

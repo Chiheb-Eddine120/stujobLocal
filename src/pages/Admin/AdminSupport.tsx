@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, Select, MenuItem, FormControl, InputLabel, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress
+  Button, Select, MenuItem, FormControl, InputLabel, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, CircularProgress, Container
 } from '@mui/material';
 import { supabase } from '../../services/supabaseClient';
+import DashboardBackButton from '../../components/DashboardBackButton';
 
 const PRIORITES = [
   { value: 'basse', label: 'Basse', color: 'default' },
@@ -75,63 +76,68 @@ const AdminSupport: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Support - Tickets</Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-        <FormControl sx={{ minWidth: 140 }} size="small">
-          <InputLabel>Statut</InputLabel>
-          <Select value={filterStatut} label="Statut" onChange={e => setFilterStatut(e.target.value)}>
-            <MenuItem value="">Tous</MenuItem>
-            {STATUTS.map(s => <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>)}
-          </Select>
-        </FormControl>
-        <FormControl sx={{ minWidth: 140 }} size="small">
-          <InputLabel>Priorité</InputLabel>
-          <Select value={filterPriorite} label="Priorité" onChange={e => setFilterPriorite(e.target.value)}>
-            <MenuItem value="">Toutes</MenuItem>
-            {PRIORITES.map(p => <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>)}
-          </Select>
-        </FormControl>
-        <Button variant="contained" color="secondary" onClick={() => setNewTicketDialogOpen(true)}>
-          Nouveau ticket
-        </Button>
-      </Box>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell>Message</TableCell>
-              <TableCell>Statut</TableCell>
-              <TableCell>Priorité</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={6}><CircularProgress /></TableCell></TableRow>
-            ) : tickets.length === 0 ? (
-              <TableRow><TableCell colSpan={6}>Aucun ticket</TableCell></TableRow>
-            ) : tickets.map(ticket => (
-              <TableRow key={ticket.id}>
-                <TableCell>{ticket.email}</TableCell>
-                <TableCell>{ticket.message.length > 60 ? ticket.message.slice(0, 60) + '…' : ticket.message}</TableCell>
-                <TableCell>
-                  <Chip label={STATUTS.find(s => s.value === ticket.statut)?.label || ticket.statut} color={ticket.statut === 'resolu' ? 'success' : ticket.statut === 'en_cours' ? 'warning' : 'default'} />
-                </TableCell>
-                <TableCell>
-                  <Chip label={PRIORITES.find(p => p.value === ticket.priorite)?.label || ticket.priorite} color={PRIORITES.find(p => p.value === ticket.priorite)?.color as any} />
-                </TableCell>
-                <TableCell>{new Date(ticket.created_at).toLocaleString()}</TableCell>
-                <TableCell>
-                  <Button size="small" onClick={() => handleEdit(ticket)}>Gérer</Button>
-                </TableCell>
+    <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
+      <DashboardBackButton />
+      <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 700 }}>
+        Support - Tickets
+      </Typography>
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <FormControl sx={{ minWidth: 140 }} size="small">
+            <InputLabel>Statut</InputLabel>
+            <Select value={filterStatut} label="Statut" onChange={e => setFilterStatut(e.target.value)}>
+              <MenuItem value="">Tous</MenuItem>
+              {STATUTS.map(s => <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ minWidth: 140 }} size="small">
+            <InputLabel>Priorité</InputLabel>
+            <Select value={filterPriorite} label="Priorité" onChange={e => setFilterPriorite(e.target.value)}>
+              <MenuItem value="">Toutes</MenuItem>
+              {PRIORITES.map(p => <MenuItem key={p.value} value={p.value}>{p.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <Button variant="contained" color="secondary" onClick={() => setNewTicketDialogOpen(true)}>
+            Nouveau ticket
+          </Button>
+        </Box>
+        <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Email</TableCell>
+                <TableCell>Message</TableCell>
+                <TableCell>Statut</TableCell>
+                <TableCell>Priorité</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={6}><CircularProgress /></TableCell></TableRow>
+              ) : tickets.length === 0 ? (
+                <TableRow><TableCell colSpan={6}>Aucun ticket</TableCell></TableRow>
+              ) : tickets.map(ticket => (
+                <TableRow key={ticket.id}>
+                  <TableCell>{ticket.email}</TableCell>
+                  <TableCell>{ticket.message.length > 60 ? ticket.message.slice(0, 60) + '…' : ticket.message}</TableCell>
+                  <TableCell>
+                    <Chip label={STATUTS.find(s => s.value === ticket.statut)?.label || ticket.statut} color={ticket.statut === 'resolu' ? 'success' : ticket.statut === 'en_cours' ? 'warning' : 'default'} />
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={PRIORITES.find(p => p.value === ticket.priorite)?.label || ticket.priorite} color={PRIORITES.find(p => p.value === ticket.priorite)?.color as any} />
+                  </TableCell>
+                  <TableCell>{new Date(ticket.created_at).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <Button size="small" onClick={() => handleEdit(ticket)}>Gérer</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
       {/* Dialog édition ticket */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -197,7 +203,7 @@ const AdminSupport: React.FC = () => {
           <Button onClick={handleNewTicket} variant="contained" disabled={saving || !newTicket.email || !newTicket.message}>{saving ? <CircularProgress size={20} /> : 'Créer'}</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h2 {
+            color: #A236EC;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .button {
+            background: linear-gradient(45deg, #A236EC, #FF28C6);
+            color: #ffffff;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: linear-gradient(45deg, #FF28C6, #FF7970);
+            transform: translateY(-2px);
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 14px;
+            color: #666;
+        }
+        .highlight {
+            color: #A236EC;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Bienvenue sur Stujob !</h2>
+    </div>
+
+    <p>Salut <span class="highlight">{{ .StudentName }}</span>,</p>
+
+    <p>Merci de t'être inscrit·e en tant qu'étudiant·e sur Stujob ! Pour finaliser ton inscription, confirme ton adresse email en cliquant sur le bouton ci-dessous :</p>
+
+    <p style="text-align: center;">
+        <a href="{{ .ConfirmationURL }}" class="button">
+            Confirmer mon adresse email
+        </a>
+    </p>
+
+    <p>Si tu n'as pas demandé cette inscription, tu peux ignorer ce message.</p>
+
+    <div class="footer">
+        <p><strong>Email utilisé :</strong> <span class="highlight">{{ .Email }}</span></p>
+        <p><strong>Redirection une fois validé :</strong> <a href="{{ .RedirectTo }}" style="color: #A236EC;">{{ .RedirectTo }}</a></p>
+    </div>
+</body>
+</html>
