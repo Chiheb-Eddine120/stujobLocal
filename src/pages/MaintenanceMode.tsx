@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 import BusinessIcon from '@mui/icons-material/Business';
 import { setMaintenanceMode } from '../services/settings';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 //import ConstructionIcon from '@mui/icons-material/Construction';
 //import LockIcon from '@mui/icons-material/Lock';
 
@@ -42,6 +43,8 @@ export default function Maintenance() {
   const [remainingTime, setRemainingTime] = useState<number>(0);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<Role>(null);
+  const muiTheme = useMuiTheme();
+  const isDarkMode = muiTheme.palette.mode === 'dark';
 
   // Nouvelle fonction pour vérifier le secret côté serveur
   const verifyAdminSecret = async (adminSecret: string) => {
@@ -260,10 +263,12 @@ export default function Maintenance() {
         cursor: 'pointer',
         transition: 'all 0.3s ease',
         transform: selectedRole === role ? 'scale(1.02)' : 'scale(1)',
-        border: selectedRole === role ? '2px solid #9333EA' : '2px solid transparent',
+        border: selectedRole === role ? `2px solid ${muiTheme.palette.primary.main}` : `2px solid transparent`,
+        background: muiTheme.palette.background.paper,
+        color: muiTheme.palette.text.primary,
         '&:hover': {
           transform: 'scale(1.02)',
-          boxShadow: '0 8px 20px rgba(147, 51, 234, 0.2)',
+          boxShadow: isDarkMode ? '0 8px 20px rgba(0,0,0,0.25)' : '0 8px 20px rgba(147, 51, 234, 0.2)',
         },
       }}
       onClick={onClick}
@@ -353,7 +358,7 @@ export default function Maintenance() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(45deg, #9333EA 0%, #E355A3 100%)',
+          background: muiTheme.palette.background.default,
           position: 'relative',
           overflow: 'hidden',
         }}

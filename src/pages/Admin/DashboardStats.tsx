@@ -30,6 +30,7 @@ import {
 import { statisticsService } from '../../services/statisticsService';
 import DashboardBackButton from '../../components/DashboardBackButton';
 import LoadingSpinner from '../../components/loading/LoadingSpinner';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface StatCardProps {
   title: string;
@@ -38,38 +39,45 @@ interface StatCardProps {
   color: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
-  <Paper
-    sx={{
-      p: 3,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      background: `linear-gradient(45deg, ${color}22 30%, ${color}11 90%)`,
-      border: `1px solid ${color}33`,
-    }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-      <Box sx={{ 
-        p: 1, 
-        borderRadius: 1, 
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
+  const muiTheme = useMuiTheme();
+  //const isDarkMode = muiTheme.palette.mode === 'dark';
+  return (
+    <Paper
+      sx={{
+        p: 3,
         display: 'flex',
-        alignItems: 'center',
-        color: color 
-      }}>
-        {icon}
+        flexDirection: 'column',
+        height: '100%',
+        background: muiTheme.palette.background.paper,
+        border: `1px solid ${muiTheme.palette.divider}`,
+        color: muiTheme.palette.text.primary,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Box 
+          sx={{ 
+            p: 1, 
+            borderRadius: 1, 
+            display: 'flex',
+            alignItems: 'center',
+            color: color 
+          }}
+        >
+          {icon}
+        </Box>
+        <Typography variant="h6" sx={{ ml: 1, color: muiTheme.palette.text.primary }}>
+          {title}
+        </Typography>
       </Box>
-      <Typography variant="h6" sx={{ ml: 1, color: 'text.primary' }}>
-        {title}
+      <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: color }}>
+        {typeof value === 'number' && !Number.isInteger(value) 
+          ? value.toFixed(1) 
+          : value}
       </Typography>
-    </Box>
-    <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: color }}>
-      {typeof value === 'number' && !Number.isInteger(value) 
-        ? value.toFixed(1) 
-        : value}
-    </Typography>
-  </Paper>
-);
+    </Paper>
+  );
+};
 
 const DashboardStats: React.FC = () => {
   const [loading, setLoading] = useState(true);

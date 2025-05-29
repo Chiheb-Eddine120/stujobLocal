@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
+import { CssBaseline } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import { HelmetProvider } from 'react-helmet-async';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CookieConsent from './components/CookieConsent';
@@ -41,92 +41,13 @@ import ResetPassword from './pages/ResetPassword';
 import AdminSupport from './pages/Admin/AdminSupport';
 import ProfileCompletionSnackbar from './components/ProfileCompletionSnackbar';
 import DashboardStudentRegistration from './pages/Admin/DashboardStudentRegistration';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#A236EC',
-      light: '#FF28C6',
-      dark: '#8929BD',
-    },
-    secondary: {
-      main: '#FF7970',
-      light: '#FF9B94',
-      dark: '#CC614A',
-    },
-  },
-  typography: {
-    fontFamily: '"Poppins", "Roboto", "Helvetica", "Arial", sans-serif',
-    button: {
-      textTransform: 'none',
-      fontWeight: 600,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 20,
-          padding: '10px 24px',
-          fontSize: '1rem',
-          fontWeight: 600,
-          transition: 'all 0.3s ease',
-        },
-        contained: {
-          '&.MuiButton-containedPrimary': {
-            background: 'linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%)',
-            boxShadow: '0 4px 10px rgba(162, 54, 236, 0.25)',
-            '&:hover': {
-              background: 'linear-gradient(90deg, #8929BD 0%, #E619B0 50%, #E66A61 100%)',
-              boxShadow: '0 6px 12px rgba(162, 54, 236, 0.35)',
-            },
-          },
-        },
-        text: {
-          background: 'transparent',
-          boxShadow: 'none',
-          '&:hover': {
-            background: 'rgba(255, 255, 255, 0.1)',
-          },
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          background: 'linear-gradient(90deg, #A236EC 0%, #FF28C6 50%, #FF7970 100%)',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-        },
-      },
-    },
-  },
-});
+import UpdatePassword from './pages/UpdatePassword';
+import DashboardRequest from './pages/Admin/DashboardRequest';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
   const [selectedRole, setSelectedRole] = React.useState<'etudiant' | 'entreprise'>(() => {
-    return (localStorage.getItem('selectedRole') as 'etudiant' | 'entreprise') || 'entreprise';
+    return (localStorage.getItem('selectedRole') as 'etudiant' | 'entreprise') || 'etudiant';
   });
 
   // Le modeAccueil est maintenant toujours basé sur le selectedRole
@@ -177,9 +98,11 @@ const AppContent: React.FC = () => {
           <Route path="/dashboard/notifications" element={<ProtectedRoute requiredRoles={['admin']}><DashboardNotifications /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute requiredRoles={['admin']}><DashboardSettings /></ProtectedRoute>} />
           <Route path="/dashboard/student-registration" element={<ProtectedRoute requiredRoles={['admin']}><DashboardStudentRegistration /></ProtectedRoute>} />
+          <Route path="/dashboard/request" element={<ProtectedRoute requiredRoles={['admin']}><DashboardRequest /></ProtectedRoute>} />
           <Route path="/dashboard-etudiant" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard/AdminSupport" element={<ProtectedRoute requiredRoles={['admin']}><AdminSupport /></ProtectedRoute>} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -236,7 +159,7 @@ const App: React.FC = () => {
 
   return (
     <HelmetProvider>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider>
         <CssBaseline />
         <ToastContainer
           position="top-right"
@@ -274,7 +197,7 @@ interface HomeSwitcherProps {
 const HomeSwitcher: React.FC<HomeSwitcherProps> = ({ selectedRole }) => {
   return (
     <main style={{ flex: 1, paddingBottom: '20px' }}>
-      {selectedRole === 'etudiant' ? <HomeEtudiant /> : <Home />}
+      {selectedRole === 'entreprise' ? <Home /> : <HomeEtudiant />}
     </main>
   );
 };

@@ -25,6 +25,7 @@ import { UserRole } from '../types';
 import Logo from './Logo';
 import { supabase } from '../services/supabase';
 import { Profile } from '../types';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface NavbarProps {
   modeAccueil?: 'etudiant' | 'entreprise';
@@ -40,6 +41,9 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isDashboardEtudiant = location.pathname.startsWith('/dashboard-etudiant');
+
+  const muiTheme = useMuiTheme();
+  const isDarkMode = muiTheme.palette.mode === 'dark';
 
   const getInitials = (profile: Profile | null) => {
     if (!profile?.prenom || !profile?.nom) return userRole?.[0].toUpperCase() || '?';
@@ -189,7 +193,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
         position="static" 
         elevation={0}
         sx={{ 
-          background: 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
+          background: isDarkMode ? muiTheme.palette.background.paper : 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
           borderRadius: '15px',
           mx: 3,
           mt: 2,
@@ -198,6 +202,7 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
           left: 0,
           right: 0,
           margin: '16px auto',
+          color: muiTheme.palette.text.primary,
           '& .MuiToolbar-root': {
             minHeight: '60px',
             py: '30px',
@@ -459,8 +464,8 @@ const Navbar: React.FC<NavbarProps> = ({ modeAccueil }) => {
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
             width: 250,
-            background: 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
-            color: 'white',
+            background: isDarkMode ? muiTheme.palette.background.paper : 'linear-gradient(90deg, #9333EA 0%, #E355A3 50%, #FF8366 100%)',
+            color: muiTheme.palette.text.primary,
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
             borderTopRightRadius: 20,

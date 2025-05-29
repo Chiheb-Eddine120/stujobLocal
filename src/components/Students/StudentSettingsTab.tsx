@@ -29,9 +29,12 @@ import {
   Work as WorkIcon,
   People as PeopleIcon,
   Warning as WarningIcon,
+  //DarkMode as DarkModeIcon,
 } from '@mui/icons-material';
 import ReportProblemDialog from '../ReportProblemDialog';
 import { authService } from '../../services/authService';
+//import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface StudentSettingsTabProps {
   settings: {
@@ -48,6 +51,8 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
   settings,
   onSettingChange,
 }) => {
+  //const { isDarkMode, toggleTheme } = useTheme();
+  const muiTheme = useMuiTheme();
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState('');
   const [snackbar, setSnackbar] = React.useState<string | null>(null);
@@ -86,12 +91,13 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
           p: 3,
           mb: 4,
           borderRadius: 4,
-          background: '#FDF8FF',
-          border: '1px solid #F3E8FF',
+          background: muiTheme.palette.background.paper,
+          border: `1px solid ${muiTheme.palette.divider}`,
+          color: muiTheme.palette.text.primary,
         }}
       >
         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-          Paramètres du compte
+          Paramètres Généraux
         </Typography>
 
         <List>
@@ -122,7 +128,32 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
             />
           </ListItem> */}
 
-
+          {/* <ListItem>
+            <ListItemIcon>
+              <DarkModeIcon sx={{ color: '#9333EA' }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Thème sombre"
+              secondary="Activer le thème sombre pour l'interface"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isDarkMode}
+                  onChange={toggleTheme}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#9333EA',
+                      '& + .MuiSwitch-track': {
+                        backgroundColor: '#9333EA',
+                      },
+                    },
+                  }}
+                />
+              }
+              label=""
+            />
+          </ListItem> */}
 
           {/*<Divider />*/}
 
@@ -164,8 +195,9 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
           p: 3,
           mb: 4,
           borderRadius: 4,
-          background: '#FDF8FF',
-          border: '1px solid #F3E8FF',
+          background: muiTheme.palette.background.paper,
+          border: `1px solid ${muiTheme.palette.divider}`,
+          color: muiTheme.palette.text.primary,
         }}
       >
         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -266,8 +298,9 @@ const StudentSettingsTab: React.FC<StudentSettingsTabProps> = ({
           p: 3,
           mb: 4,
           borderRadius: 4,
-          background: '#FDF8FF',
-          border: '1px solid #F3E8FF',
+          background: muiTheme.palette.background.paper,
+          border: `1px solid ${muiTheme.palette.divider}`,
+          color: muiTheme.palette.text.primary,
         }}
       >
         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>

@@ -25,6 +25,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import DashboardBackButton from '../../components/DashboardBackButton';
 import { notificationService } from '../../services/notificationService';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface Notification {
   id: string;
@@ -49,6 +50,9 @@ const DashboardNotifications: React.FC = () => {
     target_role: 'all' as 'all' | 'student' | 'entreprise' | 'admin',
     status: 'active' as 'active' | 'inactive',
   });
+
+  const muiTheme = useMuiTheme();
+  //const isDarkMode = muiTheme.palette.mode === 'dark';
 
   useEffect(() => {
     loadNotifications();
@@ -175,8 +179,9 @@ const DashboardNotifications: React.FC = () => {
               sx={{ 
                 p: 3,
                 borderRadius: 4,
-                background: '#FDF8FF',
-                border: '1px solid #F3E8FF'
+                background: muiTheme.palette.background.paper,
+                border: `1px solid ${muiTheme.palette.divider}`,
+                color: muiTheme.palette.text.primary,
               }}
             >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>

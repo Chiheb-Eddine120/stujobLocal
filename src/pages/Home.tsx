@@ -7,10 +7,13 @@ import HandshakeIcon from '@mui/icons-material/Handshake';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { authService } from '../services/authService';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 const Home: React.FC = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
+  const muiTheme = useMuiTheme();
+  //const isDarkMode = muiTheme.palette.mode === 'dark';
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -333,27 +336,6 @@ const Home: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* Partenaires Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" sx={{ textAlign: 'center', mb: 6, color: '#1F1F1F' }}>
-          Nos Partenaires
-        </Typography>
-        <Grid container spacing={4} justifyContent="center">
-          {/* Ajoutez ici les logos de vos partenaires */}
-          <Grid item xs={6} md={3}>
-            <Card elevation={0} sx={{ height: '100%', bgcolor: 'transparent' }}>
-              <CardMedia
-                component="img"
-                height="100"
-                image="/images/partner1.png"
-                alt="Partenaire 1"
-                sx={{ objectFit: 'contain' }}
-              />
-            </Card>
-          </Grid>
-          {/* Répétez pour d'autres partenaires */}
-        </Grid>
-      </Container>
 
       {/* CTA Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
@@ -441,14 +423,16 @@ const Home: React.FC = () => {
                     sx={{ 
                       p: 2,
                       mb: 2,
-                      background: '#FDF8FF',
+                      background: muiTheme.palette.background.paper,
                       borderRadius: '0 0 8px 8px',
-                      borderLeft: '4px solid #9333EA',
+                      borderLeft: `4px solid ${muiTheme.palette.primary.main}`,
+                      border: `1px solid ${muiTheme.palette.divider}`,
+                      color: muiTheme.palette.text.primary,
                       transform: expandedIndex === index ? 'translateY(0)' : 'translateY(-20px)',
                       transition: 'transform 0.3s ease-in-out',
                     }}
                   >
-                    <Typography sx={{ color: '#666' }}>{item.answer}</Typography>
+                    <Typography sx={{ color: muiTheme.palette.text.secondary }}>{item.answer}</Typography>
                   </Paper>
                 </Box>
               </Box>
@@ -492,14 +476,16 @@ const Home: React.FC = () => {
                     sx={{ 
                       p: 2,
                       mb: 2,
-                      background: '#FDF8FF',
+                      background: muiTheme.palette.background.paper,
                       borderRadius: '0 0 8px 8px',
-                      borderLeft: '4px solid #FF4D8D',
+                      borderLeft: `4px solid ${muiTheme.palette.primary.main}`,
+                      border: `1px solid ${muiTheme.palette.divider}`,
+                      color: muiTheme.palette.text.primary,
                       transform: expandedIndex === index + 3 ? 'translateY(0)' : 'translateY(-20px)',
                       transition: 'transform 0.3s ease-in-out',
                     }}
                   >
-                    <Typography sx={{ color: '#666' }}>{item.answer}</Typography>
+                    <Typography sx={{ color: muiTheme.palette.text.secondary }}>{item.answer}</Typography>
                   </Paper>
                 </Box>
               </Box>

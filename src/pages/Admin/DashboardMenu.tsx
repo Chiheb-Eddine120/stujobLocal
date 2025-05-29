@@ -17,14 +17,17 @@ import SupportIcon from '@mui/icons-material/Support';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 const DashboardMenu: React.FC = () => {
+  const muiTheme = useMuiTheme();
+  const isDarkMode = muiTheme.palette.mode === 'dark';
   const menuItems = [
     {
       title: 'Demandes',
       description: 'Gérer les demandes des utilisateurs',
       icon: <AssignmentIcon sx={{ fontSize: 40, color: '#9333EA' }} />,
-      link: '/demande',
+      link: '/dashboard/request',
       color: '#9333EA',
     },
     {
@@ -94,10 +97,10 @@ const DashboardMenu: React.FC = () => {
         sx={{ 
           mb: 6,
           fontWeight: 700,
-          background: 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          color: 'transparent',
+          background: isDarkMode ? undefined : 'linear-gradient(90deg, #9333EA 0%, #FF4D8D 100%)',
+          backgroundClip: isDarkMode ? undefined : 'text',
+          WebkitBackgroundClip: isDarkMode ? undefined : 'text',
+          color: isDarkMode ? muiTheme.palette.text.primary : 'transparent',
         }}
       >
         Dashboard Administrateur
@@ -112,11 +115,13 @@ const DashboardMenu: React.FC = () => {
                 p: 3,
                 height: '100%',
                 borderRadius: 4,
-                background: '#FDF8FF',
+                background: muiTheme.palette.background.paper,
                 transition: 'all 0.3s ease',
+                color: muiTheme.palette.text.primary,
+                border: `1px solid ${muiTheme.palette.divider}`,
                 '&:hover': {
                   transform: 'translateY(-8px)',
-                  boxShadow: '0 8px 16px rgba(147, 51, 234, 0.15)',
+                  boxShadow: isDarkMode ? '0 8px 16px rgba(0,0,0,0.25)' : '0 8px 16px rgba(147, 51, 234, 0.15)',
                 },
               }}
             >
@@ -152,7 +157,7 @@ const DashboardMenu: React.FC = () => {
                   sx={{
                     mb: 1,
                     fontWeight: 600,
-                    color: '#1F1F1F',
+                    color: muiTheme.palette.text.primary,
                   }}
                 >
                   {item.title}
@@ -160,7 +165,7 @@ const DashboardMenu: React.FC = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: '#666',
+                    color: muiTheme.palette.text.secondary,
                   }}
                 >
                   {item.description}

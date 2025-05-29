@@ -35,6 +35,7 @@ import { getSettings, updateSettings, setMaintenanceMode } from '../../services/
 import DashboardBackButton from '../../components/DashboardBackButton';
 import { useMaintenance } from '../../hooks/useMaintenance';
 import { supabase } from '../../services/supabase';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
 
 interface SettingsChange {
   date?: string;
@@ -89,6 +90,8 @@ const DashboardSettings: React.FC = () => {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const [loadingUserNames, setLoadingUserNames] = useState(false);
+  const muiTheme = useMuiTheme();
+  const isDarkMode = muiTheme.palette.mode === 'dark';
 
   useEffect(() => {
     loadSettings();
@@ -249,8 +252,9 @@ const DashboardSettings: React.FC = () => {
         p: 3, 
         mb: 3, 
         borderRadius: 4,
-        background: '#FDF8FF',
-        border: '1px solid #F3E8FF'
+        background: muiTheme.palette.background.paper,
+        border: `1px solid ${muiTheme.palette.divider}`,
+        color: muiTheme.palette.text.primary,
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -369,7 +373,7 @@ const DashboardSettings: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
       <DashboardBackButton />
       
       <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
@@ -411,99 +415,110 @@ const DashboardSettings: React.FC = () => {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
-          <SettingSection title="Mode Maintenance" icon={<ConstructionIcon />}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isMaintenance}
-                  onChange={handleMaintenanceToggle}
-                  disabled={isUpdating || maintenanceLoading}
-                />
-              }
-              label={
-                isMaintenance 
-                  ? "Le site est actuellement en maintenance" 
-                  : "Le site est actuellement accessible"
-              }
-            />
-            {(isUpdating || maintenanceLoading) && (
-              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                <CircularProgress size={20} />
-                <Typography variant="body2" sx={{ ml: 1 }}>
-                  Mise à jour en cours...
-                </Typography>
-              </Box>
-            )}
-          </SettingSection>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              background: muiTheme.palette.background.paper,
+              border: `1px solid ${muiTheme.palette.divider}`,
+              color: muiTheme.palette.text.primary,
+            }}
+          >
+            <SettingSection title="Mode Maintenance" icon={<ConstructionIcon />}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isMaintenance}
+                    onChange={handleMaintenanceToggle}
+                    disabled={isUpdating || maintenanceLoading}
+                  />
+                }
+                label={
+                  isMaintenance 
+                    ? "Le site est actuellement en maintenance" 
+                    : "Le site est actuellement accessible"
+                }
+              />
+              {(isUpdating || maintenanceLoading) && (
+                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                  <CircularProgress size={20} />
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    Mise à jour en cours...
+                  </Typography>
+                </Box>
+              )}
+            </SettingSection>
 
-          <SettingSection title="Paramètres généraux" icon={<LanguageIcon />}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Nom du site"
-                  value={settings.site_name}
-                  onChange={handleChange('site_name')}
-                />
+            <SettingSection title="Paramètres généraux" icon={<LanguageIcon />}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Nom du site"
+                    value={settings.site_name}
+                    onChange={handleChange('site_name')}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Email du site"
+                    value={settings.site_email}
+                    onChange={handleChange('site_email')}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Email du site"
-                  value={settings.site_email}
-                  onChange={handleChange('site_email')}
-                />
-              </Grid>
-            </Grid>
-          </SettingSection>
+            </SettingSection>
 
-          <SettingSection title="Paramètres de matching" icon={<SecurityIcon />}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Seuil de matching (%)"
-                  type="number"
-                  value={settings.matching_threshold}
-                  onChange={handleChange('matching_threshold')}
-                  InputProps={{
-                    endAdornment: (
-                      <Tooltip title="Seuil minimum pour considérer un match comme pertinent">
-                        <IconButton size="small">
-                          <InfoIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ),
-                  }}
-                />
+            <SettingSection title="Paramètres de matching" icon={<SecurityIcon />}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Seuil de matching (%)"
+                    type="number"
+                    value={settings.matching_threshold}
+                    onChange={handleChange('matching_threshold')}
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Seuil minimum pour considérer un match comme pertinent">
+                          <IconButton size="small">
+                            <InfoIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={settings.auto_match_enabled}
+                        onChange={handleChange('auto_match_enabled')}
+                      />
+                    }
+                    label="Activer le matching automatique"
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settings.auto_match_enabled}
-                      onChange={handleChange('auto_match_enabled')}
-                    />
-                  }
-                  label="Activer le matching automatique"
-                />
-              </Grid>
-            </Grid>
-          </SettingSection>
+            </SettingSection>
 
-          <SettingSection title="Notifications" icon={<NotificationsIcon />}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.email_notifications}
-                  onChange={handleChange('email_notifications')}
-                />
-              }
-              label="Activer les notifications par email"
-            />
-          </SettingSection>
+            <SettingSection title="Notifications" icon={<NotificationsIcon />}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settings.email_notifications}
+                    onChange={handleChange('email_notifications')}
+                  />
+                }
+                label="Activer les notifications par email"
+              />
+            </SettingSection>
+          </Paper>
         </Grid>
 
         <Grid item xs={12} md={4}>
@@ -513,8 +528,9 @@ const DashboardSettings: React.FC = () => {
               sx={{ 
                 p: 3, 
                 borderRadius: 4,
-                background: 'linear-gradient(135deg, #9333EA 0%, #FF4D8D 100%)',
-                color: 'white'
+                background: isDarkMode ? muiTheme.palette.background.paper : 'linear-gradient(135deg, #9333EA 0%, #FF4D8D 100%)',
+                color: isDarkMode ? muiTheme.palette.text.primary : 'white',
+                border: `1px solid ${muiTheme.palette.divider}`,
               }}
             >
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -539,13 +555,14 @@ const DashboardSettings: React.FC = () => {
               </Button>
             </Paper>
 
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
                 borderRadius: 4,
-                background: '#FDF8FF',
-                border: '1px solid #F3E8FF'
+                background: muiTheme.palette.background.paper,
+                border: `1px solid ${muiTheme.palette.divider}`,
+                color: muiTheme.palette.text.primary,
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
