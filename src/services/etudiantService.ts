@@ -103,7 +103,7 @@ export const etudiantService = {
       
       // D'abord, comptons les étudiants
       const { error: countError } = await supabase
-        .from('etudiants')
+        .from('all_students')
         .select('*', { count: 'exact', head: true });
       
       if (countError) {
@@ -112,17 +112,9 @@ export const etudiantService = {
 
       // Ensuite, récupérons les données
       const { data, error } = await supabase
-        .from('etudiants')
-        .select(`
-          *,
-          profile:profiles (
-            id,
-            nom,
-            prenom,
-            email,
-            telephone
-          )
-        `);
+        .from('all_students')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;

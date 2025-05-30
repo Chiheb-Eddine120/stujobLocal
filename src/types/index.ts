@@ -60,7 +60,24 @@ export interface Disponibilite {
 
 export interface Etudiant {
   id?: string;
-  profile_id: string;
+  created_by_user_id?: string;
+  created_by_role?: string;
+  role?: string;
+  email?: string;
+  nom?: string;
+  prenom?: string;
+  telephone?: string;
+  avatar_url?: string;
+  date_naissance?: string;
+  niveau_etudes?: string;
+  ecole?: string;
+  biographie?: string;
+  competences?: Competence[];
+  langues?: { nom: string; niveau: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' }[];
+  experiences?: Experience[];
+  disponibilite?: {
+    disponibilites: Disponibilite[];
+  };
   cv_file?: {
     cv?: {
       url: string;
@@ -75,20 +92,12 @@ export interface Etudiant {
       type: string;
     };
   };
-  competences?: Competence[];
-  competence_description?: { [key: string]: string };
-  experiences?: Experience[];
-  disponibilite?: {
-    disponibilites: Disponibilite[];
-  };
-  langues?: { nom: string; niveau: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' }[];
-  biographie?: string;
-  niveau_etudes?: string;
-  ecole?: string;
+  description?: any;
+  is_admin_created?: boolean;
+  original_profile_id?: string;
   created_at?: string;
   updated_at?: string;
   profile?: Profile;
-  date_naissance?: string;
 }
 
 export interface Demande {

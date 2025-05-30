@@ -138,7 +138,7 @@ create trigger update_demandes_updated_at
 create table matches (
   id uuid default uuid_generate_v4() primary key,
   demande_id uuid references demandes(id) on delete cascade not null,
-  etudiant_id uuid references etudiants(id) on delete cascade not null,
+  etudiant_id uuid references all_students(id) on delete cascade not null,
   statut text check (statut in ('proposé', 'accepté', 'refusé')) not null default 'proposé',
   notes_admin text,
   created_at timestamptz default now(),
