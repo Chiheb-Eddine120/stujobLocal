@@ -10,8 +10,10 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
+  //IconButton,
 } from '@mui/material';
-import { Disponibilite } from '../types/etudiant';
+//import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Disponibilite } from '../types';
 
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const PERIODES = [

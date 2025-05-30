@@ -3,7 +3,6 @@ import { Autocomplete, TextField, Box, Chip, Typography, Paper, IconButton } fro
 import { Langue } from '../types';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 const LANGUES_SUGGESTIONS = [
   'Français',
