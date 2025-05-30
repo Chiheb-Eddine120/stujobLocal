@@ -27,7 +27,7 @@ import {
   Save as SaveIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
-import { Profile, Etudiant, Experience, DocumentFile, Competence, Langue, Disponibilite } from '../../types/etudiant';
+import { Profile, Etudiant, Experience, DocumentFile, Competence, Langue, Disponibilite } from '../../types';
 import FileUpload from '../FileUpload';
 import CompetenceInput from '../CompetenceInput';
 import LangueInput from '../LangueInput';

@@ -60,6 +60,7 @@ export interface Disponibilite {
 
 export interface Etudiant {
   id?: string;
+  profile_id: string;
   created_by_user_id?: string;
   created_by_role?: string;
   role?: string;
@@ -73,6 +74,7 @@ export interface Etudiant {
   ecole?: string;
   biographie?: string;
   competences?: Competence[];
+  competence_description?: { [key: string]: string };
   langues?: { nom: string; niveau: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' }[];
   experiences?: Experience[];
   disponibilite?: {

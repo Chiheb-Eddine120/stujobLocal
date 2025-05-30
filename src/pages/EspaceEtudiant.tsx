@@ -15,8 +15,7 @@ import { profileService } from '../services/profileService';
 import { etudiantService } from '../services/etudiantService';
 import StudentProfileForm from '../components/Students/StudentProfileForm';
 import StudentProfileView from '../components/Students/StudentProfileView';
-import { Profile } from '../types';
-import { Etudiant } from '../types/etudiant';
+import { Profile, Etudiant } from '../types';
 import StudentSubNav from '../components/Students/StudentSubNav';
 
 const EspaceEtudiant: React.FC = () => {

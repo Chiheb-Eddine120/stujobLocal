@@ -18,8 +18,7 @@ import {
   Phone as PhoneIcon,
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
-import { Profile } from '../../types';
-import { Etudiant } from '../../types/etudiant';
+import { Profile, Etudiant } from '../../types';
 
 interface StudentProfileViewProps {
   profile: Profile;
