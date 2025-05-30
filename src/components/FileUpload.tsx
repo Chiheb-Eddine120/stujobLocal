@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
-import { DocumentFile } from '../types/etudiant';
+import { Box, Button, Typography, CircularProgress, IconButton } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
+import { DocumentFile } from '../types';
 
 interface FileUploadProps {
   type: 'cv' | 'lettre_motivation';
@@ -67,14 +68,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <Typography variant="body2">
             {currentFile.name} ({Math.round(currentFile.size / 1024)} KB)
           </Typography>
-          <Button
-            variant="text"
+          <IconButton
             color="error"
             onClick={onDelete}
             size="small"
           >
-            Supprimer
-          </Button>
+            <DeleteIcon />
+          </IconButton>
         </Box>
       )}
     </Box>

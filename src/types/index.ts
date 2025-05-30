@@ -144,4 +144,16 @@ export interface City {
   name: string;
   postalCode: string;
   province: string;
+}
+
+export interface DocumentFile {
+  url: string;
+  name: string;
+  size: number;
+  type: string;
+}
+
+export interface Langue {
+  nom: string;
+  niveau: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 } 

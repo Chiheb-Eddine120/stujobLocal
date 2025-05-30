@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Autocomplete, TextField, Box, Chip, Typography, Paper, IconButton } from '@mui/material';
-import { Langue } from '../types/etudiant';
+import { Langue } from '../types';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 const LANGUES_SUGGESTIONS = [
   'Français',
