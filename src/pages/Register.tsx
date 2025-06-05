@@ -9,6 +9,8 @@ import {
   Alert,
   CircularProgress,
   Grid,
+  Checkbox,
+  Link,
 } from '@mui/material';
 import { authService } from '../services/authService';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,6 +27,7 @@ const Register: React.FC = () => {
     confirmPassword: '',
     nom: '',
     prenom: '',
+    acceptCGU: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +39,12 @@ const Register: React.FC = () => {
 
     if (formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.acceptCGU) {
+      setError('Vous devez accepter les conditions générales d\'utilisation pour vous inscrire');
       setLoading(false);
       return;
     }
@@ -234,6 +243,27 @@ const Register: React.FC = () => {
                       InputProps={{ style: { fontSize: 18 } }}
                       InputLabelProps={{ style: { fontSize: 18 } }}
                     />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox
+                        required
+                        checked={formData.acceptCGU}
+                        onChange={(e) => setFormData({ ...formData, acceptCGU: e.target.checked })}
+                        disabled={loading}
+                      />
+                      <Typography variant="body2" sx={{ fontSize: 16 }}>
+                        J'accepte les{' '}
+                        <Link
+                          href="/cgu"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{ color: '#9333EA', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                        >
+                          conditions générales d'utilisation (CGU)
+                        </Link>
+                      </Typography>
+                    </Box>
                   </Grid>
                 </Grid>
                 <Button

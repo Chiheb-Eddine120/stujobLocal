@@ -167,6 +167,7 @@ export const authService = {
         options: {
           data: {
             role: 'student',
+            acceptCGU: true,
             ...profileData // Stocker temporairement les données du profil dans les métadonnées
           }
         }

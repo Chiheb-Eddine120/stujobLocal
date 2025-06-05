@@ -43,6 +43,10 @@ import ProfileCompletionSnackbar from './components/ProfileCompletionSnackbar';
 import DashboardStudentRegistration from './pages/Admin/DashboardStudentRegistration';
 import UpdatePassword from './pages/UpdatePassword';
 import DashboardRequest from './pages/Admin/DashboardRequest';
+import CGU from './pages/CGU';
+import CGV from './pages/CGV';
+import Cookies from './pages/Cookies';
+import Sitemap from './pages/Sitemap';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -81,6 +85,10 @@ const AppContent: React.FC = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/cgu" element={<CGU />} />
+          <Route path="/cgv" element={<CGV />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />

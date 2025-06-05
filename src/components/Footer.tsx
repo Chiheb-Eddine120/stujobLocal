@@ -58,7 +58,7 @@ const Footer: React.FC = () => {
                 StuJob
               </Typography>
               <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-              Parce que la fiabilité, c’est aussi une question de lien.              
+              Parce que la fiabilité, c'est aussi une question de lien.              
               </Typography>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <IconButton 
@@ -140,8 +140,17 @@ const Footer: React.FC = () => {
               <Link component={RouterLink} to="/privacy" sx={{ ...linkStyle, fontSize: '1rem' }}>
                 Confidentialité
               </Link>
-              <Link component={RouterLink} to="/terms" sx={{ ...linkStyle, fontSize: '1rem' }}>
-                CGV/CGU
+              <Link component={RouterLink} to="/cgu" sx={{ ...linkStyle, fontSize: '1rem' }}>
+                CGU
+              </Link>
+              <Link component={RouterLink} to="/cgv" sx={{ ...linkStyle, fontSize: '1rem' }}>
+                CGV
+              </Link>
+              <Link component={RouterLink} to="/cookies" sx={{ ...linkStyle, fontSize: '1rem' }}>
+                Cookies
+              </Link>
+              <Link component={RouterLink} to="/sitemap" sx={{ ...linkStyle, fontSize: '1rem' }}>
+                Plan du Site
               </Link>
             </Stack>
           </Grid>
