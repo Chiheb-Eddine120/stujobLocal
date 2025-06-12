@@ -47,6 +47,7 @@ import CGU from './pages/CGU';
 import CGV from './pages/CGV';
 import Cookies from './pages/Cookies';
 import Sitemap from './pages/Sitemap';
+import ProfilExterne from './pages/ProfilExterne';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -60,7 +61,8 @@ const AppContent: React.FC = () => {
   const showRoleSwitch = !location.pathname.startsWith('/dashboard') && 
     location.pathname !== '/login' && 
     location.pathname !== '/register' && 
-    location.pathname !== '/reset-password';
+    location.pathname !== '/reset-password' &&
+    !location.pathname.startsWith('/profil/');
 
 
   // Nouvelle fonction pour changer le rôle et le stocker
@@ -111,6 +113,7 @@ const AppContent: React.FC = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard/AdminSupport" element={<ProtectedRoute requiredRoles={['admin']}><AdminSupport /></ProtectedRoute>} />
           <Route path="/update-password" element={<UpdatePassword />} />
+          <Route path="/profil/:id" element={<ProfilExterne />} />
           {/* Route 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

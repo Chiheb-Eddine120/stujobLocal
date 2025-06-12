@@ -23,15 +23,21 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Tooltip,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
+  Visibility as VisibilityIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { authService } from '../../services/authService';
 import { UserRole } from '../../types';
 import DashboardBackButton from '../../components/DashboardBackButton';
+import { useNavigate } from 'react-router-dom';
+import { etudiantService } from '../../services/etudiantService';
 
 interface User {
   id: string;
@@ -80,10 +86,34 @@ interface AuthUser {
   phone_confirmed_at: string | null;
 }
 
+// Fonction utilitaire pour le taux de complétion
+const getProfileCompletion = (profile: any, etudiant: any) => {
+  if (!profile || !etudiant) return 0;
+  const checks = [
+    !!profile.prenom,
+    !!profile.nom,
+    !!profile.email,
+    !!profile.telephone,
+    !!etudiant.date_naissance,
+    !!etudiant.niveau_etudes,
+    !!etudiant.ecole,
+    !!etudiant.biographie && etudiant.biographie.length > 30,
+    Array.isArray(etudiant.competences) && etudiant.competences.length > 0,
+    (etudiant.competence_description && Object.keys(etudiant.competence_description).length > 0) || (Array.isArray(etudiant.experiences) && etudiant.experiences.some((exp: any) => exp.description && exp.description.length > 0)),
+    Array.isArray(etudiant.experiences) && etudiant.experiences.length > 0,
+    (etudiant.cv_file && (etudiant.cv_file.cv || etudiant.cv_file.lettre_motivation)),
+    etudiant.disponibilite && Array.isArray(etudiant.disponibilite.disponibilites) && etudiant.disponibilite.disponibilites.length > 0,
+    Array.isArray(etudiant.langues) && etudiant.langues.length > 0,
+  ];
+  const completed = checks.filter(Boolean).length;
+  return Math.round((completed / checks.length) * 100);
+};
+
 const DashboardUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [adminCreatedStudents, setAdminCreatedStudents] = useState<AdminCreatedStudent[]>([]);
   const [authUsersWithoutProfile, setAuthUsersWithoutProfile] = useState<AuthUser[]>([]);
+  const [etudiantsById, setEtudiantsById] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,12 +128,28 @@ const DashboardUsers: React.FC = () => {
   });
   const [adminConfirmation, setAdminConfirmation] = useState<AdminConfirmationData | null>(null);
   const [adminPasswordError, setAdminPasswordError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers();
     loadAdminCreatedStudents();
     loadAuthUsersWithoutProfile();
   }, []);
+
+  // Charger les données etudiant pour chaque user
+  useEffect(() => {
+    const fetchEtudiants = async () => {
+      const newMap: Record<string, any> = {};
+      await Promise.all(users.map(async (user) => {
+        try {
+          const etu = await etudiantService.getEtudiant(user.id);
+          if (etu) newMap[user.id] = etu;
+        } catch {}
+      }));
+      setEtudiantsById(newMap);
+    };
+    if (users.length > 0) fetchEtudiants();
+  }, [users]);
 
   const loadUsers = async () => {
     try {
@@ -330,7 +376,7 @@ const DashboardUsers: React.FC = () => {
                 ) : (
                   <>
                     <TableCell>Nom</TableCell>
-                    <TableCell>Téléphone</TableCell>
+                    <TableCell>Profil</TableCell>
                     {currentTab === 0 ? (
                       <>
                         <TableCell>Rôle</TableCell>
@@ -349,37 +395,64 @@ const DashboardUsers: React.FC = () => {
             </TableHead>
             <TableBody>
               {currentTab === 0 ? (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{`${user.prenom} ${user.nom}`}</TableCell>
-                    <TableCell>{user.telephone}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.role === 'student' ? 'Étudiant' : user.role === 'entreprise' ? 'Entreprise' : 'Admin'}
-                        color={user.role === 'admin' ? 'error' : user.role === 'entreprise' ? 'primary' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton onClick={() => handleEditClick(user)} size="small" color="primary">
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton 
-                        onClick={() => handleDeleteClick(user.id)} 
-                        size="small" 
-                        color="error"
-                        disabled={user.role === 'admin'}
-                        sx={{ opacity: user.role === 'admin' ? 0.5 : 1 }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredUsers.map((user) => {
+                  // On suppose que user.id = profile_id
+                  // Il faut charger les données étudiant pour chaque user (id = profile_id)
+                  // Pour la démo, on affiche une icône grise (à remplacer par la vraie logique async si besoin)
+                  // Idéalement, il faudrait précharger les etudiants dans un useEffect et les stocker dans un state
+                  // Ici, on affiche un placeholder
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{`${user.prenom} ${user.nom}`}</TableCell>
+                      <TableCell>
+                        {/* Affichage dynamique de l'icône de complétion */}
+                        {(() => {
+                          const etu = etudiantsById[user.id];
+                          const completion = getProfileCompletion(user, etu);
+                          if (completion >= 50) {
+                            return <CheckCircleIcon sx={{ color: '#43a047' }} />;
+                          } else {
+                            return <CancelIcon sx={{ color: '#e53935' }} />;
+                          }
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.role === 'student' ? 'Étudiant' : user.role === 'entreprise' ? 'Entreprise' : 'Admin'}
+                          color={user.role === 'admin' ? 'error' : user.role === 'entreprise' ? 'primary' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="Voir le profil de l'utilisateur" arrow>
+                          <IconButton onClick={() => navigate(`/profil/${user.id}`)} size="small" color="info">
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Modifier l'utilisateur" arrow>
+                          <IconButton onClick={() => handleEditClick(user)} size="small" color="primary">
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Supprimer l'utilisateur" arrow>
+                          <IconButton 
+                            onClick={() => handleDeleteClick(user.id)} 
+                            size="small" 
+                            color="error"
+                            disabled={user.role === 'admin'}
+                            sx={{ opacity: user.role === 'admin' ? 0.5 : 1 }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : currentTab === 1 ? (
                 filteredAdminCreatedStudents.map((student) => (
                   <TableRow key={student.id}>
@@ -397,16 +470,20 @@ const DashboardUsers: React.FC = () => {
                       {new Date(student.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <IconButton onClick={() => handleEditClick(student)} size="small" color="primary">
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton 
-                        onClick={() => handleDeleteClick(student.id)} 
-                        size="small" 
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      <Tooltip title="Modifier l'utilisateur" arrow>
+                        <IconButton onClick={() => handleEditClick(student)} size="small" color="primary">
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Supprimer l'utilisateur" arrow>
+                        <IconButton 
+                          onClick={() => handleDeleteClick(student.id)} 
+                          size="small" 
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))

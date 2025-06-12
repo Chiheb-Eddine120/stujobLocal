@@ -77,6 +77,14 @@ const StudentProfileView: React.FC<StudentProfileViewProps> = ({ profile, etudia
                   {profile.telephone}
                 </Typography>
               </Box>
+              {etudiant.date_naissance && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                  <CalendarIcon sx={{ fontSize: 16, mr: 1 }} />
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    Date de naissance : {etudiant.date_naissance}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Box>
         </Paper>
