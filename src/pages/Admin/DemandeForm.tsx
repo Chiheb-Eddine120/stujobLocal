@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -32,6 +32,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import competencesData from '../../data/competences.json';
 import citiesData from '../../data/restructured_cities1.json';
 import CityAutocomplete from '../../components/CityAutocomplete';
+import { profileService } from '../../services/profileService';
+import { supabase } from '../../services/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const sectors: Secteur[] = [
   'Restauration',
@@ -72,6 +75,19 @@ const DemandeForm: React.FC = () => {
     competence: '',
     priorite: 'Flexible' as 'Obligatoire' | 'Flexible' | 'Optionnel'
   });
+
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const profile = await profileService.getProfile(session.user.id);
+      if (profile.role === 'admin') setIsAdmin(true);
+    };
+    checkAdmin();
+  }, []);
 
   const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -247,7 +263,29 @@ const DemandeForm: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
+    <Container maxWidth="md" sx={{ py: 4, pt: 10, position: 'relative' }}>
+      {isAdmin && (
+        <Box sx={{ position: 'absolute', top: 16, right: 24 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/dashboard/request')}
+            sx={{
+              borderRadius: '50px',
+              color: '#9333EA',
+              borderColor: '#9333EA',
+              background: 'transparent',
+              fontWeight: 600,
+              '&:hover': {
+                borderColor: '#7928CA',
+                background: 'rgba(147, 51, 234, 0.04)',
+              },
+            }}
+          >
+            Retour à la gestion des demandes
+          </Button>
+        </Box>
+      )}
       <Typography 
         variant="h3" 
         component="h1" 

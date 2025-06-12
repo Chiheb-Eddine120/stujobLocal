@@ -31,6 +31,8 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { demandeService } from '../services/demandeService';
 import { Demande } from '../types';
+import { profileService } from '../services/profileService';
+import { supabase } from '../services/supabaseClient';
 
 const statusMap = {
   en_attente: {
@@ -88,6 +90,7 @@ const SuiviDemande: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +130,16 @@ const SuiviDemande: React.FC = () => {
       fetchDemande();
     }
   }, [demandeId]);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const profile = await profileService.getProfile(session.user.id);
+      if (profile.role === 'admin') setIsAdmin(true);
+    };
+    checkAdmin();
+  }, []);
 
   const SearchForm = () => (
     <Fade in timeout={800}>
@@ -199,7 +212,29 @@ const SuiviDemande: React.FC = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
+    <Container maxWidth="lg" sx={{ py: 4, pt: 10, position: 'relative' }}>
+      {isAdmin && (
+        <Box sx={{ position: 'absolute', top: 16, right: 24 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/dashboard/request')}
+            sx={{
+              borderRadius: '50px',
+              color: '#9333EA',
+              borderColor: '#9333EA',
+              background: 'transparent',
+              fontWeight: 600,
+              '&:hover': {
+                borderColor: '#7928CA',
+                background: 'rgba(147, 51, 234, 0.04)',
+              },
+            }}
+          >
+            Retour à la gestion des demandes
+          </Button>
+        </Box>
+      )}
       <Fade in timeout={1000}>
         <Typography 
           variant="h3" 

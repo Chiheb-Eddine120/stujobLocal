@@ -18,7 +18,14 @@ const LANGUES_SUGGESTIONS = [
   'Russe',
 ];
 
-const NIVEAUX: Langue['niveau'][] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const NIVEAUX_LABELS = [
+  { value: 'A1', label: 'Débutant' },
+  { value: 'A2', label: 'Intermédiaire' },
+  { value: 'B1', label: 'Bon' },
+  { value: 'B2', label: 'Très bon' },
+  { value: 'C1', label: 'Excellent' },
+  { value: 'C2', label: 'Bilingue' },
+];
 
 interface LangueInputProps {
   langues: Langue[];
@@ -50,10 +57,6 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
     onLanguesChange(newLangues);
   };
 
-  const handleStarClick = (star: number) => {
-    setSelectedNiveau(NIVEAUX[star - 1]);
-  };
-
   return (
     <Paper sx={{ p: 3, mb: 2 }}>
       <Typography variant="h6" gutterBottom>
@@ -63,7 +66,7 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
         {langues.map((langue, idx) => (
           <Chip
             key={langue.nom}
-            label={`${langue.nom} - ${langue.niveau}`}
+            label={`${langue.nom} - ${NIVEAUX_LABELS.find(n => n.value === langue.niveau)?.label || langue.niveau}`}
             onDelete={() => handleRemoveLangue(idx)}
             sx={{ m: 0.5 }}
           />
@@ -89,14 +92,14 @@ const LangueInput: React.FC<LangueInputProps> = ({ langues, onLanguesChange, err
           sx={{ flex: 1 }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {[1,2,3,4,5,6].map((star) => (
+          {NIVEAUX_LABELS.map((niveau, idx) => (
             <IconButton
-              key={star}
-              onClick={() => handleStarClick(star)}
-              color={NIVEAUX.indexOf(selectedNiveau) + 1 >= star ? 'warning' : 'default'}
+              key={niveau.value}
+              onClick={() => setSelectedNiveau(niveau.value as Langue['niveau'])}
+              color={NIVEAUX_LABELS.findIndex(n => n.value === selectedNiveau) >= idx ? 'warning' : 'default'}
               size="small"
             >
-              {NIVEAUX.indexOf(selectedNiveau) + 1 >= star ? <StarIcon /> : <StarBorderIcon />}
+              {NIVEAUX_LABELS.findIndex(n => n.value === selectedNiveau) >= idx ? <StarIcon /> : <StarBorderIcon />}
             </IconButton>
           ))}
         </Box>

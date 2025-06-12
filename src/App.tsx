@@ -62,7 +62,9 @@ const AppContent: React.FC = () => {
     location.pathname !== '/login' && 
     location.pathname !== '/register' && 
     location.pathname !== '/reset-password' &&
-    !location.pathname.startsWith('/profil/');
+    !location.pathname.startsWith('/profil/') &&
+    location.pathname !== '/demande' &&
+    location.pathname !== '/suivi';
 
 
   // Nouvelle fonction pour changer le rôle et le stocker
