@@ -374,30 +374,6 @@ const DemandeForm: React.FC = () => {
             <TextField
               required
               fullWidth
-              label="Délai de recrutement"
-              name="delai_recrutement"
-              value={formData.delai_recrutement}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
-              label="Durée de mission"
-              name="duree_mission"
-              value={formData.duree_mission}
-              onChange={handleTextChange}
-              sx={inputStyles}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              required
-              fullWidth
               type="number"
               label="Nombre de personnes à recruter"
               name="nombre_personnes"

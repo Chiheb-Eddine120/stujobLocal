@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
+import { profileService } from '../services/profileService';
 
 // Types à adapter selon ton projet
 import { Etudiant } from '../types';
@@ -21,12 +22,19 @@ function getProfileCompletion(etudiant: Etudiant): number {
 const ProfileCompletionSnackbar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [etudiant, setEtudiant] = useState<Etudiant | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchEtudiant = async () => {
+    const fetchEtudiantAndProfile = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
+      // Récupérer le profil pour vérifier le rôle
+      const profile = await profileService.getProfile(session.user.id);
+      if (profile.role === 'admin') {
+        setIsAdmin(true);
+        return;
+      }
       const { data, error } = await supabase
         .from('etudiants')
         .select('*')
@@ -36,7 +44,7 @@ const ProfileCompletionSnackbar: React.FC = () => {
         setEtudiant(data as Etudiant);
       }
     };
-    fetchEtudiant();
+    fetchEtudiantAndProfile();
   }, []);
 
   useEffect(() => {
@@ -48,7 +56,7 @@ const ProfileCompletionSnackbar: React.FC = () => {
     }
   }, [etudiant]);
 
-  if (!etudiant) return null;
+  if (!etudiant || isAdmin) return null;
 
   return (
     <Snackbar
