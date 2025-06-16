@@ -30,8 +30,6 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Visibility as VisibilityIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { authService } from '../../services/authService';
 import { UserRole } from '../../types';

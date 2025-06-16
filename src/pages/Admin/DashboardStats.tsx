@@ -21,7 +21,6 @@ import {
 } from 'recharts';
 import {
   People as PeopleIcon,
-  Business as BusinessIcon,
   School as SchoolIcon,
   AdminPanelSettings as AdminIcon,
   Assignment as AssignmentIcon,
