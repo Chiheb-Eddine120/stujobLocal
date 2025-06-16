@@ -111,7 +111,6 @@ export interface Demande {
   secteur: Secteur;
   email: string;
   delai_recrutement: string;
-  duree_mission: string;
   nombre_personnes: number;
   remarques: string;
   status: 'en_attente' | 'en_traitement' | 'etudiant_trouve' | 'termine';
@@ -126,6 +125,7 @@ export interface Demande {
   }>;
   created_at: string;
   telephone?: string;
+  personne_contact?: string;
   ville: string;
   description_projet?: string;
 }

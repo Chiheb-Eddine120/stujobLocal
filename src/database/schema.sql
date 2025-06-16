@@ -74,7 +74,6 @@ alter table demandes
   add column if not exists suggestions_competences jsonb default '[]'::jsonb,
   add column if not exists competences_personnalisees jsonb default '[]'::jsonb,
   drop column if exists priorite,
-  add column if not exists duree_mission text,
   add column if not exists date_debut_souhaitee date,
   add column if not exists budget text;
 
@@ -203,7 +202,6 @@ create table demandes_entreprises (
   region text,
   type_etude text,
   description_projet text,
-  duree_mission text,
   date_debut_souhaitee date,
   budget text,
   statut text check (statut in ('nouvelle', 'en cours', 'terminée', 'annulée')) not null default 'nouvelle',

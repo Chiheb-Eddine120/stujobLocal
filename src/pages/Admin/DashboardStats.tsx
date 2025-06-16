@@ -130,8 +130,8 @@ const DashboardStats: React.FC = () => {
       </Typography>
 
       {/* Cartes de statistiques */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid container spacing={3} sx={{ mb: 4, justifyContent: 'center' }}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="Total Utilisateurs"
             value={userStats.totalUsers}
@@ -139,7 +139,7 @@ const DashboardStats: React.FC = () => {
             color="#2196F3"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="Étudiants"
             value={userStats.studentCount}
@@ -147,15 +147,7 @@ const DashboardStats: React.FC = () => {
             color="#4CAF50"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Entreprises"
-            value={userStats.entrepriseCount}
-            icon={<BusinessIcon />}
-            color="#FF9800"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCard
             title="Administrateurs"
             value={userStats.adminCount}
@@ -166,8 +158,8 @@ const DashboardStats: React.FC = () => {
       </Grid>
 
       {/* Statistiques des demandes et matches */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4}>
+      <Grid container spacing={3} sx={{ mb: 4, justifyContent: 'center' }}>
+        <Grid item xs={12} sm={6} md={6}>
           <StatCard
             title="Total Demandes"
             value={demandeStats.totalDemandes}
@@ -175,20 +167,12 @@ const DashboardStats: React.FC = () => {
             color="#9C27B0"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={6}>
           <StatCard
             title="Total Matches"
             value={matchStats.totalMatches}
             icon={<HandshakeIcon />}
             color="#009688"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCard
-            title="Taux de Réussite"
-            value={`${matchStats.tauxReussite}%`}
-            icon={<HandshakeIcon />}
-            color="#673AB7"
           />
         </Grid>
       </Grid>

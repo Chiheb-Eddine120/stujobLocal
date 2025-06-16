@@ -44,7 +44,15 @@ const sectors: Secteur[] = [
   'Autre',
 ];
 
-const DemandeForm: React.FC = () => {
+// Ajout des props pour l'édition
+interface DemandeFormProps {
+  initialValues?: Partial<Demande>;
+  onSubmit?: (values: Partial<Demande>) => void;
+  onCancel?: () => void;
+  isEdit?: boolean;
+}
+
+const DemandeForm: React.FC<DemandeFormProps> = ({ initialValues, onSubmit, onCancel, isEdit }) => {
   const [formData, setFormData] = useState<Omit<Demande, 'id' | 'created_at'>>({
     entreprise: '',
     numero_entreprise: '',
@@ -52,7 +60,6 @@ const DemandeForm: React.FC = () => {
     secteur: 'Autre' as Secteur,
     email: '',
     delai_recrutement: '',
-    duree_mission: '',
     nombre_personnes: 1,
     remarques: '',
     status: 'en_attente',
@@ -62,6 +69,8 @@ const DemandeForm: React.FC = () => {
     telephone: '',
     ville: '',
     code_demande: '',
+    personne_contact: '',
+    ...initialValues,
   });
 
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -163,6 +172,11 @@ const DemandeForm: React.FC = () => {
     setError('');
 
     try {
+      if (isEdit && onSubmit) {
+        await onSubmit(formData);
+        setLoading(false);
+        return;
+      }
       const result = await demandeService.createDemande(formData);
       setTrackingNumber(result.code_demande);
       setSubmitted(true);
@@ -432,6 +446,17 @@ const DemandeForm: React.FC = () => {
             />
           </Grid>
 
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Personne de contact"
+              name="personne_contact"
+              value={formData.personne_contact || ''}
+              onChange={handleTextChange}
+              sx={inputStyles}
+            />
+          </Grid>
+
           <Grid item xs={12}>
             <Typography variant="h6" sx={{ mb: 2, color: '#1F1F1F', fontWeight: 600 }}>
               Suggestions de compétences
@@ -648,8 +673,11 @@ const DemandeForm: React.FC = () => {
                 }
               }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Envoyer la demande'}
+              {loading ? <CircularProgress size={24} /> : isEdit ? 'Enregistrer les modifications' : 'Envoyer la demande'}
             </Button>
+            {isEdit && onCancel && (
+              <Button onClick={onCancel} fullWidth sx={{ mt: 2 }}>Annuler</Button>
+            )}
           </Grid>
         </Grid>
       </Box>

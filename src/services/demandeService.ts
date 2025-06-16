@@ -25,7 +25,8 @@ export const demandeService = {
   async createDemande(demande: Omit<Demande, 'id' | 'created_at'>) {
     const demandeWithCode = {
       ...demande,
-      code_demande: generateUniqueCode()
+      code_demande: generateUniqueCode(),
+      personne_contact: demande.personne_contact || '',
     };
 
     const { data, error } = await supabase
@@ -116,5 +117,14 @@ export const demandeService = {
       console.error('Erreur lors de la récupération des demandes en attente:', error);
       throw error;
     }
+  },
+
+  async deleteDemande(id: string) {
+    const { error } = await supabase
+      .from('demandes')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return true;
   },
 }; 

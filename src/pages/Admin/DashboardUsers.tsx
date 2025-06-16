@@ -406,15 +406,19 @@ const DashboardUsers: React.FC = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{`${user.prenom} ${user.nom}`}</TableCell>
                       <TableCell>
-                        {/* Affichage dynamique de l'icône de complétion */}
+                        {/* Affichage dynamique du pourcentage de complétion */}
                         {(() => {
                           const etu = etudiantsById[user.id];
                           const completion = getProfileCompletion(user, etu);
-                          if (completion >= 50) {
-                            return <CheckCircleIcon sx={{ color: '#43a047' }} />;
-                          } else {
-                            return <CancelIcon sx={{ color: '#e53935' }} />;
-                          }
+                          return (
+                            <span style={{
+                              color: completion >= 50 ? '#43a047' : '#e53935',
+                              fontWeight: 'bold',
+                              fontSize: '1.1em',
+                            }}>
+                              {completion}%
+                            </span>
+                          );
                         })()}
                       </TableCell>
                       <TableCell>
