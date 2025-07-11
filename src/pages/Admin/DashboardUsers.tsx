@@ -30,6 +30,8 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Visibility as VisibilityIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
 } from '@mui/icons-material';
 import { authService } from '../../services/authService';
 import { UserRole } from '../../types';
@@ -116,6 +118,8 @@ const DashboardUsers: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
+  const [completionFilter, setCompletionFilter] = useState<string>('all');
+  const [sortByCompletion, setSortByCompletion] = useState<'asc' | 'desc' | null>(null);
   const [currentTab, setCurrentTab] = useState(0);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editData, setEditData] = useState<EditUserData>({
@@ -286,6 +290,16 @@ const DashboardUsers: React.FC = () => {
     }
   };
 
+  const handleSortByCompletion = () => {
+    if (sortByCompletion === null) {
+      setSortByCompletion('desc');
+    } else if (sortByCompletion === 'desc') {
+      setSortByCompletion('asc');
+    } else {
+      setSortByCompletion(null);
+    }
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = (
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -293,8 +307,36 @@ const DashboardUsers: React.FC = () => {
       user.prenom.toLowerCase().includes(searchTerm.toLowerCase())
     );
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    return matchesSearch && matchesRole;
+    
+    // Filtre par taux de completion
+    const etu = etudiantsById[user.id];
+    const completion = getProfileCompletion(user, etu);
+    let matchesCompletion = true;
+    
+    if (completionFilter !== 'all') {
+      const minCompletion = parseInt(completionFilter);
+      matchesCompletion = completion >= minCompletion;
+    }
+    
+    return matchesSearch && matchesRole && matchesCompletion;
   });
+
+  // Appliquer le tri si nécessaire
+  const sortedUsers = [...filteredUsers];
+  if (sortByCompletion) {
+    sortedUsers.sort((a, b) => {
+      const etuA = etudiantsById[a.id];
+      const etuB = etudiantsById[b.id];
+      const completionA = getProfileCompletion(a, etuA);
+      const completionB = getProfileCompletion(b, etuB);
+      
+      if (sortByCompletion === 'asc') {
+        return completionA - completionB;
+      } else {
+        return completionB - completionA;
+      }
+    });
+  }
 
   const filteredAdminCreatedStudents = adminCreatedStudents.filter(student => {
     return (
@@ -345,19 +387,37 @@ const DashboardUsers: React.FC = () => {
             }}
           />
           {currentTab === 0 && (
-            <TextField
-              select
-              label="Rôle"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
-              size="small"
-              sx={{ minWidth: 150 }}
-            >
-              <MenuItem value="all">Tous les rôles</MenuItem>
-              <MenuItem value="student">Étudiant</MenuItem>
-              <MenuItem value="entreprise">Entreprise</MenuItem>
-              <MenuItem value="admin">Administrateur</MenuItem>
-            </TextField>
+            <>
+              <TextField
+                select
+                label="Rôle"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
+                size="small"
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">Tous les rôles</MenuItem>
+                <MenuItem value="student">Étudiant</MenuItem>
+                <MenuItem value="entreprise">Entreprise</MenuItem>
+                <MenuItem value="admin">Administrateur</MenuItem>
+              </TextField>
+              <TextField
+                select
+                label="Taux de completion"
+                value={completionFilter}
+                onChange={(e) => setCompletionFilter(e.target.value)}
+                size="small"
+                sx={{ minWidth: 180 }}
+              >
+                <MenuItem value="all">Tous les taux</MenuItem>
+                <MenuItem value="0">0% et plus</MenuItem>
+                <MenuItem value="25">25% et plus</MenuItem>
+                <MenuItem value="50">50% et plus</MenuItem>
+                <MenuItem value="75">75% et plus</MenuItem>
+                <MenuItem value="90">90% et plus</MenuItem>
+                <MenuItem value="100">100% (complet)</MenuItem>
+              </TextField>
+            </>
           )}
         </Box>
 
@@ -374,7 +434,23 @@ const DashboardUsers: React.FC = () => {
                 ) : (
                   <>
                     <TableCell>Nom</TableCell>
-                    <TableCell>Profil</TableCell>
+                    <TableCell 
+                      onClick={handleSortByCompletion}
+                      sx={{ 
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Profil
+                        {sortByCompletion && (
+                          sortByCompletion === 'asc' ? 
+                            <ArrowUpwardIcon sx={{ fontSize: 16 }} /> : 
+                            <ArrowDownwardIcon sx={{ fontSize: 16 }} />
+                        )}
+                      </Box>
+                    </TableCell>
                     {currentTab === 0 ? (
                       <>
                         <TableCell>Rôle</TableCell>
@@ -393,7 +469,7 @@ const DashboardUsers: React.FC = () => {
             </TableHead>
             <TableBody>
               {currentTab === 0 ? (
-                filteredUsers.map((user) => {
+                sortedUsers.map((user) => {
                   // On suppose que user.id = profile_id
                   // Il faut charger les données étudiant pour chaque user (id = profile_id)
                   // Pour la démo, on affiche une icône grise (à remplacer par la vraie logique async si besoin)
